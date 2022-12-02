@@ -1,4 +1,5 @@
 {
+ "genType": "spatio-temporal",
  "dataFile": "suratITMSDPtest.json",
  "duplicateDetection": [
       "trip_id",
@@ -15,5 +16,14 @@
    "id",
    "location.type",
    "trip_id"
- ]
+ ],
+ "col.location": "<col-name-for-location-field>",
+ "resolution": 7,
+ "col.datetime": "<col-name-for-datetime-field>",
+ "start_date": 2022-11-23,
+ "end_date": 2022-12-07,
+ "start_time": 09,
+ "end_time": 23,
+ "col.aggregateCol": "<col-name-to-perform-agg-on>",
+ "minEventOccurances": 10
 }

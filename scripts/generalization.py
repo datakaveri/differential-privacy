@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
 import h3
+import json
 
 
 class Generalization:
-    def __init__(self, genType: string):
-        self.getType = genType
+    def __init__(self, configFile: json):
+        self.getType = configFile['genType']
         return
 
     def categorize(self, dataframe, configFile):
