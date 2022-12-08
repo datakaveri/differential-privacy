@@ -12,11 +12,14 @@ from pandas.io.json import json_normalize
 
 def readFile(configFileName):
     #reading config
-    configFile = 'config/' + configFileName
+    configFile = '../config/' + configFileName
     with open(configFile, "r") as cfile:
         configDict = json.load(cfile)
+
+    genType = configDict['genType']
+    configDict = configDict['spatio-temporal']
     #reading datafile
-    dataFileName = 'data/' + configDict['dataFile']
+    dataFileName = '../data/' + configDict['dataFile']
     with open(dataFileName, "r") as dfile:
         dataDict = json.load(dfile)
     #loading data
@@ -34,7 +37,7 @@ def readFile(configFileName):
     p1 = print(str(dupeCount) + ' duplicate rows have been removed.') 
     p2 = print(str(dfDrop.shape) + ' is the shape of the new dataframe.')
     dataframe = dfDrop  
-    return dataframe
+    return dataframe, configDict, genType
 
 def suppress(dataframe):
     dataframe = dataframe.drop(columns = configDict['suppressCols'])
