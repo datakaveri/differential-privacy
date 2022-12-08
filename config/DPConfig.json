@@ -1,19 +1,38 @@
 {
- "dataFile": "suratITMSDPtest.json",
- "duplicateDetection": [
-      "trip_id",
-      "observationDateTime"
-    ],
- "suppressCols": [
-   "trip_direction",
-   "last_stop_id",
-   "last_stop_arrival_time",
-   "route_id",
-   "actual_trip_start_time",
-   "trip_delay",
-   "vehicle_label",
-   "id",
-   "location.type",
-   "trip_id"
- ]
+	"genType": "spatio-temporal",
+	"spatio-temporal": {
+		"dataFile": "suratITMSDPtest.json",
+		"duplicateDetection": [
+			"trip_id",
+			"observationDateTime"
+		],
+		"suppressCols": [
+			"trip_direction",
+			"last_stop_id",
+			"last_stop_arrival_time",
+			"route_id",
+			"actual_trip_start_time",
+			"trip_delay",
+			"vehicle_label",
+			"id",
+			"location.type",
+			"trip_id"
+		],
+		"col.location": "location.coordinates",
+		"resolution": 7,
+		"col.datetime": "observationDateTime",
+		"start_date": "",
+		"end_date": "2022 - 12 - 07",
+		"start_time": 9,
+		"end_time": 23,
+		"col.groupyByCol": "license_plate",
+		"minEventOccurances": 10
+	},
+	"numeric": {
+		"dataFile": "",
+		"duplicateDetection": [],
+		"suppressCols": [],
+		"minEventOccurances": 20,
+		"col.groupyByCol": "license_plate"
+	}
 }
