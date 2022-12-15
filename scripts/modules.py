@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import json
 from pandas.io.json import json_normalize
+import matplotlib.pyplot as plt
 
 def readFile(configFileName):
     #reading config
@@ -53,28 +54,33 @@ def aggregateStats1(dataframe):
 	
 	#getting average speed for every license_plate in every HAT per day
 	df = dataframe.groupby(['HAT','Date','license_plate']).agg({'speed':'mean'}).reset_index()
-
+#	df.to_csv('test1.csv')
+	
 	#getting average of average speeds
 	dfAgg = df.groupby('HAT').agg({'speed':'mean'}).reset_index()
+#	dfAgg.to_csv('test2.csv')
+	
 	maxSpeed = dataframe['speed'].max()
 	minSpeed = dataframe['speed'].min()
 	
 	#N is number of unique license plates per HAT
-	N = dataframe.groupby(['HAT']).agg({'license_plate':'nunique'}).reset_index()
+	dfInter = dataframe.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
+#	dfInter.to_csv('test3.csv')
 
-	#appending N to dfAgg
-	dfAgg['N'] = N['license_plate']
+	
+	dfInter = dfInter.groupby(['HAT']).agg({'license_plate':'sum'}).reset_index()
+	dfAgg['N'] = dfInter['license_plate']
+#	dfAgg.to_csv('test4.csv')
 	
 	#calculating local sensitivity
 	sensitivity = [None] * len(dfAgg)
-	for i in range(len(dfAgg['N'])):
-		sensitivity[i] = (maxSpeed-minSpeed)/dfAgg['N'][i]
 	
-	#assigning Sensitivity to dfAgg
+	sensitivity = (maxSpeed - minSpeed)/dfAgg['N']
 	dfAgg['Sensitivity'] = sensitivity
 	
+	print(sensitivity)
 	#remove after testing
-	dfAgg.to_csv('sensTest.csv')
+	dfAgg.to_csv('test5.csv')
 	return dfAgg, sensitivity
 
 def aggregateStats2(dataframe, speedLimit):
@@ -107,21 +113,25 @@ def aggregateStats2(dataframe, speedLimit):
 	#remove after testing
 	dfAgg.to_csv('sensTest3.csv')
 	return dfAgg, sensitivity
+
 	
-	
-	
-def plot(dataframe)"
-	
-	
-	return
-	
-	
-def noiseAddition(dataframe, sensitivity, b):
+def noiseAddition(dataframe, column, sensitivity, b):
 	for i in range(len(b)):
 		ep[i] = sensitivity/(b[i])
 		noise = np.random.laplace(0,b[i],1)
 #    print("Epsilon= " + str(ep))
 	return dataframe, noise, ep
+	
+
+def plot(dataframe, x, y):
+	plt.xlabel('x')
+	plt.ylabel('y')
+	xValues = dataframe('x')
+	yValues = dataframe('y')
+	plt.legend()
+	plt.show()
+	return
+	
 	
 
 #Define Epsilon as Sensitivity/b
