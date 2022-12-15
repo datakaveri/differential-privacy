@@ -25,6 +25,8 @@ def spatioTemporalGeneralization(dataframe, configFile):
     h3index = [None] * dfLen
     resolution = configFile["resolution"]
     
+#    print(dataframe)
+    
     for i in range(dfLen):
         h3index[i] = h3.geo_to_h3(lat=float(lat[i]), lng=float(lon[i]), resolution=resolution)
 
@@ -55,8 +57,8 @@ def spatioTemporalGeneralization(dataframe, configFile):
     f2 = f1.groupby(["Timeslot", "h3index"]).agg({groupByColumn: "sum"}).reset_index()
 
     date = dataframe["Date"].unique()
-    min_event_occurances = int(configFile["minEventOccurances"])
-    limit = len(date) * min_event_occurances
+    min_event_occurences = int(configFile["minEventOccurences"])
+    limit = len(date) * min_event_occurences
     f3 = f2[f2[groupByColumn] >= limit]
     f4 = f3.groupby("h3index").agg({"Timeslot": "count"}).reset_index()
 
@@ -65,7 +67,7 @@ def spatioTemporalGeneralization(dataframe, configFile):
 
     df = dataframe["h3index"].isin(f5["h3index"])
     dataframe = dataframe[df]
-    print(dataframe)
+#    print(dataframe)
     return dataframe
 
 def numericGeneralization(dataframe, configFile):

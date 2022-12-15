@@ -18,6 +18,7 @@
 			"location.type",
 			"trip_id"
 		],
+    "b": [0.5, 0.75, 1, 1.25, 1.5, 2],
 		"col.location": "location.coordinates",
 		"resolution": 7,
 		"col.datetime": "observationDateTime",
@@ -26,13 +27,14 @@
 		"start_time": 9,
 		"end_time": 23,
 		"col.groupyByCol": "license_plate",
-		"minEventOccurances": 10
+		"minEventOccurences": 10,
+    "speed_limit": 35
 	},
 	"numeric": {
 		"dataFile": "",
 		"duplicateDetection": [],
 		"suppressCols": [],
-		"minEventOccurances": 20,
+		"minEventOccurences": 20,
 		"col.groupyByCol": "license_plate"
 	}
 }
