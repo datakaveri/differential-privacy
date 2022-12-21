@@ -18,16 +18,18 @@
 			"location.type",
 			"trip_id"
 		],
+    "sensitivity": "global",
+    "globalMaxSpeed": 150,
+    "globalMinSpeed": 0,
+    "privacy_loss_budget_eps": 10000000,
     "b": [0.5, 0.75, 1, 1.25, 1.5, 2],
 		"col.location": "location.coordinates",
 		"resolution": 7,
 		"col.datetime": "observationDateTime",
-		"start_date": "",
-		"end_date": "2022 - 12 - 07",
 		"start_time": 9,
-		"end_time": 23,
+		"end_time": 20,
 		"col.groupyByCol": "license_plate",
-		"minEventOccurences": 10,
+		"minEventOccurences": 20,
     "speed_limit": 35
 	},
 	"numeric": {
