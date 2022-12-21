@@ -45,12 +45,12 @@ def spatioTemporalGeneralization(dataframe, configFile):
     # Filter date and time slots
     #start_date = pd.to_datetime(configFile["start_date"]).date()
     #end_date = pd.to_datetime(configFile["end_date"]).date()
-    #start_time = configFile["start_time"].astype(int)
-    #end_time = configFile["end_time"].astype(int)
+    start_time = configFile["start_time"]
+    end_time = configFile["end_time"]
     groupByColumn = configFile["col.groupyByCol"]
 
     #dataframe = dataframe[ (dataframe["Date"] >= start_date & dataframe["Date"] <= end_date) ]
-    #dataframe = dataframe[ (dataframe["Timeslot"] >= start_time & dataframe["Timeslot"] <= end_time) ]
+    dataframe = dataframe[ (dataframe["Timeslot"] >= start_time) & (dataframe["Timeslot"] <= end_time) ]
 
     # Selecting h3 indices where a min number of events occur in all timeslots of the day
     f1 = ( dataframe.groupby(["Timeslot", "Date", "h3index"]) .agg({groupByColumn: "nunique"}) .reset_index())
@@ -67,6 +67,7 @@ def spatioTemporalGeneralization(dataframe, configFile):
 
     df = dataframe["h3index"].isin(f5["h3index"])
     dataframe = dataframe[df]
+    
 #    print(dataframe)
     return dataframe
 
