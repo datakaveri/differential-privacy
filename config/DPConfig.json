@@ -21,17 +21,17 @@
 		"locationCol": "location.coordinates",
 		"datetimeCol": "observationDateTime",
 		"groupByCol": "license_plate",
-    	"localityFactor": 1,
-    	"globalMaxSpeed": 150,
-    	"globalMinSpeed": 0,
-    	"privacyLossBudgetEpsQuery1": 10,
+    		"localityFactor": 1,
+    		"globalMaxSpeed": 150,
+    		"globalMinSpeed": 0,
+    		"privacyLossBudgetEpsQuery1": 10,
 		"privacyLossBudgetEpsQuery2": 10,
 		"h3Resolution": 7,
 		"startTime": 9,
 		"endTime": 20,
 		"minEventOccurences": 20,
-    	"speedLimit": 35,
-		"signalNoiseRatio": 10
+    		"speedLimit": 35,
+		"snrTarget": 10
 	},
 	"numeric": {
 		"duplicateDetection": [],
