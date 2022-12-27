@@ -20,6 +20,6 @@ dfAggregateQuery1, K = modules.aggregateStats1(df, configDict)
 dfAggregateQuery2, sensitivity2 = modules.aggregateStats2(df, configDict)
 
 #adding noise to the output of aggregateStats1
-noisySpeed = modules.variableNoiseAddition1(dfAggregateQuery1, configDict, K)
+dfNoisyQuery1 = modules.variableNoiseAddition1(dfAggregateQuery1, configDict, K)
 
 

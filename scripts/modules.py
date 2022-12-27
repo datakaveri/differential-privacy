@@ -4,6 +4,8 @@
 # 2. Generalization
 # 3. Aggregation
 # 4. Differential Privacy (noise addition)
+
+#import statements
 import pandas as pd
 import numpy as np
 import json
@@ -138,8 +140,7 @@ def aggregateStats1(dataframe, configDict):
     #getting average of average speeds
     dfAgg = df.groupby('HAT').agg({'speed':'mean'}).reset_index()
     
-    maxSpeed = dataframe['speed'].max() * localityFactor
-    minSpeed = dataframe['speed'].min() * localityFactor
+
     
     #N is sum of number of unique license plates per HAT
     dfInter = dataframe.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
@@ -154,10 +155,9 @@ def aggregateStats1(dataframe, configDict):
     ############## ########## ################
 
     #calculating global sensitivity (1 value)
-    date = dataframe["Date"].unique()
-    threshold = configDict['minEventOccurences'] * len(date)
-    globalSensitivity = (configDict['globalMaxSpeed'] - configDict['globalMinSpeed'])/dfAgg['N'].min()
-
+    maxSpeed = configDict['globalMaxSpeed'] * localityFactor
+    minSpeed = configDict['globalMinSpeed'] * localityFactor
+    globalSensitivity = (maxSpeed - minSpeed)/dfAgg['N'].min()
     dfAgg['globalSensitivity'] = globalSensitivity
 
     #finding 'K', the maximum number of HATs a bus passes through per day and delocalising using locality factor
@@ -177,17 +177,16 @@ def variableNoiseAddition1(dataframe, configDict, K):
     
     #calculating noise 'b' for each HAT based on sensitivity using b = E/S
     dfVariableNoise = dataframe
-    b1 = dfVariableNoise['globalSensitivity']/epsPrime
+    globalSensitivity = dfVariableNoise['globalSensitivity'][0]
+    b1 = globalSensitivity/epsPrime
     dfVariableNoise['b'] = np.random.laplace(0,b1, len(dfVariableNoise))
     dfVariableNoise['NoisySpeed'] = dfVariableNoise['speed'] + dfVariableNoise['b']
     dfVariableNoise['NoisySpeed'].clip(0, inplace = True)
     dfVariableNoise.to_csv('NoisySpeed.csv')
 
     # calculate SNR
-    # compare the original query value to the noisy query
-    snr1 = dfVariableNoise['speed'].mean()/((dfVariableNoise['speed']-dfVariableNoise['NoisySpeed']).mean())
-    snr2 = dfVariableNoise['speed'].mean()/(np.abs(dfVariableNoise['speed'].mean()-dfVariableNoise['NoisySpeed']).mean())
-    print(snr1, snr2)
+    # snr defined as signal mean over std of noise
+    snr = (dfVariableNoise['speed'].mean())/(np.sqrt(2)*b1)
 
     ############## DEPRECATED ################
     # #METHOD 2	
