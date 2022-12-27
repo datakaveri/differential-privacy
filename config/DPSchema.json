@@ -102,7 +102,7 @@
         "endTime",
         "minEventOccurences",
         "speedLimit",
-        "signalNoiseRatio"
+        "snrTarget"
       ]
     },
     "numeric": {
