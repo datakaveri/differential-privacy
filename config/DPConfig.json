@@ -1,7 +1,7 @@
 {
+	"dataFile": "suratITMSDPtest.json",
 	"genType": "spatio-temporal",
 	"spatio-temporal": {
-		"dataFile": "suratITMSDPtest.json",
 		"duplicateDetection": [
 			"trip_id",
 			"observationDateTime"
@@ -18,25 +18,25 @@
 			"location.type",
 			"trip_id"
 		],
-    "sensitivity": "global",
-    "globalMaxSpeed": 150,
-    "globalMinSpeed": 0,
-    "privacy_loss_budget_eps": 10000000,
-    "b": [0.5, 0.75, 1, 1.25, 1.5, 2],
-		"col.location": "location.coordinates",
-		"resolution": 7,
-		"col.datetime": "observationDateTime",
-		"start_time": 9,
-		"end_time": 20,
-		"col.groupyByCol": "license_plate",
+		"locationCol": "location.coordinates",
+		"datetimeCol": "observationDateTime",
+		"groupByCol": "license_plate",
+    	"localityFactor": 1,
+    	"globalMaxSpeed": 150,
+    	"globalMinSpeed": 0,
+    	"privacyLossBudgetEpsQuery1": 10,
+		"privacyLossBudgetEpsQuery2": 10,
+		"h3Resolution": 7,
+		"startTime": 9,
+		"endTime": 20,
 		"minEventOccurences": 20,
-    "speed_limit": 35
+    	"speedLimit": 35,
+		"signalNoiseRatio": 10
 	},
 	"numeric": {
-		"dataFile": "",
 		"duplicateDetection": [],
 		"suppressCols": [],
 		"minEventOccurences": 20,
-		"col.groupyByCol": "license_plate"
+		"groupyByCol": "license_plate"
 	}
 }

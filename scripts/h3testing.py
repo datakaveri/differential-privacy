@@ -1,28 +1,25 @@
 import pandas as pd
 import modules
-import generalization
 
-df, configDict, genType, b = modules.readFile('DPConfig.json')
+#validating the config file against the schema
+modules.schemaValidator('DPSchema.json', 'DPConfig.json')
 
+#reading the file and dropping any duplicates
+df, configDict, genType = modules.readFile('DPConfig.json')
+
+#supressing any columns that may not be required in the final output
 df = modules.suppress(df, configDict)
 
-df = generalization.categorize(df, configDict, genType)
+#generalization applied to categories like time, location, etc that may contain personal identifiable information
+df = modules.categorize(df, configDict, genType)
 
+#computing the first query for ITMS
 dfAggregateQuery1, K = modules.aggregateStats1(df, configDict)
 
+#computing the second query for ITMS (average number of instances a bus exceeds a speed threshold.)
 dfAggregateQuery2, sensitivity2 = modules.aggregateStats2(df, configDict)
 
-#dfNoisy, epsMax, b = modules.noiseAddition1(dfAggregateQuery1, sensitivity1, b, K)
+#adding noise to the output of aggregateStats1
+noisySpeed = modules.variableNoiseAddition1(dfAggregateQuery1, configDict, K)
 
-noisySpeed = modules.variableNoiseAddition1(dfAggregateQuery1, configDict['privacy_loss_budget_eps'], K)
-
-#modules.plot(b, epsMax)
-
-#print(df['h3index'])
-#print('8742d98b6ffffff' in df['h3index'].unique())
-#dlist = modules.avg_query_noise_q1(df)
-
-
-#print(avgspeed, localSensitivity)
-#print(noise, ep)
 
