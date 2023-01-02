@@ -88,7 +88,6 @@ def schemaValidator(schemaFile, configFile):
     jsonschema.validate(instance=document, schema=schema)
     return
 
-
 def readFile(configFileName):
     #reading config
     configFile = '../config/' + configFileName
@@ -175,7 +174,7 @@ def variableNoiseAddition1(dataframe, configDict, K):
     privacyLossBudgetEps = configDict['privacyLossBudgetEpsQuery1']
     epsPrime = privacyLossBudgetEps/K
     
-    #calculating noise 'b' for each HAT based on sensitivity using b = E/S
+    #calculating noise 'b' for each HAT based on sensitivity using b = S/E
     dfVariableNoise = dataframe
     globalSensitivity = dfVariableNoise['globalSensitivity'][0]
     b1 = globalSensitivity/epsPrime
@@ -184,30 +183,16 @@ def variableNoiseAddition1(dataframe, configDict, K):
     dfVariableNoise['NoisySpeed'].clip(0, inplace = True)
     dfVariableNoise.to_csv('NoisySpeed.csv')
 
-    # calculate SNR
-    # snr defined as signal mean over std of noise
-    snr = (dfVariableNoise['speed'].mean())/(np.sqrt(2)*b1)
+    #epsilon checker 
+    mean_absolute_percentage_error = np.mean(np.abs((dfVariableNoise['speed'] - dfVariableNoise['NoisySpeed'])/dfVariableNoise['speed'])) * 100
+    # print("MAPE is: " + str(mean_absolute_percentage_error))
+    exitStatement = "The Privacy Loss Budget is too high! Please reduce the value in the Config file."
+    if (mean_absolute_percentage_error <= 10):
+        return print(exitStatement), exit
+    elif (mean_absolute_percentage_error > 10):
+        return dfVariableNoise
 
-    ############## DEPRECATED ################
-    # #METHOD 2	
-    # #calculating epsilon for b = 1, method applicable to global sensitivity
-    # eps_b1 = K * dfVariableNoise['sensitivityFromConfig'].max()
-    # # eps_b1 = dfVariableNoise['sensitivity'].sum()
-    # print(eps_b1)
-    
-    # #computing required value of 'b' to meet the user-defined privacy budget
-    # b_method2 = eps_b1/privacyBudgetEps
-    # print(b_method2)
-    # # print('For the chosen privacy loss budget (Epsilon) of: ' + str(eps) + ', the noise \'b\' to be added is: ' + str(b))
-    
-    # #adding noise 'b' to the average speed
-    # dfVariableNoise['b_method2'] = np.random.laplace(0,b_method2, len(dfVariableNoise))		
-    # dfVariableNoise['NoisySpeed2'] = dfVariableNoise['speed'] + dfVariableNoise['b_method2']
-    # dfVariableNoise.to_csv('dfVariable.csv')
-    ############## ########## ################
-    return dfVariableNoise
 
-    
 def aggregateStats2(dataframe, configDict):
     #output - average number of instances a bus passes through a HAT over the input speed limit
     #dropping all records lower than the chosen speedLimit
@@ -220,7 +205,7 @@ def aggregateStats2(dataframe, configDict):
     #remove after testing
 #	df.to_csv('statsTest2.csv')
     
-    #N is number of unique license plates per HAT that meet speed limit requirement
+    #N is number of unique license plates per HAT that exceed speed limit
     dfAgg = df.groupby(['HAT']).agg({'license_plate':'nunique'}).reset_index()
     dfAgg.rename(columns = {'license_plate':'N'}, inplace = True)
 #	print(dfAgg)
@@ -230,16 +215,42 @@ def aggregateStats2(dataframe, configDict):
     endDay = df['Date'].max()
     timeRange = (endDay - startDay).days
     
-    #Calculating the average number of buses per day
+    #Calculating the average number of buses per day that exceed speed limit
     dfAgg['avgNumBuses'] = dfAgg['N']/timeRange
     
+    #remove after testing
+    dfAgg.to_csv('statsTest3.csv')
+    return dfAgg, timeRange
+
+def variableNoiseAddition2(dataframe, configDict, timeRange, K):
+    privacyLossBudgetEps = configDict['privacyLossBudgetEpsQuery2']
+    dfNoise = dataframe
+    epsPrime = privacyLossBudgetEps/K
+
     #Calculating the sensitivity
     sensitivity = 1/timeRange
-    
-    #remove after testing
-#	dfAgg.to_csv('statsTest3.csv')
-    return dfAgg, sensitivity
 
+    #calculating the noise 'b' for each HAT based on sensitivity
+    b2 = sensitivity/epsPrime
+    dfNoise['b'] = np.random.laplace(0,b2,len(dfNoise))
+    dfNoise['NoisyIncidents'] = dfNoise['avgNumBuses'] + dfNoise['b']
+    dfNoise.to_csv('NoisyIncidents.csv')
+
+    #epsilon checker 
+    mean_absolute_percentage_error = np.mean(np.abs((dfNoise['avgNumBuses'] - dfNoise['NoisyIncidents'])/dfNoise['avgNumBuses'])) * 100
+    # print("MAPE is: " + str(mean_absolute_percentage_error))
+    exitStatement = "The Privacy Loss Budget is too high! Please reduce the value in the Config file."
+    if (mean_absolute_percentage_error <= 10):
+        return print(exitStatement), exit
+    elif (mean_absolute_percentage_error > 10):
+        return dfNoise
+
+def signalToNoise(signal,noise):
+    # calculate SNR
+    # snr defined as signal mean over std of noise
+    snr = (signal.mean())/(np.sqrt(2)*noise)
+    # snr = (dfVariableNoise['speed'].mean())/(np.sqrt(2)*b1)
+    return snr
 
 def plot(x, y):
     plt.xlabel('B')
