@@ -139,8 +139,6 @@ def aggregateStats1(dataframe, configDict):
     #getting average of average speeds
     dfAgg = df.groupby('HAT').agg({'speed':'mean'}).reset_index()
     
-
-    
     #N is sum of number of unique license plates per HAT
     dfInter = dataframe.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
     dfInter = dfInter.groupby(['HAT']).agg({'license_plate':'sum'}).reset_index()
@@ -195,12 +193,16 @@ def variableNoiseAddition1(dataframe, configDict, K):
 
 def aggregateStats2(dataframe, configDict):
     #output - average number of instances a bus passes through a HAT over the input speed limit
+    
+    #calculating locality factor from the config file
+    localityFactor = 1 + configDict['localityFactor']
+
     #dropping all records lower than the chosen speedLimit
     speedLimit = configDict['speedLimit']
-    dataframe = dataframe[(dataframe['speed'] > speedLimit)]
+    dataframeThreshold = dataframe[(dataframe['speed'] > speedLimit)]
     
     #getting maximum speed for every license_plate in every HAT per day
-    df = dataframe.groupby(['HAT','license_plate','Date']).agg({'speed':'max'}).reset_index()
+    df = dataframeThreshold.groupby(['HAT','license_plate','Date']).agg({'speed':'max'}).reset_index()
     
     #remove after testing
 #	df.to_csv('statsTest2.csv')
@@ -218,6 +220,17 @@ def aggregateStats2(dataframe, configDict):
     #Calculating the average number of buses per day that exceed speed limit
     dfAgg['avgNumBuses'] = dfAgg['N']/timeRange
     
+    #finding 'K', the maximum number of HATs a bus passes through per day and delocalising using locality factor
+    dfK = dataframe.groupby(['Date','license_plate']).agg({'HAT':'nunique'}).reset_index()
+    K = dfK['HAT'].max()
+    K = K * localityFactor
+
+    #global sensitivity as maximum number of buses that pass any HAT
+    dfSens = dataframe.groupby(['HAT']).agg({'license_plate':'nunique'}).reset_index()
+    dfSens.rename(columns = {'license_plate':'globalSensitivity'}, inplace = True)
+    globalSensitivity = dfSens['globalSensitivity'].max()
+    dfAgg['globalSensitivity'] = globalSensitivity
+
     #remove after testing
     dfAgg.to_csv('statsTest3.csv')
     return dfAgg, timeRange
@@ -227,11 +240,11 @@ def variableNoiseAddition2(dataframe, configDict, timeRange, K):
     dfNoise = dataframe
     epsPrime = privacyLossBudgetEps/K
 
-    #Calculating the sensitivity
-    sensitivity = 1/timeRange
+    #getting the sensitivity
+    globalSensitivity = dfNoise['globalSensitivity'][0]
 
     #calculating the noise 'b' for each HAT based on sensitivity
-    b2 = sensitivity/epsPrime
+    b2 = globalSensitivity/epsPrime
     dfNoise['b'] = np.random.laplace(0,b2,len(dfNoise))
     dfNoise['NoisyIncidents'] = dfNoise['avgNumBuses'] + dfNoise['b']
     dfNoise.to_csv('NoisyIncidents.csv')
