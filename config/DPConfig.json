@@ -21,17 +21,30 @@
 		"locationCol": "location.coordinates",
 		"datetimeCol": "observationDateTime",
 		"groupByCol": "license_plate",
+<<<<<<< Updated upstream
     		"localityFactor": 1,
     		"globalMaxSpeed": 150,
     		"globalMinSpeed": 0,
     		"privacyLossBudgetEpsQuery1": 10,
 		"privacyLossBudgetEpsQuery2": 10,
+=======
+    	"localityFactor": 1,
+    	"globalMaxSpeed": 150,
+    	"globalMinSpeed": 0, 
+    	"privacyLossBudgetEpsQuery1": 20,
+		"privacyLossBudgetEpsQuery2": 20,
+>>>>>>> Stashed changes
 		"h3Resolution": 7,
 		"startTime": 9,
 		"endTime": 20,
 		"minEventOccurences": 20,
+<<<<<<< Updated upstream
     		"speedLimit": 35,
 		"snrTarget": 10
+=======
+    	"speedLimit": 35,
+		"snrTarget": 1
+>>>>>>> Stashed changes
 	},
 	"numeric": {
 		"duplicateDetection": [],
