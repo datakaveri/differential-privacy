@@ -101,12 +101,7 @@
         "startTime",
         "endTime",
         "minEventOccurences",
-<<<<<<< Updated upstream
-        "speedLimit",
-        "snrTarget"
-=======
         "speedLimit"
->>>>>>> Stashed changes
       ]
     },
     "numeric": {
