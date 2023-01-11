@@ -3,7 +3,8 @@
 # 1. Filter/Suppress
 # 2. Generalization
 # 3. Aggregation
-# 4. Differential Privacy (noise addition)
+# 4. Differential Privacy Computation (noise addition)
+# 5. Post PostProcessing
 
 #import statements
 import pandas as pd
@@ -119,7 +120,6 @@ def readFile(configFileName):
     dataframe = dfDrop  
     return dataframe, configDict, genType
 
-
 def suppress(dataframe, configDict):
     dataframe = dataframe.drop(columns = configDict['suppressCols'])
     print("Dropping columns from configuration file...")
@@ -130,14 +130,17 @@ def suppress(dataframe, configDict):
 def aggregateStats1(dataframe, configDict):
     #output - average speed of bus passing through the specific H3index, TimeSlot and sensitivity
 
+    #getting the column on which noise is to be added
+    trueValue = configDict['trueValue']
+
     #calculating locality factor from the config file
     localityFactor = 1 + configDict['localityFactor']
 
     #getting average speed for every license_plate in every HAT per day
-    df = dataframe.groupby(['HAT','Date','license_plate']).agg({'speed':'mean'}).reset_index()
+    df = dataframe.groupby(['HAT','Date','license_plate']).agg({trueValue:'mean'}).reset_index()
     
     #getting average of average speeds
-    dfAgg = df.groupby('HAT').agg({'speed':'mean'}).reset_index()
+    dfAgg = df.groupby('HAT').agg({trueValue:'mean'}).reset_index()
     
     #N is sum of number of unique license plates per HAT
     dfInter = dataframe.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
@@ -152,9 +155,9 @@ def aggregateStats1(dataframe, configDict):
     ############## ########## ################
 
     #calculating global sensitivity (1 value)
-    maxSpeed = configDict['globalMaxSpeed'] * localityFactor
-    minSpeed = configDict['globalMinSpeed'] * localityFactor
-    globalSensitivity = (maxSpeed - minSpeed)/dfAgg['N'].min()
+    maxValue = configDict['globalMaxValue'] * localityFactor
+    minValue = configDict['globalMinValue'] * localityFactor
+    globalSensitivity = (maxValue - minValue)/dfAgg['N'].min()
     dfAgg['globalSensitivity'] = globalSensitivity
 
     #finding 'K', the maximum number of HATs a bus passes through per day and delocalising using locality factor
@@ -164,10 +167,13 @@ def aggregateStats1(dataframe, configDict):
 
     #remove after testing
     # dfAgg.to_csv('test5.csv')
-    return dfAgg, K
+    return dfAgg, K, maxValue, minValue
     
 def variableNoiseAddition1(dataframe, configDict, K):
-    #METHOD 1
+    
+    #getting the column on which noise is to be added
+    trueValue = configDict['trueValue']
+    
     #calculating E' which is E/K where K is maximum number of HATs a bus passes through per day
     privacyLossBudgetEps = configDict['privacyLossBudgetEpsQuery1']
     epsPrime = privacyLossBudgetEps/K
@@ -177,65 +183,70 @@ def variableNoiseAddition1(dataframe, configDict, K):
     globalSensitivity = dfVariableNoise['globalSensitivity'][0]
     b1 = globalSensitivity/epsPrime
     dfVariableNoise['b'] = np.random.laplace(0,b1, len(dfVariableNoise))
-    dfVariableNoise['NoisySpeed'] = dfVariableNoise['speed'] + dfVariableNoise['b']
-    dfVariableNoise['NoisySpeed'].clip(0, inplace = True)
-    dfVariableNoise.to_csv('NoisySpeed.csv')
+    dfVariableNoise['noisyValue'] = dfVariableNoise[trueValue] + dfVariableNoise['b']
+    
+    #remove after testing
+    # dfVariableNoise.to_csv('NoisyDF.csv')
 
-    #epsilon checker 
-    mean_absolute_percentage_error = np.mean(np.abs((dfVariableNoise['speed'] - dfVariableNoise['NoisySpeed'])/dfVariableNoise['speed'])) * 100
-    # print("MAPE is: " + str(mean_absolute_percentage_error))
+    #epsilon checker
+    mapeThreshold = configDict['mapeThreshold'] 
+    mean_absolute_percentage_error = np.mean(np.abs((dfVariableNoise[trueValue] - dfVariableNoise['noisyValue'])/dfVariableNoise[trueValue])) * 100
+    print("MAPE for Query 1 is: " + str(mean_absolute_percentage_error))
     exitStatement = "The Privacy Loss Budget is too high! Please reduce the value in the Config file."
-    if (mean_absolute_percentage_error <= 10):
+    if (mean_absolute_percentage_error <= mapeThreshold):
         return print(exitStatement), exit
-    elif (mean_absolute_percentage_error > 10):
-        return dfVariableNoise
-
+    elif (mean_absolute_percentage_error > mapeThreshold):
+        return dfVariableNoise, b1
 
 def aggregateStats2(dataframe, configDict):
-    #output - average number of instances a bus passes through a HAT over the input speed limit
+    #output - average number of instances per day a bus passes through a HAT over the input speed limit  
     
+    #getting the column on which noise is to be added
+    trueValue = configDict['trueValue']
+
     #calculating locality factor from the config file
     localityFactor = 1 + configDict['localityFactor']
 
     #dropping all records lower than the chosen speedLimit
-    speedLimit = configDict['speedLimit']
-    dataframeThreshold = dataframe[(dataframe['speed'] > speedLimit)]
+    speedThreshold = configDict['speedThreshold']
+    dataframeThreshold = dataframe[(dataframe[trueValue] > speedThreshold)]
     
     #getting maximum speed for every license_plate in every HAT per day
-    df = dataframeThreshold.groupby(['HAT','license_plate','Date']).agg({'speed':'max'}).reset_index()
+    df = dataframeThreshold.groupby(['HAT','license_plate','Date']).agg({trueValue:'max'}).reset_index()
     
-    #remove after testing
-#	df.to_csv('statsTest2.csv')
     
-    #N is number of unique license plates per HAT that exceed speed limit
-    dfAgg = df.groupby(['HAT']).agg({'license_plate':'nunique'}).reset_index()
+    #N is number of unique license plates per HAT per day that exceed speed limit
+    dfAgg = df.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
     dfAgg.rename(columns = {'license_plate':'N'}, inplace = True)
-#	print(dfAgg)
-    
+    dfAgg = dfAgg.groupby(['HAT']).agg({'N':'sum'}).reset_index()
+
+
     #calculating the number of days in the dataset
     startDay = df['Date'].min()
     endDay = df['Date'].max()
-    timeRange = (endDay - startDay).days
+    timeRange = 1 + (endDay - startDay).days
     
     #Calculating the average number of buses per day that exceed speed limit
-    dfAgg['avgNumBuses'] = dfAgg['N']/timeRange
+    dfAgg['aggregateValue'] = dfAgg['N']/timeRange
+    
+    #remove after testing
+    # dfAgg.to_csv('statsTest2.csv')
     
     #finding 'K', the maximum number of HATs a bus passes through per day and delocalising using locality factor
     dfK = dataframe.groupby(['Date','license_plate']).agg({'HAT':'nunique'}).reset_index()
     K = dfK['HAT'].max()
     K = K * localityFactor
 
-    #global sensitivity as maximum number of buses that pass any HAT
-    dfSens = dataframe.groupby(['HAT']).agg({'license_plate':'nunique'}).reset_index()
-    dfSens.rename(columns = {'license_plate':'globalSensitivity'}, inplace = True)
-    globalSensitivity = dfSens['globalSensitivity'].max()
+    #global sensitivity as 1/No. of days
+    globalSensitivity = 1/timeRange
     dfAgg['globalSensitivity'] = globalSensitivity
 
     #remove after testing
-    dfAgg.to_csv('statsTest3.csv')
+    # dfAgg.to_csv('statsTest3.csv')
     return dfAgg, timeRange
 
-def variableNoiseAddition2(dataframe, configDict, timeRange, K):
+def variableNoiseAddition2(dataframe, configDict, K):
+    #calculating E' which is E/K where K is maximum number of HATs a bus passes through per day
     privacyLossBudgetEps = configDict['privacyLossBudgetEpsQuery2']
     dfNoise = dataframe
     epsPrime = privacyLossBudgetEps/K
@@ -245,32 +256,39 @@ def variableNoiseAddition2(dataframe, configDict, timeRange, K):
 
     #calculating the noise 'b' for each HAT based on sensitivity
     b2 = globalSensitivity/epsPrime
+    # print(b2, epsPrime, globalSensitivity, K)
     dfNoise['b'] = np.random.laplace(0,b2,len(dfNoise))
-    dfNoise['NoisyIncidents'] = dfNoise['avgNumBuses'] + dfNoise['b']
-    dfNoise.to_csv('NoisyIncidents.csv')
+    dfNoise['noisyValue'] = dfNoise['aggregateValue'] + dfNoise['b']
+    dfNoise['noisyValue'] = np.round(dfNoise['noisyValue'])
+    
+    #remove after testing
+    # dfNoise.to_csv('NoisyIncidents.csv')
 
     #epsilon checker 
-    mean_absolute_percentage_error = np.mean(np.abs((dfNoise['avgNumBuses'] - dfNoise['NoisyIncidents'])/dfNoise['avgNumBuses'])) * 100
-    # print("MAPE is: " + str(mean_absolute_percentage_error))
+    mapeThreshold = configDict['mapeThreshold']
+    mean_absolute_percentage_error = np.mean(np.abs((dfNoise['aggregateValue'] - dfNoise['noisyValue'])/dfNoise['aggregateValue'])) * 100
+    print("MAPE for Query 2 is: " + str(mean_absolute_percentage_error))
     exitStatement = "The Privacy Loss Budget is too high! Please reduce the value in the Config file."
-    if (mean_absolute_percentage_error <= 10):
+    if (mean_absolute_percentage_error <= mapeThreshold):
         return print(exitStatement), exit
-    elif (mean_absolute_percentage_error > 10):
-        return dfNoise
+    elif (mean_absolute_percentage_error > mapeThreshold):
+        return dfNoise, b2
+
+def postProcessing(dataframe, lowerClip = 0, upperClip = np.inf):
+    #clipping upper and lower values to max and min used to define sensitivity
+    dataframe['noisyValue'].clip(lowerClip, upperClip, inplace = True)
+    dataframe['noisyValue'] = dataframe['noisyValue'].round(0)
+
+    # creating the final dataframe
+    dfFinal = dataframe[['HAT', 'noisyValue']]
+    return dfFinal
 
 def signalToNoise(signal,noise):
     # calculate SNR
     # snr defined as signal mean over std of noise
-    snr = (signal.mean())/(np.sqrt(2)*noise)
-    # snr = (dfVariableNoise['speed'].mean())/(np.sqrt(2)*b1)
+    snr = (signal.mean())/(np.sqrt(2)*(noise))
+    if snr <= 3:
+        print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is within the acceptable bounds.")
+    else:
+        print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is quite high!")
     return snr
-
-def plot(x, y):
-    plt.xlabel('B')
-    plt.ylabel('Worst Case Epsilon')
-    xValues = x
-    yValues = y
-    plt.plot(x,y, marker = 'x')
-#	plt.legend()
-    plt.show()
-    return

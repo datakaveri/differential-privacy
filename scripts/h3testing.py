@@ -1,4 +1,3 @@
-import pandas as pd
 import modules as mod
 
 #validating the config file against the schema
@@ -14,13 +13,25 @@ df = mod.suppress(df, configDict)
 df = mod.categorize(df, configDict, genType)
 
 #computing the first query for ITMS
-dfAggregateQuery1, K = mod.aggregateStats1(df, configDict)
+dfAggregateQuery1, K, lowerClip1, upperClip1 = mod.aggregateStats1(df, configDict)
 
 #computing the second query for ITMS (average number of instances a bus exceeds a speed threshold.)
 dfAggregateQuery2, timeRange = mod.aggregateStats2(df, configDict)
 
 #adding noise to the output of aggregateStats1
-dfNoisyQuery1 = mod.variableNoiseAddition1(dfAggregateQuery1, configDict, K)
+dfNoisyQuery1, b1 = mod.variableNoiseAddition1(dfAggregateQuery1, configDict, K)
 
 #adding noise to the output of aggregateStats2
-dfNoisyQuery2 = mod.variableNoiseAddition2(dfAggregateQuery2, configDict, timeRange, K)
+dfNoisyQuery2, b2 = mod.variableNoiseAddition2(dfAggregateQuery2, configDict, K)
+
+#calculating signal to noise ratio
+trueValue = configDict['trueValue']
+snr1 = mod.signalToNoise(dfNoisyQuery1[trueValue], b1)
+snr2 = mod.signalToNoise(dfNoisyQuery2['aggregateValue'], b2)
+
+#postprocessing (clipping and rounding and dropping unnecessary information)
+dfFinal1 = mod.postProcessing(dfNoisyQuery1, lowerClip1, upperClip1)
+dfFinal2 = mod.postProcessing(dfNoisyQuery2)
+
+dfFinal1.to_csv('dfFinal1.csv')
+dfFinal2.to_csv('dfFinal2.csv')
