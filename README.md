@@ -11,7 +11,9 @@ Mathematically, this is represented as:
 The differential privacy guarantee offered by this statement is that for any two neighbouring datasets D and D’ that differ only by the data of a single user, any function or process M is considered ε-differential private iff for every possible output x, the probability of this output being observed never differs by more than exp(ε) between the scenario with and without that user’s data.
 
 In practice, this privacy preserving mechanism is achieved through the addition of noise sampled from a probability distribution function to the original data query. In our case, this distribution is the Laplacian or double-exponential, a symmetric and unimodal distribution.
-DP-Pipeline Use Case
+
+## Use Case
+
 This Differential Privacy pipeline currently offers the option to choose a privacy loss budget ε and compute the amount of noise to be added by using the formula:
 
 **<div align="center"> ε = S/b </div>**
