@@ -1,4 +1,4 @@
-# DP User Guide
+# Differential Privacy User Guide
 
 ## Differential Privacy at a Glance
 Differential Privacy describes a promise made by a data holder or curator to a data subject: “You will not be affected, adversely or otherwise, by allowing your data to be used in any study or analysis, no matter what other studies, data sets, or information sources, are available.”
