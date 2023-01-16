@@ -5,7 +5,8 @@ Differential Privacy describes a promise made by a data holder or curator to a d
 
 Mathematically, this is represented as:
 
-∀ D and D′ ∀ x: ℙ[M(D) = x] ≤ exp(ε) ⋅ ℙ[M(D′) = x]
+**<div align="center"> ∀ D and D′ ∀ x: ℙ[M(D) = x] ≤ exp(ε) ⋅ ℙ[M(D′) = x] </div>**
+
 
 The differential privacy guarantee offered by this statement is that for any two neighbouring datasets D and D’ that differ only by the data of a single user, any function or process M is considered ε-differential private iff for every possible output x, the probability of this output being observed never differs by more than exp(ε) between the scenario with and without that user’s data.
 
@@ -13,12 +14,12 @@ In practice, this privacy preserving mechanism is achieved through the addition 
 DP-Pipeline Use Case
 This Differential Privacy pipeline currently offers the option to choose a privacy loss budget ε and compute the amount of noise to be added by using the formula:
 
-ε = S/b
+**<div align="center"> ε = S/b </div>**
 
-where,
-Ε is the privacy loss budget,
-S is the Sensitivity,
-b is the noise
+where,  
+ ε is the privacy loss budget,  
+ S is the Sensitivity,  
+ b is the noise
 
 The tool is currently limited to a few temporal and geospatial datasets and work is being done to expand the functionality to all types of datasets.
 ## Pipeline
@@ -35,7 +36,7 @@ This function removes and duplicates found in the dataset based on the choice of
 #### Suppression
 This function removes unnecessary columns from the data as determined and selected by the user in the suppressCols parameter in the configuration file.
 
-#### Generalisation and Delocalisation
+#### Generalisation and Delocalisation**<div align="center">
 This function generalises specific information in the dataset that could be used to reveal identifying information of the users whose data is present in the dataset. This could apply to location, time, etc. 
 
 ### ε-Differential Privacy Computation
@@ -52,11 +53,13 @@ This function rounds the query outputs to ensure integer values are returned and
 #### Signal to Noise Ratio Validation
 This function computes the ratio of signal to noise using the formula 
 
-![CodeCogsEqnSNR](https://user-images.githubusercontent.com/100753500/212615310-2c47e9f1-fe5b-4e80-b4cd-e8776234d94d.png)
 
-where,
- is the mean of the true value or the signal,
- is the standard deviation of the noise parameter b.
+**<div align="center"> SNR =  μ/σ </div>**
+
+where,  
+μ is the mean of the true value or the signal,  
+σ is the standard deviation of the noise parameter b  
+
 If the SNR is too high, it is recommended that the parameter privacy budget be adjusted to avoid potential data leakage from addition of a very small amount of noise.
 
 The output of the pipeline is an ε-differential private output for the specific query requested and the chosen value of ε.
