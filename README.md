@@ -36,7 +36,7 @@ This function removes and duplicates found in the dataset based on the choice of
 #### Suppression
 This function removes unnecessary columns from the data as determined and selected by the user in the suppressCols parameter in the configuration file.
 
-#### Generalisation and Delocalisation**<div align="center">
+#### Generalisation and Delocalisation
 This function generalises specific information in the dataset that could be used to reveal identifying information of the users whose data is present in the dataset. This could apply to location, time, etc. 
 
 ### ε-Differential Privacy Computation
