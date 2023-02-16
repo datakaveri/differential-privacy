@@ -175,7 +175,7 @@ def variableNoiseAddition1(dataframe, configDict, K):
     trueValue = configDict['trueValue']
     
     #calculating E' which is E/K where K is maximum number of HATs a bus passes through per day
-    privacyLossBudgetEps = configDict['privacyLossBudgetEpsQuery1']
+    privacyLossBudgetEps = configDict['privacyLossBudgetEpsQuery'][0]
     epsPrime = privacyLossBudgetEps/K
     
     #calculating noise 'b' for each HAT based on sensitivity using b = S/E
@@ -208,7 +208,7 @@ def aggregateStats2(dataframe, configDict):
     localityFactor = 1 + configDict['localityFactor']
 
     #dropping all records lower than the chosen speedLimit
-    speedThreshold = configDict['speedThreshold']
+    speedThreshold = configDict['trueValueThreshold']
     dataframeThreshold = dataframe[(dataframe[trueValue] > speedThreshold)]
     
     #getting maximum speed for every license_plate in every HAT per day
@@ -247,7 +247,7 @@ def aggregateStats2(dataframe, configDict):
 
 def variableNoiseAddition2(dataframe, configDict, K):
     #calculating E' which is E/K where K is maximum number of HATs a bus passes through per day
-    privacyLossBudgetEps = configDict['privacyLossBudgetEpsQuery2']
+    privacyLossBudgetEps = configDict['privacyLossBudgetEpsQuery'][1]
     dfNoise = dataframe
     epsPrime = privacyLossBudgetEps/K
 
@@ -274,13 +274,19 @@ def variableNoiseAddition2(dataframe, configDict, K):
     elif (mean_absolute_percentage_error > mapeThreshold):
         return dfNoise, b2
 
-def postProcessing(dataframe, lowerClip = 0, upperClip = np.inf):
+def postProcessing(dataframe, configDict, lowerClip = 0, upperClip = np.inf):
     #clipping upper and lower values to max and min used to define sensitivity
     dataframe['noisyValue'].clip(lowerClip, upperClip, inplace = True)
     dataframe['noisyValue'] = dataframe['noisyValue'].round(0)
 
     # creating the final dataframe
     dfFinal = dataframe[['HAT', 'noisyValue']]
+
+    #printing the cumulative epsilon
+    epsArray = configDict['privacyLossBudgetEpsQuery']
+    cumulativeEps = np.sum(epsArray)
+    print('The Cumulative Epsilon for these queries is ' + str(cumulativeEps))
+
     return dfFinal
 
 def signalToNoise(signal,noise):
@@ -292,3 +298,43 @@ def signalToNoise(signal,noise):
     else:
         print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is quite high!")
     return snr
+
+def aggregator(dataframe, configDict):
+    groupByCol = configDict['groupByCol']
+    trueValue = configDict['trueValue']
+    dfThreshold = dataframe[dataframe[trueValue] > 0]
+
+    if (dfThreshold[groupByCol].dtype) == int or (dfThreshold[groupByCol].dtype) == float:
+        dfGrouped = dfThreshold.groupby(['HAT']).agg(
+                                groupBy_count=(groupByCol,'count'),
+                                groupBy_sum=(groupByCol,'sum'),
+                                groupBy_max=(groupByCol,'max'),
+                                groupBy_min=(groupByCol,'min')).reset_index()
+    else:
+        dfGrouped = dfThreshold.groupby(['HAT']).agg(
+                                groupBy_count=(groupByCol,'count'))
+        print('Warning: Only the count query is available for non-numeric choice of groupByCol')
+
+    print(dfGrouped.head())
+    # dfAggregated.to_csv('aggregatorTest.csv')
+    return
+
+def sensitivityCompute(dataframe, configDict):
+    groupByCol = configDict['groupByCol']
+
+    #sensitivity for counting queries is always 1
+    sensitivityCountQuery = 1
+
+    #sensitivity for summation queries is diff(upper, lower) when bounded
+    # sensitivitySummationQuery = 
+    print(dataframe['speed'].quantile(q=[0.05, 0.95]))
+
+
+    return sensitivityCountQuery
+
+
+
+def noiseCompute(dfGrouped, configDict):
+    # sensitivity
+
+    return 
