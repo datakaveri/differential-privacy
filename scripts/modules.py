@@ -1,12 +1,5 @@
-# File created to store modules for Differential Privacy
-# Modules:
-# 1. Filter/Suppress
-# 2. Generalization
-# 3. Aggregation
-# 4. Differential Privacy Computation (noise addition)
-# 5. Post PostProcessing
+# Modules used to run Differential-Privacy Pipeline
 
-#import statements
 import pandas as pd
 import numpy as np
 import json
@@ -46,27 +39,28 @@ def spatioTemporalGeneralization(dataframe, configFile):
 
     # assigning HATs from H3index and timeslot
     dataframe["HAT"] = ( dataframe["Timeslot"].astype(str) + " " + dataframe["h3index"])
+    print('\nNumber of unique HATs created is: ' + str(dataframe['HAT'].nunique()))
 
     # Filtering time slots by start and end time from config file
     startTime = configFile["startTime"]
     endTime = configFile["endTime"]
-    groupByColumn = configFile["groupByCol"]
+    groupByColumn = 'license_plate'
     dataframe = dataframe[(dataframe["Timeslot"] >= startTime) & (dataframe["Timeslot"] <= endTime) ]
 
     # Selecting h3 indices where a min number of events occur in all timeslots of the day
-    f1 = (dataframe.groupby(["Timeslot", "Date", "h3index"]).agg({groupByColumn: "nunique"}).reset_index())
-    f2 = f1.groupby(["Timeslot", "h3index"]).agg({groupByColumn: "sum"}).reset_index()
+    df1 = (dataframe.groupby(["HAT", "Date"]).agg({groupByColumn: "nunique"}).reset_index())
+    df2 = df1.groupby(["HAT"]).agg({groupByColumn: "sum"}).reset_index()
+
+    #filtering average num of occurences per day per HAT
     date = dataframe["Date"].unique()
-    minEventOccurences = int(configFile["minEventOccurences"])
-    limit = len(date) * minEventOccurences
-    f3 = f2[f2[groupByColumn] >= limit]
-    f4 = f3.groupby("h3index").agg({"Timeslot": "count"}).reset_index()
-
-    maxTimeslots = f4["Timeslot"].max()
-    f5 = f4[f4["Timeslot"] == maxTimeslots]
-
-    df = dataframe["h3index"].isin(f5["h3index"])
+    minEventOccurencesPerDay = int(configFile["minEventOccurences"])
+    limit = len(date) * minEventOccurencesPerDay
+    df3 = df2[df2[groupByColumn] >= limit]
+    df = dataframe["HAT"].isin(df3["HAT"])
     dataframe = dataframe[df]
+
+    print('Number of unique HATs left after filtering is: ' + str(dataframe['HAT'].nunique()))
+
     return dataframe
 
 def numericGeneralization(dataframe, configFile):
@@ -115,226 +109,168 @@ def readFile(configFileName):
     dfDrop = dataframe.drop_duplicates(subset = [dupe1, dupe2], inplace = False, ignore_index = True)
     dfLen2 = len(dfDrop)
     dupeCount = dfLen1 - dfLen2
-    p1 = print(str(dupeCount) + ' duplicate rows have been removed.') 
-    p2 = print(str(dfDrop.shape) + ' is the shape of the new dataframe.')
+    print("\nIdentifying and removing duplicates...")
+    print(str(dupeCount) + ' duplicate rows have been removed.') 
+    print(str(dfDrop.shape) + ' is the shape of the deduplicated dataframe .')
     dataframe = dfDrop  
     return dataframe, configDict, genType
 
 def suppress(dataframe, configDict):
     dataframe = dataframe.drop(columns = configDict['suppressCols'])
-    print("Dropping columns from configuration file...")
-    print("The shape of the new dataframe is:")
-    print(dataframe.shape)
+    print("\nDropping columns from configuration file...")
+    print(str(dataframe.shape) + ' is the shape of the dataframe after suppression.')
     return dataframe
     
-def aggregateStats1(dataframe, configDict):
-    #output - average speed of bus passing through the specific H3index, TimeSlot and sensitivity
+def timeRange(dataframe):
+    #calculating the number of days in the dataset
+    startDay = dataframe['Date'].min()
+    endDay = dataframe['Date'].max()
+    timeRange = 1 + (endDay - startDay).days
+    return timeRange
 
-    #getting the column on which noise is to be added
-    trueValue = configDict['trueValue']
+def aggregator(dataframe, configDict):
+    #initializing variables from config file
+    groupByCol = configDict['groupByCol']
+    localityFactor = configDict['localityFactor']
+    winsorizeLower = configDict['winsorizeLowerBound']
+    winsorizeUpper = configDict['winsorizeUpperBound']
+    dfThreshold = dataframe
 
-    #calculating locality factor from the config file
-    localityFactor = 1 + configDict['localityFactor']
+    #winsorizing the values of the chosen column
+    lowClip = dfThreshold[groupByCol].quantile(winsorizeLower) * (1 - localityFactor)
+    highClip = dfThreshold[groupByCol].quantile(winsorizeUpper) * (1 + localityFactor)
+    dfThreshold[groupByCol].clip(lower=lowClip, upper=highClip, inplace = True)
+        
+    if (dfThreshold[groupByCol].dtype) == int or (dfThreshold[groupByCol].dtype) == float:
+        dfGrouped = dfThreshold.groupby(['HAT','Date','license_plate']).agg(
+                                count=(groupByCol,'count'),
+                                sum=(groupByCol,'sum'),
+                                mean=(groupByCol,'mean'),
+                                max=(groupByCol,'max'),
+                                min=(groupByCol,'min')).reset_index()
+    else:
+        dfGrouped = dfThreshold.groupby(['HAT']).agg(
+                                count=(groupByCol,'count'))
+        print('Warning: Only the count query is available for non-numeric choice of groupByCol')
 
-    #getting average speed for every license_plate in every HAT per day
-    df = dataframe.groupby(['HAT','Date','license_plate']).agg({trueValue:'mean'}).reset_index()
-    
+    return dfGrouped
+
+def ITMSQuery1(dataframe):
+    #average speed per HAT
+    dfITMSQuery1 = dataframe
+
     #getting average of average speeds
-    dfAgg = df.groupby('HAT').agg({trueValue:'mean'}).reset_index()
-    
-    #N is sum of number of unique license plates per HAT
-    dfInter = dataframe.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
-    dfInter = dfInter.groupby(['HAT']).agg({'license_plate':'sum'}).reset_index()
-    dfAgg['N'] = dfInter['license_plate']
-    
-    ############## DEPRECATED ################
-    # calculating local sensitivity (value for each unique HAT)
-    # localSensitivity = [None] * len(dfAgg)
-    # localSensitivity = (maxSpeed - minSpeed)/dfAgg['N']
-    # dfAgg['localSensitivity'] = localSensitivity
-    ############## ########## ################
+    dfITMSQuery1 = dfITMSQuery1.groupby('HAT').agg({'mean':'mean'}).reset_index()
+    dfITMSQuery1.rename(columns = {'mean':'query1Output'}, inplace = True)
+    return dfITMSQuery1
 
-    #calculating global sensitivity (1 value)
-    maxValue = configDict['globalMaxValue'] * localityFactor
-    minValue = configDict['globalMinValue'] * localityFactor
-    globalSensitivity = (maxValue - minValue)/dfAgg['N'].min()
-    dfAgg['globalSensitivity'] = globalSensitivity
-
-    #finding 'K', the maximum number of HATs a bus passes through per day and delocalising using locality factor
-    dfK = dataframe.groupby(['Date','license_plate']).agg({'HAT':'nunique'}).reset_index()
-    K = dfK['HAT'].max()
-    K = K * localityFactor
-
-    #remove after testing
-    # dfAgg.to_csv('test5.csv')
-    return dfAgg, K, maxValue, minValue
-    
-def variableNoiseAddition1(dataframe, configDict, K):
-    
-    #getting the column on which noise is to be added
-    trueValue = configDict['trueValue']
-    
-    #calculating E' which is E/K where K is maximum number of HATs a bus passes through per day
-    privacyLossBudgetEps = configDict['privacyLossBudgetEpsQuery'][0]
-    epsPrime = privacyLossBudgetEps/K
-    
-    #calculating noise 'b' for each HAT based on sensitivity using b = S/E
-    dfVariableNoise = dataframe
-    globalSensitivity = dfVariableNoise['globalSensitivity'][0]
-    b1 = globalSensitivity/epsPrime
-    dfVariableNoise['b'] = np.random.laplace(0,b1, len(dfVariableNoise))
-    dfVariableNoise['noisyValue'] = dfVariableNoise[trueValue] + dfVariableNoise['b']
-    
-    #remove after testing
-    # dfVariableNoise.to_csv('NoisyDF.csv')
-
-    #epsilon checker
-    mapeThreshold = configDict['mapeThreshold'] 
-    mean_absolute_percentage_error = np.mean(np.abs((dfVariableNoise[trueValue] - dfVariableNoise['noisyValue'])/dfVariableNoise[trueValue])) * 100
-    print("MAPE for Query 1 is: " + str(mean_absolute_percentage_error))
-    exitStatement = "The Privacy Loss Budget is too high! Please reduce the value in the Config file."
-    if (mean_absolute_percentage_error <= mapeThreshold):
-        return print(exitStatement), exit
-    elif (mean_absolute_percentage_error > mapeThreshold):
-        return dfVariableNoise, b1
-
-def aggregateStats2(dataframe, configDict):
-    #output - average number of instances per day a bus passes through a HAT over the input speed limit  
-    
-    #getting the column on which noise is to be added
-    trueValue = configDict['trueValue']
-
-    #calculating locality factor from the config file
-    localityFactor = 1 + configDict['localityFactor']
+def ITMSQuery2(dataframe, configDict):
+    #average number of speed violations per HAT over all days
 
     #dropping all records lower than the chosen speedLimit
     speedThreshold = configDict['trueValueThreshold']
-    dataframeThreshold = dataframe[(dataframe[trueValue] > speedThreshold)]
-    
-    #getting maximum speed for every license_plate in every HAT per day
-    df = dataframeThreshold.groupby(['HAT','license_plate','Date']).agg({trueValue:'max'}).reset_index()
-    
-    
-    #N is number of unique license plates per HAT per day that exceed speed limit
-    dfAgg = df.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
-    dfAgg.rename(columns = {'license_plate':'N'}, inplace = True)
-    dfAgg = dfAgg.groupby(['HAT']).agg({'N':'sum'}).reset_index()
 
+    # dropping all rows that don't meet threshold requirement
+    dfITMSQuery2 = dataframe[(dataframe['max'] >= speedThreshold)].reset_index()
 
-    #calculating the number of days in the dataset
-    startDay = df['Date'].min()
-    endDay = df['Date'].max()
-    timeRange = 1 + (endDay - startDay).days
-    
-    #Calculating the average number of buses per day that exceed speed limit
-    dfAgg['aggregateValue'] = dfAgg['N']/timeRange
-    
-    #remove after testing
-    # dfAgg.to_csv('statsTest2.csv')
-    
-    #finding 'K', the maximum number of HATs a bus passes through per day and delocalising using locality factor
+    # finding number of threshold violations per HAT, per Day, per license plate
+    dfITMSQuery2 = dfITMSQuery2.groupby(['HAT', 'Date']).agg({'license_plate':'count'}).reset_index()
+
+    # finding average number of violations per HAT over all the days
+    dfITMSQuery2 = dfITMSQuery2.groupby(['HAT']).agg({'license_plate':'mean'}).reset_index()
+    dfITMSQuery2.rename(columns={'license_plate':'query2Output'}, inplace = True)
+    return dfITMSQuery2
+
+def NCompute(dataframe):
+    #N is sum of number of unique license plates per HAT
+    dataframe = dataframe.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
+    dataframe = dataframe.groupby(['HAT']).agg({'license_plate':'sum'}).reset_index()
+    dataframe.rename(columns={'license_plate':'N'}, inplace = True)
+
+    #since 'n' is the denominator in sensitivity, max change in sensitivity is from min value of 'n'
+    N = dataframe['N'].min()
+    return N
+
+def KCompute(dataframe):
+    #finding 'K', the maximum number of HATs a bus passes through per day
     dfK = dataframe.groupby(['Date','license_plate']).agg({'HAT':'nunique'}).reset_index()
     K = dfK['HAT'].max()
-    K = K * localityFactor
+    return K
 
-    #global sensitivity as 1/No. of days
-    globalSensitivity = 1/timeRange
-    dfAgg['globalSensitivity'] = globalSensitivity
+def ITMSSensitivityCompute(configDict, timeRange, N):
+    maxValue = configDict['globalMaxValue']
+    minValue = configDict['globalMinValue']
 
-    #remove after testing
-    # dfAgg.to_csv('statsTest3.csv')
-    return dfAgg, timeRange
-
-def variableNoiseAddition2(dataframe, configDict, K):
-    #calculating E' which is E/K where K is maximum number of HATs a bus passes through per day
-    privacyLossBudgetEps = configDict['privacyLossBudgetEpsQuery'][1]
-    dfNoise = dataframe
-    epsPrime = privacyLossBudgetEps/K
-
-    #getting the sensitivity
-    globalSensitivity = dfNoise['globalSensitivity'][0]
-
-    #calculating the noise 'b' for each HAT based on sensitivity
-    b2 = globalSensitivity/epsPrime
-    # print(b2, epsPrime, globalSensitivity, K)
-    dfNoise['b'] = np.random.laplace(0,b2,len(dfNoise))
-    dfNoise['noisyValue'] = dfNoise['aggregateValue'] + dfNoise['b']
-    dfNoise['noisyValue'] = np.round(dfNoise['noisyValue'])
+    # sensitivity for query 1
+    sensitivityITMSQuery1 = (maxValue - minValue)/N   
     
-    #remove after testing
-    # dfNoise.to_csv('NoisyIncidents.csv')
+    # sensitivity for query 2
+    sensitivityITMSQuery2 = 1/timeRange
 
-    #epsilon checker 
-    mapeThreshold = configDict['mapeThreshold']
-    mean_absolute_percentage_error = np.mean(np.abs((dfNoise['aggregateValue'] - dfNoise['noisyValue'])/dfNoise['aggregateValue'])) * 100
-    print("MAPE for Query 2 is: " + str(mean_absolute_percentage_error))
-    exitStatement = "The Privacy Loss Budget is too high! Please reduce the value in the Config file."
-    if (mean_absolute_percentage_error <= mapeThreshold):
-        return print(exitStatement), exit
-    elif (mean_absolute_percentage_error > mapeThreshold):
-        return dfNoise, b2
+    return sensitivityITMSQuery1, sensitivityITMSQuery2
 
-def postProcessing(dataframe, configDict, lowerClip = 0, upperClip = np.inf):
-    #clipping upper and lower values to max and min used to define sensitivity
-    dataframe['noisyValue'].clip(lowerClip, upperClip, inplace = True)
-    dataframe['noisyValue'] = dataframe['noisyValue'].round(0)
+def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K):
+    dfNoiseITMSQuery1 = dfITMSQuery1
+    dfNoiseITMSQuery2 = dfITMSQuery2
 
-    # creating the final dataframe
-    dfFinal = dataframe[['HAT', 'noisyValue']]
+    # epsilon
+    privacyLossBudgetEpsITMSQuery1 = configDict['privacyLossBudgetEpsQuery'][0]
+    privacyLossBudgetEpsITMSQuery2 = configDict['privacyLossBudgetEpsQuery'][1]
 
-    #printing the cumulative epsilon
-    epsArray = configDict['privacyLossBudgetEpsQuery']
-    cumulativeEps = np.sum(epsArray)
-    print('The Cumulative Epsilon for these queries is ' + str(cumulativeEps))
+    # computing epsilon prime
+    epsPrimeQuery1 = privacyLossBudgetEpsITMSQuery1/K
+    epsPrimeQuery2 = privacyLossBudgetEpsITMSQuery2/K
 
-    return dfFinal
+    # computing noise query 1
+    bITMSQuery1 = sensitivityITMSQuery1/epsPrimeQuery1
+    noiseITMSQuery1 = np.random.laplace(0, bITMSQuery1, len(dfNoiseITMSQuery1))
 
-def signalToNoise(signal,noise):
-    # calculate SNR
+    # computing noise query 2
+    bITMSQuery2 = sensitivityITMSQuery2/epsPrimeQuery2
+    noiseITMSQuery2 = np.random.laplace(0, bITMSQuery2, len(dfNoiseITMSQuery2))
+
+    # adding noise to the true value
+    dfNoiseITMSQuery1['query1NoisyOutput'] = dfNoiseITMSQuery1['query1Output'] + noiseITMSQuery1
+    dfNoiseITMSQuery2['query2NoisyOutput'] = dfNoiseITMSQuery2['query2Output'] + noiseITMSQuery2
+
+    return dfNoiseITMSQuery1, dfNoiseITMSQuery2
+
+def postProcessing(dfNoiseITMSQuery1, dfNoiseITMSQuery2, configDict):
+
+    #postprocessing ITMSQuery1
+    globalMaxValue = configDict['globalMaxValue']
+    globalMinValue = configDict['globalMinValue']
+    dfFinalITMSQuery1 = dfNoiseITMSQuery1
+    dfFinalITMSQuery1['query1NoisyOutput'].clip(globalMinValue, globalMaxValue, inplace = True)
+    dfFinalITMSQuery1.drop(['query1Output'], axis = 1, inplace = True)
+    
+    #postprocessing ITMS Query 2
+    dfFinalITMSQuery2 = dfNoiseITMSQuery2
+    dfFinalITMSQuery2['query2NoisyOutput'].clip(0, np.inf, inplace = True)
+    dfFinalITMSQuery2.drop(['query2Output'], axis = 1, inplace = True)
+    
+    return dfFinalITMSQuery1, dfFinalITMSQuery2
+
+def signalToNoise(signal,noise,configDict):
+    # SNR Threshold
+    snrThreshold = configDict['snrThreshold']
     # snr defined as signal mean over std of noise
-    snr = (signal.mean())/(np.sqrt(2)*(noise))
-    if snr <= 3:
+    snr = (np.mean(signal))/(np.std(noise))
+    if snr <= snrThreshold:
         print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is within the acceptable bounds.")
     else:
         print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is quite high!")
     return snr
 
-def aggregator(dataframe, configDict):
-    groupByCol = configDict['groupByCol']
-    trueValue = configDict['trueValue']
-    dfThreshold = dataframe[dataframe[trueValue] > 0]
+def cumulativeEpsilon(configDict):
 
-    if (dfThreshold[groupByCol].dtype) == int or (dfThreshold[groupByCol].dtype) == float:
-        dfGrouped = dfThreshold.groupby(['HAT']).agg(
-                                groupBy_count=(groupByCol,'count'),
-                                groupBy_sum=(groupByCol,'sum'),
-                                groupBy_max=(groupByCol,'max'),
-                                groupBy_min=(groupByCol,'min')).reset_index()
-    else:
-        dfGrouped = dfThreshold.groupby(['HAT']).agg(
-                                groupBy_count=(groupByCol,'count'))
-        print('Warning: Only the count query is available for non-numeric choice of groupByCol')
+    privacyLossBudgetQuery1 = configDict['privacyLossBudgetEpsQuery'][0]
+    privacyLossBudgetQuery2 = configDict['privacyLossBudgetEpsQuery'][1]
+    cumulativeEpsilon = privacyLossBudgetQuery1 + privacyLossBudgetQuery2
+    print('Your Cumulative Epsilon for the displayed queries is: ' + str(cumulativeEpsilon))
+    return cumulativeEpsilon
 
-    print(dfGrouped.head())
-    # dfAggregated.to_csv('aggregatorTest.csv')
+def outputFile(dfFinal, dataframeName):
+    # dataframeName = input('What would you like to name the output dataframe?')
+    dfFinal.to_csv('../pipelineOutput/' + dataframeName + '.csv')
     return
-
-def sensitivityCompute(dataframe, configDict):
-    groupByCol = configDict['groupByCol']
-
-    #sensitivity for counting queries is always 1
-    sensitivityCountQuery = 1
-
-    #sensitivity for summation queries is diff(upper, lower) when bounded
-    # sensitivitySummationQuery = 
-    print(dataframe['speed'].quantile(q=[0.05, 0.95]))
-
-
-    return sensitivityCountQuery
-
-
-
-def noiseCompute(dfGrouped, configDict):
-    # sensitivity
-
-    return 
