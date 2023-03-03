@@ -80,6 +80,7 @@ differential-privacy
 │   │   ├── DPConfig.json
 │   │   ├── DPSchema.json
 ├── data/
+├── pipelineOutput/
 ├── scripts/
 │   │   ├── .gitkeep
 │   │   ├── h3testing.py
@@ -154,5 +155,5 @@ The config file DPConfig.json requires the user to set the following parameters:
 ### Running the Tool
 To run the tool, ensure that the parameters are all defined in the config file in the format defined by the schema. Once that is done, run the following command:
 ```
-python3 h3testing.py
+python3 diffPrivPipeline.py
 ```
