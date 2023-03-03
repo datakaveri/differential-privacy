@@ -47,6 +47,16 @@
           "minimum": 0,
           "type": "number"
         },
+        "winsorizeLowerBound": {
+          "maximum": 0.1,
+          "minimum": 0.01,
+          "type": "number"
+        },
+        "winsorizeUpperBound": {
+          "maximum": 1.0,
+          "minimum": 0.9,
+          "type": "number"
+        },
         "globalMaxValue": {
           "maximum": 200,
           "minimum": 0,
@@ -57,13 +67,11 @@
           "minimum": 0,
           "type": "integer"
         },
-        "privacyLossBudgetEpsQuery1": {
-          "type": "integer",
-          "maximum": 100,
-          "minimum": 0
-        },
-        "privacyLossBudgetEpsQuery2": {
-          "type": "integer",
+        "privacyLossBudgetEpsQuery": {
+          "type": "array",
+          "items": {
+            "type": "integer"  
+          },
           "maximum": 100,
           "minimum": 0
         },
@@ -85,7 +93,7 @@
         "minEventOccurences": {
           "type": "integer"
         },
-        "speedThreshold": {
+        "trueValueThreshold": {
           "type": "integer"
         },
         "mapeThreshold": {
@@ -105,17 +113,17 @@
         "locationCol",
         "datetimeCol",
         "groupByCol",
-        "trueValue",
         "localityFactor",
+        "winsorizeLowerBound",
+        "winsorizeUpperBound",
         "globalMaxValue",
         "globalMinValue",
-        "privacyLossBudgetEpsQuery1",
-        "privacyLossBudgetEpsQuery2",
+        "privacyLossBudgetEpsQuery",
         "h3Resolution",
         "startTime",
         "endTime",
         "minEventOccurences",
-        "speedThreshold",
+        "trueValueThreshold",
         "mapeThreshold",
         "snrThreshold"
       ]
