@@ -1,0 +1,163 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "dataFile": {
+      "type": "string"
+    },
+    "genType": {
+      "type": "string"
+    },
+    "spatio-temporal": {
+      "type": "object",
+      "properties": {
+        "duplicateDetection": {
+          "type": "array",
+          "maxItems": 2,
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "suppressCols": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "locationCol": {
+          "type": "string"
+        },
+        "datetimeCol": {
+          "type": "string"
+        },
+        "groupByCol": {
+          "type": "string"
+        },
+        "trueValue": {
+          "type": "string"
+        },
+        "localityFactor": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "winsorizeLowerBound": {
+          "maximum": 0.1,
+          "minimum": 0.01,
+          "type": "number"
+        },
+        "winsorizeUpperBound": {
+          "maximum": 1.0,
+          "minimum": 0.9,
+          "type": "number"
+        },
+        "globalMaxValue": {
+          "maximum": 200,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "globalMinValue": {
+          "maximum": 200,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "privacyLossBudgetEpsQuery": {
+          "type": "array",
+          "items": {
+            "type": "integer"  
+          },
+          "maximum": 100,
+          "minimum": 0
+        },
+        "h3Resolution": {
+          "minimum": 6,
+          "maximum": 8,
+          "type": "integer"
+        },
+        "startTime": {
+          "minimum": 0,
+          "maximum": 24,
+          "type": "integer"
+        },
+        "endTime": {
+          "minimum": 0,
+          "maximum": 24,
+          "type": "integer"
+        },
+        "minEventOccurences": {
+          "type": "integer"
+        },
+        "trueValueThreshold": {
+          "type": "integer"
+        },
+        "mapeThreshold": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "snrThreshold": {
+          "maximum": 3,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "duplicateDetection",
+        "suppressCols",
+        "locationCol",
+        "datetimeCol",
+        "groupByCol",
+        "localityFactor",
+        "winsorizeLowerBound",
+        "winsorizeUpperBound",
+        "globalMaxValue",
+        "globalMinValue",
+        "privacyLossBudgetEpsQuery",
+        "h3Resolution",
+        "startTime",
+        "endTime",
+        "minEventOccurences",
+        "trueValueThreshold",
+        "mapeThreshold",
+        "snrThreshold"
+      ]
+    },
+    "numeric": {
+      "type": "object",
+      "properties": {
+        "duplicateDetection": {
+          "type": "array",
+          "items": {}
+        },
+        "suppressCols": {
+          "type": "array",
+          "items": {}
+        },
+        "minEventOccurences": {
+          "type": "integer"
+        },
+        "groupyByCol": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "duplicateDetection",
+        "suppressCols",
+        "minEventOccurences",
+        "groupyByCol"
+      ]
+    }
+  },
+  "required": [
+    "dataFile",
+    "genType",
+    "spatio-temporal",
+    "numeric"
+  ]
+}
