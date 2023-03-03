@@ -1,5 +1,5 @@
 def runDiffPrivPipeline():
-    import modulesTest as mod
+    import modules as mod
 
     print('\n################################################################\n')
     print('PREPROCESSING')
