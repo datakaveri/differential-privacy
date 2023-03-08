@@ -27,7 +27,7 @@ The tool is currently limited to a few temporal and geospatial datasets and work
 ## Pipeline
 This pipeline has the following structure:
 
-![image](https://user-images.githubusercontent.com/100753500/212615935-21161bfa-dc93-4356-ae7b-9be4a976277b.png)
+![image](https://user-images.githubusercontent.com/100753500/223689309-94f66e7d-f3cb-416f-985b-cd6e29a30a5f.png)
 
 The individual modules have the following functionality:
 
