@@ -7,15 +7,99 @@ import jsonschema
 from pandas.io.json import json_normalize
 import matplotlib.pyplot as plt
 import h3
+import itertools 
+import matplotlib.pyplot as plt
 
 def categorize(dataframe, configFile,genType):
     if genType == "spatio-temporal":
         dataframe = spatioTemporalGeneralization(dataframe, configFile)
     elif genType == "numeric":
         dataframe = numericGeneralization(dataframe)
-    # TODO: introduce new categories
+    elif genType == "categorical":
+        dataframe = categoricGeneralization(dataframe, configFile)
     return dataframe
 
+def categoricGeneralization(dataframe, configFile):
+    
+    dataframe = dataframe.dropna(subset=[configFile['ID']])    
+    
+    # Split the individual values into categories
+    listToSplit = configFile['splitCols']
+    dataframe[listToSplit] = dataframe[listToSplit].apply(lambda x: x.str.split().str[-1])
+    
+    dataframe = dataframe.drop(dataframe[dataframe['cycle'].isin(configFile['CycleToDrop'])].index)
+    
+    return dataframe
+    
+def histogramQuery1(df, configFile):   
+    print('size of data before hist' ,len(df))
+    listToGrouped = configFile['groupByCols']
+    
+    #newDataframe = df.groupby(list_to_grouped).size().reset_index(name='Count')   
+    crosstab = pd.crosstab(index=configFile['ID'], columns=[df[col] for col in listToGrouped])
+    
+    # get all possible combinations of the columns
+    all_combinations = itertools.product(*[df[col].dropna().unique() for col in listToGrouped])
+    
+    # create an empty dictionary to store the counts
+    counts = {}
+    
+    # iterate over all combinations and get the count from the cross-tabulation table
+    for comb in all_combinations:
+        print(comb)
+        if comb in crosstab.columns:
+            count = crosstab.loc[:, tuple(comb)].values[0]
+        else:
+            count = 0
+        counts[comb] = count
+    
+    # convert the dictionary to a DataFrame
+    result = pd.DataFrame.from_dict(counts, orient='index', columns=['Count'])
+    
+    # reset the index and rename the columns
+    result = result.reset_index()
+    result[listToGrouped] = result['index'].apply(lambda x: pd.Series(x))    
+    result = result.drop('index', axis=1)
+    first_col = result.pop(result.columns[0])
+    result = result.assign(Count=first_col)
+    print('size of data after hist' ,result['Count'].sum())
+    return result
+    #return newDataframe
+    
+def noiseComputeHistogramQuery(dataframe, configFile):
+    NoisyDataframe = dataframe
+    bins = len(NoisyDataframe)
+    hist = NoisyDataframe['Count'].values
+    epsilon = configFile['PrivacyLossBudget']
+    sensitivity = configFile['Sensitivity']
+    b = sensitivity/epsilon
+    NoisyHistogram = np.random.laplace(0, b, bins)
+    NoisyDataframe['Noise']=NoisyHistogram
+    NoisyDataframe['noisyCount']=NoisyDataframe['Count']+NoisyHistogram
+      
+    return NoisyDataframe, NoisyHistogram
+    
+def printHistogram(df):
+    plt.bar(df.index, df['Count'])
+
+    # set the title and axis labels
+    plt.title('Number of Soil Samples in each bin')
+    plt.xlabel('Index(Bin Number)')
+    plt.ylabel('No. of Samples')
+    
+    # show the plot
+    plt.show()
+    
+    plt.bar(df.index, df['roundedNoisyCount'])
+
+    # set the title and axis labels
+    plt.title('Number of Noisy Soil Samples in each bin')
+    plt.xlabel('Index(Bin Number)')
+    plt.ylabel('No. of Samples')
+    
+    # show the plot
+    plt.show()
+    
 def spatioTemporalGeneralization(dataframe, configFile):
     # separating latitude and longitude from location
     lat_lon = dataframe[configFile['locationCol']]
@@ -83,7 +167,9 @@ def schemaValidator(schemaFile, configFile):
     jsonschema.validate(instance=document, schema=schema)
     return
 
-def readFile(configFileName):
+def readFile(configFileName):#reading config
+    
+    
     #reading config
     configFile = '../config/' + configFileName
     with open(configFile, "r") as cfile:
@@ -91,34 +177,50 @@ def readFile(configFileName):
     
     #reading datafile
     dataFileName = '../data/' + configDict['dataFile']
-    with open(dataFileName, "r") as dfile:
-        dataDict = json.load(dfile)
+    #with open(dataFileName, "r") as dfile:
+    #   dataDict = json.load(dfile)
     
     #loading data
-    dataframe = pd.json_normalize(dataDict)
+    dataframe = pd.read_json(dataFileName)
     pd.set_option('mode.chained_assignment', None)
     print('The loaded file is: ' + dataFileName + ' with shape ' + str(dataframe.shape))
     
     genType = configDict['genType']
-    configDict = configDict['spatio-temporal']
-
+    configDict = configDict[genType]
+    
     #dropping duplicates based on config file parameters
-    dupe1 = configDict['duplicateDetection'][0]
-    dupe2 = configDict['duplicateDetection'][1]
-    dfLen1 = len(dataframe)
-    dfDrop = dataframe.drop_duplicates(subset = [dupe1, dupe2], inplace = False, ignore_index = True)
-    dfLen2 = len(dfDrop)
-    dupeCount = dfLen1 - dfLen2
-    print("\nIdentifying and removing duplicates...")
-    print(str(dupeCount) + ' duplicate rows have been removed.') 
-    print(str(dfDrop.shape) + ' is the shape of the deduplicated dataframe .')
-    dataframe = dfDrop  
+    
+    if(len(configDict['duplicateDetection']))==0:
+        dfLen1 = len(dataframe)
+        dfDrop = dataframe.drop_duplicates(inplace = False, ignore_index = True)
+        dfLen2 = len(dfDrop)
+        dupeCount = dfLen1 - dfLen2
+        print("\nIdentifying and removing duplicates...")
+        print(str(dupeCount) + ' duplicate rows have been removed.') 
+        print(str(dfDrop.shape) + ' is the shape of the deduplicated dataframe .')
+        dataframe = dfDrop  
+    else:
+        #subset= []
+        #for i in range(len(configDict['duplicateDetection'])):
+        #    subset = subset.append(configDict['duplicateDetection'][i])
+        #print(subset)
+        #dupe1 = configDict['duplicateDetection'][0]
+        #dupe2 = configDict['duplicateDetection'][1]
+        dfLen1 = len(dataframe)
+        dfDrop = dataframe.drop_duplicates(subset = configDict['duplicateDetection'], inplace = False, ignore_index = True)
+        dfLen2 = len(dfDrop)
+        dupeCount = dfLen1 - dfLen2
+        print("\nIdentifying and removing duplicates...")
+        print(str(dupeCount) + ' duplicate rows have been removed.') 
+        print(str(dfDrop.shape) + ' is the shape of the deduplicated dataframe .')
+        dataframe = dfDrop  
+    
     return dataframe, configDict, genType
 
 def suppress(dataframe, configDict):
     dataframe = dataframe.drop(columns = configDict['suppressCols'])
     print("\nDropping columns from configuration file...")
-    print(str(dataframe.shape) + ' is the shape of the dataframe after suppression.')
+    print(str(dataframe.shape) + ' is the shape of the dataframe after suppression.\n\nThe number of unique rows are:\n')
     return dataframe
     
 def timeRange(dataframe):
@@ -235,21 +337,30 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
 
     return dfNoiseITMSQuery1, dfNoiseITMSQuery2
 
-def postProcessing(dfNoiseITMSQuery1, dfNoiseITMSQuery2, configDict):
-
-    #postprocessing ITMSQuery1
-    globalMaxValue = configDict['globalMaxValue']
-    globalMinValue = configDict['globalMinValue']
-    dfFinalITMSQuery1 = dfNoiseITMSQuery1
-    dfFinalITMSQuery1['query1NoisyOutput'].clip(globalMinValue, globalMaxValue, inplace = True)
-    dfFinalITMSQuery1.drop(['query1Output'], axis = 1, inplace = True)
+def postProcessing(dfNoise, configDict, genType):
     
-    #postprocessing ITMS Query 2
-    dfFinalITMSQuery2 = dfNoiseITMSQuery2
-    dfFinalITMSQuery2['query2NoisyOutput'].clip(0, np.inf, inplace = True)
-    dfFinalITMSQuery2.drop(['query2Output'], axis = 1, inplace = True)
+    if genType == 'spatio-temporal':
+        #postprocessing ITMSQuery1
+        globalMaxValue = configDict['globalMaxValue']
+        globalMinValue = configDict['globalMinValue']
+        dfFinalITMSQuery1 = dfNoise
+        dfFinalITMSQuery1['query1NoisyOutput'].clip(globalMinValue, globalMaxValue, inplace = True)
+        dfFinalITMSQuery1.drop(['query1Output'], axis = 1, inplace = True)
+        
+        '''
+        #postprocessing ITMS Query 2
+        dfFinalITMSQuery2 = dfNoiseITMSQuery2
+        dfFinalITMSQuery2['query2NoisyOutput'].clip(0, np.inf, inplace = True)
+        dfFinalITMSQuery2.drop(['query2Output'], axis = 1, inplace = True)
+        '''
+        return dfFinalITMSQuery1
     
-    return dfFinalITMSQuery1, dfFinalITMSQuery2
+    elif genType == 'categorical':
+        dfFinal = dfNoise
+        dfFinal['roundedNoisyCount']=dfFinal['noisyCount'].round()
+        dfFinal['roundedNoisyCount'].clip(0, np.inf, inplace = True)
+        dfFinal.drop(['noisyCount'], axis = 1, inplace = True)
+        return dfFinal
 
 def signalToNoise(signal,noise,configDict):
     # SNR Threshold

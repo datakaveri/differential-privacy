@@ -1,46 +1,6 @@
 {
-	"dataFile": "CombinedThreeDistricts.json",
-	"configFileName": "DPConfig.json",
-	"genType": "categorical",
-	"categorical":{
-		"duplicateDetection": [
-    		"Sample No."
-		],
-		"splitCols":[
-    		"pH",
-    		"EC",
-    		"OC",
-    		"N",
-    		"P",
-    		"K",
-    		"S",
-    		"Zn",
-    		"Fe",
-    		"Cu", 
-    		"Mn", 
-    		"B"
-		],
-		"suppressCols": [
-			"Farmer Name",
-			"Land Area",
-			"Khasra No./ Dag No.",
-			"Survey No.",
-			"Longitude",
-			"Latitude"
-		],
-		"groupByCols":[
-    		"N",
-    		"P",
-    		"K"
-		],
-		"ID":"Sample No.",
-		"CycleToDrop":[
-    		"2019-20-to-2020-2021"
-		],
-		"Sensitivity":2,
-		"PrivacyLossBudget":0.1,
-		"snrThreshold" : 3
-	},
+	"dataFile": "suratITMSDPtest.json",
+	"genType": "spatio-temporal",
 	"spatio-temporal": {
 		"duplicateDetection": [
 			"trip_id",
