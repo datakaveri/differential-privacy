@@ -6,6 +6,7 @@
 		"duplicateDetection": [
     		"Sample No."
 		],
+		"queryPer":"district",
 		"splitCols":[
     		"pH",
     		"EC",
@@ -37,9 +38,10 @@
 		"CycleToDrop":[
     		"2019-20-to-2020-2021"
 		],
-		"Sensitivity":2,
-		"PrivacyLossBudget":0.1,
-		"snrThreshold" : 3
+		"CycleToKeep":"2017-18-to-2018-19",
+		"PrivacyLossBudget":0.05,
+		"snrUpperLimit" : 3,
+		"snrLowerLimit" : 0
 	},
 	"spatio-temporal": {
 		"duplicateDetection": [
@@ -76,7 +78,9 @@
 		"minEventOccurences": 30,
     	"trueValueThreshold": 35,
 		"mapeThreshold": 1,
-		"snrThreshold" : 3
+		"snrThreshold" : 3,
+		"snrUpperLimit" : 3,
+		"snrLowerLimit" : 0
 	},
 	"numeric": {
 		"duplicateDetection": [],

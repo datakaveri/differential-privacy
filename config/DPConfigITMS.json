@@ -36,7 +36,9 @@
 		"minEventOccurences": 30,
     	"trueValueThreshold": 35,
 		"mapeThreshold": 1,
-		"snrThreshold" : 3
+		"snrThreshold" : 3,
+		"snrUpperLimit" : 3,
+		"snrLowerLimit" : 0
 	},
 	"numeric": {
 		"duplicateDetection": [],

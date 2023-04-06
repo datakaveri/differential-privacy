@@ -25,79 +25,177 @@ def categoricGeneralization(dataframe, configFile):
     
     # Split the individual values into categories
     listToSplit = configFile['splitCols']
-    dataframe[listToSplit] = dataframe[listToSplit].apply(lambda x: x.str.split().str[-1])
-    
-    dataframe = dataframe.drop(dataframe[dataframe['cycle'].isin(configFile['CycleToDrop'])].index)
-    
+    dataframe[listToSplit] = dataframe[listToSplit].apply(lambda x: x.str.split().str[-1])   
+        
     return dataframe
     
-def histogramQuery1(df, configFile):   
-    print('size of data before hist' ,len(df))
+def histogramQuery1(dataframe, configFile):   
+    
+    # set the value you want to filter on
+    filter_value = configFile['CycleToKeep']
+    
+    # create a boolean index based on the condition that the value in the column is equal to the filter_value
+    bool_index = dataframe['cycle'] == filter_value
+    
+    # filter the rows based on the boolean index
+    dataframe = dataframe[bool_index]
+    
+    grouped = dataframe.groupby(configFile['queryPer'])
+
+    # create a dictionary of dataframes where each key corresponds to a unique value in the column
+    dfs = {}
+    for name, group in grouped:
+        dfs[name] = group
+    
+    
+    histogramDfs = {}
+    
+    
+    #print('size of data before hist' ,len(df))
     listToGrouped = configFile['groupByCols']
     
-    #newDataframe = df.groupby(list_to_grouped).size().reset_index(name='Count')   
-    crosstab = pd.crosstab(index=configFile['ID'], columns=[df[col] for col in listToGrouped])
     
-    # get all possible combinations of the columns
-    all_combinations = itertools.product(*[df[col].dropna().unique() for col in listToGrouped])
+    for name, DF in dfs.items():
+        
+        #newDataframe = df.groupby(list_to_grouped).size().reset_index(name='Count')   
+        crosstab = pd.crosstab(index=configFile['ID'], columns=[DF[col] for col in listToGrouped])
+        crosstab = crosstab.reindex()
+        
+        # get all possible combinations of the columns
+        all_combinations = itertools.product(*[DF[col].dropna().unique() for col in listToGrouped])
+        
+        # create an empty dictionary to store the counts
+        counts = {}
+        
+        # iterate over all combinations and get the count from the cross-tabulation table
+        for comb in all_combinations:
+            #print(comb)
+            if comb in crosstab.columns:
+                count = crosstab.loc[:, tuple(comb)].values[0]
+            else:
+                count = 0
+            counts[comb] = count
+        
+        # convert the dictionary to a DataFrame
+        result = pd.DataFrame.from_dict(counts, orient='index', columns=['Count'])
+        
+        # reset the index and rename the columns
+        result = result.reset_index()
+        result[listToGrouped] = result['index'].apply(lambda x: pd.Series(x))    
+        result = result.drop('index', axis=1)
+        first_col = result.pop(result.columns[0])
+        result = result.assign(Count=first_col)
+        result = result.sort_values(by=listToGrouped)
+
+        #print('size of data after hist' ,result['Count'].sum())
+        histogramDfs[name] = result 
     
-    # create an empty dictionary to store the counts
-    counts = {}
+    return histogramDfs
     
-    # iterate over all combinations and get the count from the cross-tabulation table
-    for comb in all_combinations:
-        print(comb)
-        if comb in crosstab.columns:
-            count = crosstab.loc[:, tuple(comb)].values[0]
+
+def histogramGroup(dataframe, configFile):
+    
+    # set the value you want to filter on
+    filter_value = configFile['CycleToKeep']
+    
+    # create a boolean index based on the condition that the value in the column is equal to the filter_value
+    bool_index = dataframe['cycle'] == filter_value
+    
+    # filter the rows based on the boolean index
+    dataframe = dataframe[bool_index]
+    
+    dataframe = dataframe.dropna()        
+    # Split the individual values into categories
+    listToSplit = configFile['splitCols']
+    
+    for col in listToSplit:
+        new_cols = dataframe[col].str.split(' ',n=1, expand=True)
+        new_cols[0] = pd.to_numeric(new_cols[0])
+        new_cols = new_cols.rename(columns={0: col + '_num', 1: col + '_str'})
+        dataframe = pd.concat([dataframe, new_cols], axis=1)
+        dataframe.drop(col, axis=1, inplace=True)
+        
+    
+    
+    return dataframe
+
+def histogramQuery2(dataframe, configFile):
+    listToGrouped = configFile['groupByCols']
+    val1 = 'N_str'
+    val2 = 'N_num'
+    
+    newdf = pd.DataFrame()
+    
+    for colName in listToGrouped:
+        dfColName = colName + '_num'
+        
+        if len(newdf)==0:
+            newdf = dataframe.groupby(['village', 'district']).agg(                                
+                                dfColName=(dfColName,'mean')
+                               ).reset_index()
+            newdf = newdf.rename(columns={'dfColName': dfColName+' mean'})
+            
         else:
-            count = 0
-        counts[comb] = count
+            print(dfColName)
+            tempdf = dataframe.groupby(['village', 'district']).agg(                                
+                                dfColName=(dfColName,'mean')
+                               ).reset_index()
+            print(tempdf)
+            tempdf = tempdf.rename(columns={'dfColName': dfColName+' mean'})
+            
+            newdf = pd.merge(newdf, tempdf)
+            
+            
+    dfGrouped = dataframe.groupby(['village', 'district']).agg(                                
+                                mean=('N_num','mean')
+                               ).reset_index()
     
-    # convert the dictionary to a DataFrame
-    result = pd.DataFrame.from_dict(counts, orient='index', columns=['Count'])
+    dfGrouped2 = dataframe.groupby([val1]).agg(
+                                count=(val2,'count'),
+                                max=(val2,'max'),
+                                min=(val2,'min')).reset_index()
     
-    # reset the index and rename the columns
-    result = result.reset_index()
-    result[listToGrouped] = result['index'].apply(lambda x: pd.Series(x))    
-    result = result.drop('index', axis=1)
-    first_col = result.pop(result.columns[0])
-    result = result.assign(Count=first_col)
-    print('size of data after hist' ,result['Count'].sum())
-    return result
-    #return newDataframe
+    return newdf, dfGrouped2
+
+def noiseComputeHistogramQuery(dataframeDict, configFile):
     
-def noiseComputeHistogramQuery(dataframe, configFile):
-    NoisyDataframe = dataframe
-    bins = len(NoisyDataframe)
-    hist = NoisyDataframe['Count'].values
-    epsilon = configFile['PrivacyLossBudget']
-    sensitivity = configFile['Sensitivity']
-    b = sensitivity/epsilon
-    NoisyHistogram = np.random.laplace(0, b, bins)
-    NoisyDataframe['Noise']=NoisyHistogram
-    NoisyDataframe['noisyCount']=NoisyDataframe['Count']+NoisyHistogram
+    noisyDataframeDict = {}
+    
+    for name, dataframe in dataframeDict.items():
+        bins = len(dataframe)
+        epsilon = configFile['PrivacyLossBudget']
+        if bins == 1 :
+            sensitivity = 1
+        else:
+            sensitivity = 2    
+        b = sensitivity/epsilon
+        noisyHistogram = np.random.laplace(0, b, bins)
+        dataframe['Noise']=noisyHistogram
+        dataframe['noisyCount']=dataframe['Count']+noisyHistogram
+        noisyDataframeDict[name] = dataframe
       
-    return NoisyDataframe, NoisyHistogram
+    return noisyDataframeDict
     
-def printHistogram(df):
-    plt.bar(df.index, df['Count'])
-
-    # set the title and axis labels
-    plt.title('Number of Soil Samples in each bin')
-    plt.xlabel('Index(Bin Number)')
-    plt.ylabel('No. of Samples')
+def printHistogram(df, name):
     
-    # show the plot
-    plt.show()
+    # create figure and axis objects
+    fig, ax = plt.subplots(dpi=800)
     
-    plt.bar(df.index, df['roundedNoisyCount'])
-
-    # set the title and axis labels
-    plt.title('Number of Noisy Soil Samples in each bin')
-    plt.xlabel('Index(Bin Number)')
-    plt.ylabel('No. of Samples')
+    # plot original data as bars
+    ax.bar(df.index, df['Count'], alpha=0.5)
     
-    # show the plot
+    # calculate deviation of noisy data from original data
+    deviation = df['roundedNoisyCount'] 
+    
+    # plot deviation as dotted line
+    ax.plot(df.index, deviation, 'x',markersize = 1, color='red')
+    
+    # set axis labels and title
+    ax.set_xlabel('Index')
+    ax.set_ylabel('Count')
+    ax.set_title('Original Count vs Rounded Noisy Count')
+    
+    # show plot
     plt.show()
     
 def spatioTemporalGeneralization(dataframe, configFile):
@@ -178,9 +276,10 @@ def readFile(configFileName):#reading config
     #reading datafile
     dataFileName = '../data/' + configDict['dataFile']
     #with open(dataFileName, "r") as dfile:
-    #   dataDict = json.load(dfile)
+    #  dataDict = json.load(dfile)
     
     #loading data
+    #dataframe = pd.json_normalize(dataDict)
     dataframe = pd.read_json(dataFileName)
     pd.set_option('mode.chained_assignment', None)
     print('The loaded file is: ' + dataFileName + ' with shape ' + str(dataframe.shape))
@@ -220,7 +319,7 @@ def readFile(configFileName):#reading config
 def suppress(dataframe, configDict):
     dataframe = dataframe.drop(columns = configDict['suppressCols'])
     print("\nDropping columns from configuration file...")
-    print(str(dataframe.shape) + ' is the shape of the dataframe after suppression.\n\nThe number of unique rows are:\n')
+    print(str(dataframe.shape) + ' is the shape of the dataframe after suppression.\n\nThe number of unique rows are:\n' + str(dataframe.shape[0]))
     return dataframe
     
 def timeRange(dataframe):
@@ -263,7 +362,7 @@ def ITMSQuery1(dataframe):
 
     #getting average of average speeds
     dfITMSQuery1 = dfITMSQuery1.groupby('HAT').agg({'mean':'mean'}).reset_index()
-    dfITMSQuery1.rename(columns = {'mean':'query1Output'}, inplace = True)
+    dfITMSQuery1.rename(columns = {'mean':'queryOutput'}, inplace = True)
     return dfITMSQuery1
 
 def ITMSQuery2(dataframe, configDict):
@@ -280,7 +379,7 @@ def ITMSQuery2(dataframe, configDict):
 
     # finding average number of violations per HAT over all the days
     dfITMSQuery2 = dfITMSQuery2.groupby(['HAT']).agg({'license_plate':'mean'}).reset_index()
-    dfITMSQuery2.rename(columns={'license_plate':'query2Output'}, inplace = True)
+    dfITMSQuery2.rename(columns={'license_plate':'queryOutput'}, inplace = True)
     return dfITMSQuery2
 
 def NCompute(dataframe):
@@ -332,8 +431,8 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
     noiseITMSQuery2 = np.random.laplace(0, bITMSQuery2, len(dfNoiseITMSQuery2))
 
     # adding noise to the true value
-    dfNoiseITMSQuery1['query1NoisyOutput'] = dfNoiseITMSQuery1['query1Output'] + noiseITMSQuery1
-    dfNoiseITMSQuery2['query2NoisyOutput'] = dfNoiseITMSQuery2['query2Output'] + noiseITMSQuery2
+    dfNoiseITMSQuery1['queryNoisyOutput'] = dfNoiseITMSQuery1['queryOutput'] + noiseITMSQuery1
+    dfNoiseITMSQuery2['queryNoisyOutput'] = dfNoiseITMSQuery2['queryOutput'] + noiseITMSQuery2
 
     return dfNoiseITMSQuery1, dfNoiseITMSQuery2
 
@@ -344,8 +443,8 @@ def postProcessing(dfNoise, configDict, genType):
         globalMaxValue = configDict['globalMaxValue']
         globalMinValue = configDict['globalMinValue']
         dfFinalITMSQuery1 = dfNoise
-        dfFinalITMSQuery1['query1NoisyOutput'].clip(globalMinValue, globalMaxValue, inplace = True)
-        dfFinalITMSQuery1.drop(['query1Output'], axis = 1, inplace = True)
+        dfFinalITMSQuery1['queryNoisyOutput'].clip(globalMinValue, globalMaxValue, inplace = True)
+        dfFinalITMSQuery1.drop(['queryOutput'], axis = 1, inplace = True)
         
         '''
         #postprocessing ITMS Query 2
@@ -364,13 +463,17 @@ def postProcessing(dfNoise, configDict, genType):
 
 def signalToNoise(signal,noise,configDict):
     # SNR Threshold
-    snrThreshold = configDict['snrThreshold']
+    snrUpperLimit = configDict['snrUpperLimit']
+    snrLowerLimit = configDict['snrLowerLimit']
     # snr defined as signal mean over std of noise
-    snr = (np.mean(signal))/(np.std(noise))
-    if snr <= snrThreshold:
-        print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is within the acceptable bounds.")
+    #signalPower/noisePower
+    snr = (np.mean(signal*signal))/(np.var(noise))
+    if snr < snrLowerLimit :
+        print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is below the bound.")
+    elif snr > snrUpperLimit:
+        print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is above the bound.")
     else:
-        print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is quite high!")
+        print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is within the bounds.")
     return snr
 
 def cumulativeEpsilon(configDict):
