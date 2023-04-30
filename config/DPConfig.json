@@ -1,7 +1,7 @@
 {
-	"dataFile": "CombinedThreeDistricts.json",
+	"dataFile": "suratITMSDPtest.json",
 	"configFileName": "DPConfig.json",
-	"genType": "categorical",
+	"genType": "spatio-temporal",
 	"categorical":{
 		"duplicateDetection": [
     		"Sample No."
