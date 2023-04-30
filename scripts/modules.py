@@ -275,12 +275,12 @@ def readFile(configFileName):#reading config
     
     #reading datafile
     dataFileName = '../data/' + configDict['dataFile']
-    #with open(dataFileName, "r") as dfile:
-    #  dataDict = json.load(dfile)
+    with open(dataFileName, "r") as dfile:
+     dataDict = json.load(dfile)
     
     #loading data
-    #dataframe = pd.json_normalize(dataDict)
-    dataframe = pd.read_json(dataFileName)
+    dataframe = pd.json_normalize(dataDict)
+    # dataframe = pd.read_json(dataFileName)
     pd.set_option('mode.chained_assignment', None)
     print('The loaded file is: ' + dataFileName + ' with shape ' + str(dataframe.shape))
     
@@ -349,12 +349,27 @@ def aggregator(dataframe, configDict):
                                 mean=(groupByCol,'mean'),
                                 max=(groupByCol,'max'),
                                 min=(groupByCol,'min')).reset_index()
+        
+        aggFunctionCount = {groupByCol: ['count']}
+        dfSensitivity = dfThreshold.groupby(['HAT', 'license_plate', 'Date']).agg(aggFunctionCount)
+        dfSensitivity.columns = dfSensitivity.columns.droplevel(0)
+        dfSensitivity.reset_index(inplace = True)
+        # print(dfSensitivity)
+
+        # dfCount = dfSensitivity.groupby(['HAT'], as_index=False).agg(['max', 'sum'])
+        dfCount = dfSensitivity.groupby(['HAT']).agg(
+                                max=('count', 'max'),
+                                sum=('count', 'sum'))
+        # dfCount.columns = dfCount.columns.droplevel(0)
+        dfCount.reset_index(inplace = True)
+        # print(dfCount['max'])
+
     else:
         dfGrouped = dfThreshold.groupby(['HAT']).agg(
                                 count=(groupByCol,'count'))
         print('Warning: Only the count query is available for non-numeric choice of groupByCol')
 
-    return dfGrouped
+    return dfGrouped, dfSensitivity, dfCount
 
 def ITMSQuery1(dataframe):
     #average speed per HAT
@@ -363,7 +378,22 @@ def ITMSQuery1(dataframe):
     #getting average of average speeds
     dfITMSQuery1 = dfITMSQuery1.groupby('HAT').agg({'mean':'mean'}).reset_index()
     dfITMSQuery1.rename(columns = {'mean':'queryOutput'}, inplace = True)
+    # print(dfITMSQuery1)
     return dfITMSQuery1
+
+def ITMSQuery1Weighted(dataframe):
+    dfITMSQuery1Weighted = dataframe
+    #weighted mean
+    dfITMSQuery1WeightedHATSum = dfITMSQuery1Weighted.groupby('HAT').agg({'sum':'sum'})
+    dfITMSQuery1WeightedHATCount = dfITMSQuery1Weighted.groupby('HAT').agg({'count':'sum'})
+    dfITMSQuery1Weighted = dfITMSQuery1WeightedHATSum['sum']/dfITMSQuery1WeightedHATCount['count']
+    dfITMSQuery1Weighted = dfITMSQuery1Weighted.to_frame().reset_index()
+    # dfITMSQuery1Weighted.rename(columns = {'':'queryOutput'}, inplace = True)
+    # //TODO convert series to dataframe
+    # print(dfITMSQuery1Weighted)
+    return dfITMSQuery1Weighted
+
+
 
 def ITMSQuery2(dataframe, configDict):
     #average number of speed violations per HAT over all days
@@ -387,10 +417,11 @@ def NCompute(dataframe):
     dataframe = dataframe.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
     dataframe = dataframe.groupby(['HAT']).agg({'license_plate':'sum'}).reset_index()
     dataframe.rename(columns={'license_plate':'N'}, inplace = True)
-
+    dfN = dataframe
+    # print(dfN)
     #since 'n' is the denominator in sensitivity, max change in sensitivity is from min value of 'n'
     N = dataframe['N'].min()
-    return N
+    return N, dfN
 
 def KCompute(dataframe):
     #finding 'K', the maximum number of HATs a bus passes through per day
@@ -398,21 +429,28 @@ def KCompute(dataframe):
     K = dfK['HAT'].max()
     return K
 
-def ITMSSensitivityCompute(configDict, timeRange, N):
+def ITMSSensitivityCompute(configDict, timeRange, N, dfN, dfSensitivity, dfCount):
     maxValue = configDict['globalMaxValue']
     minValue = configDict['globalMinValue']
 
     # sensitivity for query 1
-    sensitivityITMSQuery1 = (maxValue - minValue)/N   
+    # print(dfN)
+    sensitivityITMSQuery1 = ((maxValue - minValue)/dfN['N'])
+    # print(sensitivityITMSQuery1)
     
+    # sensitivity for weighted query 1
+    sensitivityITMSQuery1Weighted = ((dfCount['max']*(maxValue - minValue))/(dfCount['sum']))
+    # print(sensitivityITMSQuery1Weighted)
+
     # sensitivity for query 2
     sensitivityITMSQuery2 = 1/timeRange
 
-    return sensitivityITMSQuery1, sensitivityITMSQuery2
+    return sensitivityITMSQuery1, sensitivityITMSQuery2, sensitivityITMSQuery1Weighted
 
-def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K):
+def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, dfITMSQuery1Weighted, sensitivityITMSQuery1, sensitivityITMSQuery2, sensitivityITMSQuery1Weighted, configDict, K):
     dfNoiseITMSQuery1 = dfITMSQuery1
     dfNoiseITMSQuery2 = dfITMSQuery2
+    dfNoiseITMSQuery1Weighted = dfITMSQuery1Weighted
 
     # epsilon
     privacyLossBudgetEpsITMSQuery1 = configDict['privacyLossBudgetEpsQuery'][0]
@@ -424,7 +462,19 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
 
     # computing noise query 1
     bITMSQuery1 = sensitivityITMSQuery1/epsPrimeQuery1
-    noiseITMSQuery1 = np.random.laplace(0, bITMSQuery1, len(dfNoiseITMSQuery1))
+    # print(sensitivityITMSQuery1)
+    # print(bITMSQuery1)
+    noiseITMSQuery1 = np.random.laplace(0, bITMSQuery1)
+    # print(len(noiseITMSQuery1))
+    # print(noiseITMSQuery1)
+    # print(np.linalg.norm(noiseITMSQuery1, ord = 2))
+
+
+    # computing noise weighted query 1
+    bITMSQuery1Weighted = sensitivityITMSQuery1Weighted/epsPrimeQuery1
+    noiseITMSQuery1Weighted = np.random.laplace(0, bITMSQuery1Weighted)
+    print(noiseITMSQuery1Weighted)
+    # print(np.linalg.norm(noiseITMSQuery1Weighted, ord = 2))
 
     # computing noise query 2
     bITMSQuery2 = sensitivityITMSQuery2/epsPrimeQuery2
@@ -433,8 +483,9 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
     # adding noise to the true value
     dfNoiseITMSQuery1['queryNoisyOutput'] = dfNoiseITMSQuery1['queryOutput'] + noiseITMSQuery1
     dfNoiseITMSQuery2['queryNoisyOutput'] = dfNoiseITMSQuery2['queryOutput'] + noiseITMSQuery2
+    # dfNoiseITMSQuery1Weighted['queryNoisyOutput'] = dfNoiseITMSQuery1Weighted['queryOutput'] + noiseITMSQuery1Weighted
 
-    return dfNoiseITMSQuery1, dfNoiseITMSQuery2
+    return dfNoiseITMSQuery1, dfNoiseITMSQuery2, dfNoiseITMSQuery1Weighted
 
 def postProcessing(dfNoise, configDict, genType):
     

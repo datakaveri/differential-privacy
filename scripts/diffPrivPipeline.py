@@ -50,32 +50,30 @@ def runSpatioTemporalPipeline():
     timeRange = mod.timeRange(df) 
     
     #compute N
-    N = mod.NCompute(df)
+    N, dfN = mod.NCompute(df)
     
     #compute K
     K = mod.KCompute(df) 
     
     #aggregating dataframe
-    dfGrouped = mod.aggregator(df, configDict)
-    print('\n################################################################\n')
-    
+    dfGrouped, dfSensitivity, dfCount = mod.aggregator(df, configDict)
     print('\n################################################################\n')
     print('APPLYING DIFFERENTIAL PRIVACY')
-    
+
     #query building
     dfQuery1 = mod.ITMSQuery1(dfGrouped)
     dfQuery2 = mod.ITMSQuery2(dfGrouped, configDict)
-    
+    dfQuery1Weighted = mod.ITMSQuery1Weighted(dfGrouped)
     
     #signal assignment
     signalQuery1 = dfQuery1['queryOutput'].reset_index(drop = True)
     signalQuery2 = dfQuery2['queryOutput'].reset_index(drop = True)
     
     #compute sensitivity
-    sensitivityITMSQuery1, sensitivityITMSQuery2 = mod.ITMSSensitivityCompute(configDict, timeRange, N)
+    sensitivityITMSQuery1, sensitivityITMSQuery2, sensitivityITMSQuery1Weighted = mod.ITMSSensitivityCompute(configDict, timeRange, N, dfN, dfSensitivity, dfCount)
     
     #compute noise 
-    dfNoiseQuery1, dfNoiseQuery2 = mod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
+    dfNoiseQuery1, dfNoiseQuery2, dfNoiseQuery1Weighted = mod.noiseComputeITMSQuery(dfQuery1, dfQuery2, dfQuery1Weighted, sensitivityITMSQuery1, sensitivityITMSQuery2, sensitivityITMSQuery1Weighted, configDict, K)
     
     #postprocessing
     dfFinalQuery1 = mod.postProcessing(dfNoiseQuery1, configDict, genType)
@@ -99,5 +97,5 @@ def runSpatioTemporalPipeline():
     print('Differentially Private output generated. Please check the pipelineOutput folder.')
     print('\n################################################################\n')
 
-runHistoPipeline()
-#runSpatioTemporalPipeline()
+# runHistoPipeline()
+runSpatioTemporalPipeline()
