@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import h3
 import itertools 
 import matplotlib.pyplot as plt
+from math import exp
 
 def categorize(dataframe, configFile,genType):
     if genType == "spatio-temporal":
@@ -25,20 +26,21 @@ def categoricGeneralization(dataframe, configFile):
     
     # Split the individual values into categories
     listToSplit = configFile['splitCols']
-    dataframe[listToSplit] = dataframe[listToSplit].apply(lambda x: x.str.split().str[-1])   
-        
-    return dataframe
-    
-def histogramQuery1(dataframe, configFile):   
+    dataframe[listToSplit] = dataframe[listToSplit].apply(lambda x: x.str.split().str[-1])
     
     # set the value you want to filter on
-    filter_value = configFile['CycleToKeep']
+    filter_value = configFile['cycleToKeep']
     
     # create a boolean index based on the condition that the value in the column is equal to the filter_value
     bool_index = dataframe['cycle'] == filter_value
     
     # filter the rows based on the boolean index
     dataframe = dataframe[bool_index]
+    
+        
+    return dataframe
+    
+def histogramQuery1(dataframe, configFile):       
     
     grouped = dataframe.groupby(configFile['queryPer'])
 
@@ -96,7 +98,7 @@ def histogramQuery1(dataframe, configFile):
 def histogramGroup(dataframe, configFile):
     
     # set the value you want to filter on
-    filter_value = configFile['CycleToKeep']
+    filter_value = configFile['cycleToKeep']
     
     # create a boolean index based on the condition that the value in the column is equal to the filter_value
     bool_index = dataframe['cycle'] == filter_value
@@ -119,6 +121,134 @@ def histogramGroup(dataframe, configFile):
     
     return dataframe
 
+def histogramQuery2(dataframe, configFile):
+    grouped = dataframe.groupby(configFile['queryPer'])
+    listToGrouped = configFile['groupByCols']
+    allGroups = configFile['splitCols']
+    
+    cols = [x for x in allGroups if x not in listToGrouped]
+ 
+    # drop columns
+    dataframe = dataframe.drop(listToGrouped, axis=1)  
+
+    # create a dictionary of dataframes where each key corresponds to a unique value in the column
+    dfs = {}
+    groupedModeDfs = {}
+    truemodeDf = {}
+    counts = pd.DataFrame()
+    temp = pd.DataFrame()
+    temp2 = pd.DataFrame()
+    for name, group in grouped:
+        dfs[name] = group
+     
+    for key in dfs:
+        df = dfs[key]
+        for col in cols:
+        # Apply value_counts() on the current column
+            vc = df[col].value_counts()
+            # Convert the result to a DataFrame
+            vc_df = pd.DataFrame({col: vc.index, 'count': vc.values})
+            # Store the result under the original DataFrame
+            if key not in groupedModeDfs.keys():
+                groupedModeDfs[key] = {}
+            groupedModeDfs[key][col] = vc_df
+            
+        
+            
+            
+        
+     
+        
+    '''
+    for name, df in dfs.items():
+        counts[name] = {}
+        for col in cols:
+            counts[name][col] = pd.DataFrame(df[col].value_counts())
+            #print(counts[name][cols])'''
+            
+    for name, DF in dfs.items():
+        truemodeDf[name] = DF[cols].agg(lambda x: x.mode()[0])
+    truemodeDf = pd.DataFrame.from_dict(truemodeDf, orient='index')
+    #print(counts)
+    return groupedModeDfs,truemodeDf
+
+
+def noiseComputeHistogramQuery2(dfs, configFile):
+    noisy_mode = {}
+    sensitivity = 1
+    epsilon = configFile['PrivacyLossBudget'][1]
+    for district in dfs:
+        scores = []
+        for col in dfs[district]:
+            scores = np.array(dfs[district][col]['count'].values)
+            max_score = np.max(scores)
+            scores = scores - max_score
+           
+            # Calculate the maximum possible score (i.e., the mode)
+            #max_score = max(scores)
+                
+            # Calculate the probabilities of selecting each item
+            probabilities = np.array([exp(epsilon * score / (2 * sensitivity)) for score in scores])
+            probabilities = probabilities / np.linalg.norm(probabilities, ord=1)
+                
+            # Select an item based on the probabilities
+            selected_index = np.random.choice(len(dfs[district][col]), p=probabilities)
+            selected_item = dfs[district][col].iloc[selected_index][0]
+            #print(selected_item)
+            if district not in noisy_mode.keys():
+                noisy_mode[district] = {}
+            noisy_mode[district][col] = selected_item
+            #noisy_mode[district] = pd.DataFrame(noisy_mode[district])
+            
+    finalDF2 = pd.DataFrame.from_dict(noisy_mode, orient='index')
+
+    return noisy_mode,finalDF2
+
+def laplace_mech(score, sensitivity, epsilon):
+    b = sensitivity/epsilon
+    noise = np.random.laplace(0, b, len(score))
+    
+    
+    
+    
+def reportNoisyMax(dfs, configFile):
+    noisy_mode2 ={}
+    sensitivity = 2
+    epsilon = 0.001
+    for district in dfs:
+        scores = []
+        for col in dfs[district]:
+            scores = np.array(dfs[district][col]['count'].values)
+            b = sensitivity/epsilon
+            noise = np.random.laplace(0, b, len(scores))
+            noisyScores = noise+scores
+            #print(scores, noisyScores)
+            max_idx = np.argmax(noisyScores)
+            # Return the element corresponding to that index
+            selected_item = dfs[district][col].iloc[max_idx][0]
+            if district not in noisy_mode2.keys():
+                noisy_mode2[district] = {}
+            noisy_mode2[district][col] = selected_item
+            #noisy_mode[district] = pd.DataFrame(noisy_mode[district])
+            
+    finalDF3 = pd.DataFrame.from_dict(noisy_mode2, orient='index')
+    return noisy_mode2, finalDF3
+    
+    
+        
+
+def test(dfNoiseQuery4, dfQuery4, configDict):
+    for district in dfNoiseQuery4:
+        print('##################### '+district)
+        for col in dfNoiseQuery4[district]:
+            print('---------------for col '+col+'\nPrinting for Exponential Mech')
+            r = [noiseComputeHistogramQuery2(dfQuery4, configDict)[0][district][col] for i in range(200)]
+            x = [reportNoisyMax(dfQuery4, configDict)[0][district][col] for i in range(200)]
+            print(pd.Series(r).value_counts() )
+            print('\n\nPrinitng for RNM')
+            print(pd.Series(x).value_counts() )
+    
+'''
 def histogramQuery2(dataframe, configFile):
     listToGrouped = configFile['groupByCols']
     val1 = 'N_str'
@@ -156,14 +286,14 @@ def histogramQuery2(dataframe, configFile):
                                 min=(val2,'min')).reset_index()
     
     return newdf, dfGrouped2
-
+'''
 def noiseComputeHistogramQuery(dataframeDict, configFile):
     
     noisyDataframeDict = {}
     
     for name, dataframe in dataframeDict.items():
         bins = len(dataframe)
-        epsilon = configFile['PrivacyLossBudget']
+        epsilon = configFile['PrivacyLossBudget'][0]
         if bins == 1 :
             sensitivity = 1
         else:
@@ -182,19 +312,24 @@ def printHistogram(df, name):
     fig, ax = plt.subplots(dpi=800)
     
     # plot original data as bars
-    ax.bar(df.index, df['Count'], alpha=0.5)
+    original_bars = ax.bar(df.index, df['Count'], alpha=0.5, label='Original Count')
     
     # calculate deviation of noisy data from original data
-    deviation = df['roundedNoisyCount'] 
+    deviation = df['roundedNoisyCount']
     
     # plot deviation as dotted line
-    ax.plot(df.index, deviation, 'x',markersize = 1, color='red')
+    noisy_points = ax.plot(df.index, deviation, 'x', markersize=2, color='red', label='Rounded Noisy Count')
     
     # set axis labels and title
     ax.set_xlabel('Index')
     ax.set_ylabel('Count')
-    ax.set_title('Original Count vs Rounded Noisy Count')
+    ax.set_title('Original Count vs Rounded Noisy Count for ' + name)
     
+    # add legend
+    ax.legend()
+    
+    fig.savefig('../pipelineOutput/plots/'+name+'.png', dpi=800)
+
     # show plot
     plt.show()
     
@@ -272,15 +407,19 @@ def readFile(configFileName):#reading config
     configFile = '../config/' + configFileName
     with open(configFile, "r") as cfile:
         configDict = json.load(cfile)
-    
-    #reading datafile
     dataFileName = '../data/' + configDict['dataFile']
-    with open(dataFileName, "r") as dfile:
-     dataDict = json.load(dfile)
     
-    #loading data
-    dataframe = pd.json_normalize(dataDict)
-    # dataframe = pd.read_json(dataFileName)
+    if configDict['genType']=='spatio-temporal':        
+        #reading datafile
+        
+        with open(dataFileName, "r") as dfile:
+            dataDict = json.load(dfile)        
+        #loading data
+        dataframe = pd.json_normalize(dataDict)
+        
+    elif configDict['genType']=='categorical':
+        dataframe = pd.read_json(dataFileName)
+        
     pd.set_option('mode.chained_assignment', None)
     print('The loaded file is: ' + dataFileName + ' with shape ' + str(dataframe.shape))
     

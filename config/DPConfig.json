@@ -35,11 +35,13 @@
     		"K"
 		],
 		"ID":"Sample No.",
-		"CycleToDrop":[
+		"cycleToDrop":[
     		"2019-20-to-2020-2021"
 		],
-		"CycleToKeep":"2017-18-to-2018-19",
-		"PrivacyLossBudget":0.05,
+		"cycleToKeep":"2017-18-to-2018-19",
+		"PrivacyLossBudget":[
+    		0.01,
+    		0.001],
 		"snrUpperLimit" : 3,
 		"snrLowerLimit" : 0
 	},
