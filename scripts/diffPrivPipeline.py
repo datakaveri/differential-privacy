@@ -26,11 +26,12 @@ def runHistoPipeline():
     noiseHistQuery1 = mod.noiseComputeHistogramQuery(histQuery1, configDict)   
     
     #postprocessing and histogram display
-    for name, dfsNoise in noiseHistQuery1.items():
-        dfFinalHistQuery1 = mod.postProcessing(dfsNoise.copy(), configDict, genType)        
-        mod.printHistogram(dfFinalHistQuery1, name)
-        dfFinalHistQuery1 = dfFinalHistQuery1.drop(['Count','Noise'], axis = 1).reset_index(drop = True)
-        mod.outputFile(dfFinalHistQuery1, 'dfNoisySoil1_'+name)
+    for name, dfs in noiseHistQuery1.items():
+        for pair, dfsNoise in dfs.items():
+            dfFinalHistQuery1 = mod.postProcessing(dfsNoise.copy(), configDict, genType)        
+            mod.printHistogram(dfFinalHistQuery1, name, pair)
+            dfFinalHistQuery1 = dfFinalHistQuery1.drop(['Count','Noise'], axis = 1).reset_index(drop = True)
+            mod.outputFile(dfFinalHistQuery1, 'dfNoisySoil1_'+name+'_'+pair)
         
     #signal to noise computation
     for name, finalDF in noiseHistQuery1.items():
@@ -43,12 +44,15 @@ def runHistoPipeline():
         #signal to noise computation
         mod.signalToNoise(signalQuery3, noiseQuery3, configDict)    
         
-    histQuery2, histQuery2TrueModeDf = mod.histogramQuery2(df, configDict)
-
-    noiseHistQuery2, dfFinalHistQuery2 = mod.noiseComputeHistogramQuery2(histQuery2, configDict)
-    mod.outputFile(dfFinalHistQuery2, 'dfNoisySoil2')    
+    #histQuery2, histQuery2TrueModeDf = mod.histogramQuery2(df, configDict)
     
-    noiseHistQuery2Alt, histQuery2FinalDFAlt = mod.reportNoisyMax(histQuery2, configDict)
+    histQuery2Alt = mod.histogramQuery2Alt(df, configDict)
+
+    noiseHistQuery2Alt = mod.noiseComputeHistogramQuery2(histQuery2Alt, configDict)
+    
+    modeHistQuery2Alt, dfFinalHistQuery2Alt = mod.exponentialMechanismHistogramQuery2(histQuery2Alt, configDict)
+    
+    mod.outputFile(dfFinalHistQuery2Alt, 'dfNoisySoil2')    
     
     #mod.test(noiseHistQuery2, histQuery2, configDict)
 

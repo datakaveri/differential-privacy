@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import h3
 import itertools 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from math import exp
 
 def categorize(dataframe, configFile,genType):
@@ -52,48 +53,75 @@ def histogramQuery1(dataframe, configFile):
     
     histogramDfs = {}
     
+    for listToGrouped in configFile['groupByPairs']:
+        for name, DF in dfs.items():
+            
+            #newDataframe = df.groupby(list_to_grouped).size().reset_index(name='Count')   
+            crosstab = pd.crosstab(index=configFile['ID'], columns=[DF[col] for col in listToGrouped])
+            crosstab = crosstab.reindex()
+            
+            # get all possible combinations of the columns
+            all_combinations = itertools.product(*[DF[col].dropna().unique() for col in listToGrouped])
+            
+            # create an empty dictionary to store the counts
+            counts = {}
+            
+            # iterate over all combinations and get the count from the cross-tabulation table
+            for comb in all_combinations:
+                #print(comb)
+                if comb in crosstab.columns:
+                    count = crosstab.loc[:, tuple(comb)].values[0]
+                else:
+                    count = 0
+                counts[comb] = count
+            
+            # convert the dictionary to a DataFrame
+            result = pd.DataFrame.from_dict(counts, orient='index', columns=['Count'])
+            
+            # reset the index and rename the columns
+            result = result.reset_index()
+            result[listToGrouped] = result['index'].apply(lambda x: pd.Series(x))    
+            result = result.drop('index', axis=1)
+            first_col = result.pop(result.columns[0])
+            result = result.assign(Count=first_col)
+            result = result.sort_values(by=listToGrouped)
     
-    #print('size of data before hist' ,len(df))
-    listToGrouped = configFile['groupByCols']
-    
-    
-    for name, DF in dfs.items():
-        
-        #newDataframe = df.groupby(list_to_grouped).size().reset_index(name='Count')   
-        crosstab = pd.crosstab(index=configFile['ID'], columns=[DF[col] for col in listToGrouped])
-        crosstab = crosstab.reindex()
-        
-        # get all possible combinations of the columns
-        all_combinations = itertools.product(*[DF[col].dropna().unique() for col in listToGrouped])
-        
-        # create an empty dictionary to store the counts
-        counts = {}
-        
-        # iterate over all combinations and get the count from the cross-tabulation table
-        for comb in all_combinations:
-            #print(comb)
-            if comb in crosstab.columns:
-                count = crosstab.loc[:, tuple(comb)].values[0]
-            else:
-                count = 0
-            counts[comb] = count
-        
-        # convert the dictionary to a DataFrame
-        result = pd.DataFrame.from_dict(counts, orient='index', columns=['Count'])
-        
-        # reset the index and rename the columns
-        result = result.reset_index()
-        result[listToGrouped] = result['index'].apply(lambda x: pd.Series(x))    
-        result = result.drop('index', axis=1)
-        first_col = result.pop(result.columns[0])
-        result = result.assign(Count=first_col)
-        result = result.sort_values(by=listToGrouped)
-
-        #print('size of data after hist' ,result['Count'].sum())
-        histogramDfs[name] = result 
+            if name not in histogramDfs.keys():
+                histogramDfs[name] = {}
+            histogramDfs[name][listToGrouped[0]+' and '+listToGrouped[1]] = result.reset_index(drop = True)
     
     return histogramDfs
+
+def histogramQuery2Alt(dataframe, configFile):
+    allCols = configFile['splitCols']
+    computedCols = configFile['groupByPairs']
     
+    grouped = dataframe.groupby(configFile['queryPer'])
+
+    # create a dictionary of dataframes where each key corresponds to a unique value in the column
+    dfs = {}
+    groupedCountDfs = {}
+    for name, group in grouped:
+        dfs[name] = group
+        
+    for pair in computedCols:
+        for element in pair:
+            if element in allCols:
+                allCols.remove(element)    
+        
+    for key in dfs:
+        df = dfs[key]
+        for col in allCols:
+        # Apply value_counts() on the current column
+            vc = df[col].value_counts()
+            # Convert the result to a DataFrame
+            vc_df = pd.DataFrame({col: vc.index, 'count': vc.values})
+            # Store the result under the original DataFrame
+            if key not in groupedCountDfs.keys():
+                groupedCountDfs[key] = {}
+            groupedCountDfs[key][col] = vc_df
+            
+    return groupedCountDfs
 
 def histogramGroup(dataframe, configFile):
     
@@ -135,9 +163,6 @@ def histogramQuery2(dataframe, configFile):
     dfs = {}
     groupedModeDfs = {}
     truemodeDf = {}
-    counts = pd.DataFrame()
-    temp = pd.DataFrame()
-    temp2 = pd.DataFrame()
     for name, group in grouped:
         dfs[name] = group
      
@@ -152,20 +177,7 @@ def histogramQuery2(dataframe, configFile):
             if key not in groupedModeDfs.keys():
                 groupedModeDfs[key] = {}
             groupedModeDfs[key][col] = vc_df
-            
-        
-            
-            
-        
-     
-        
-    '''
-    for name, df in dfs.items():
-        counts[name] = {}
-        for col in cols:
-            counts[name][col] = pd.DataFrame(df[col].value_counts())
-            #print(counts[name][cols])'''
-            
+
     for name, DF in dfs.items():
         truemodeDf[name] = DF[cols].agg(lambda x: x.mode()[0])
     truemodeDf = pd.DataFrame.from_dict(truemodeDf, orient='index')
@@ -173,7 +185,7 @@ def histogramQuery2(dataframe, configFile):
     return groupedModeDfs,truemodeDf
 
 
-def noiseComputeHistogramQuery2(dfs, configFile):
+def exponentialMechanismHistogramQuery2(dfs, configFile):
     noisy_mode = {}
     sensitivity = 1
     epsilon = configFile['PrivacyLossBudget'][1]
@@ -234,6 +246,31 @@ def reportNoisyMax(dfs, configFile):
     finalDF3 = pd.DataFrame.from_dict(noisy_mode2, orient='index')
     return noisy_mode2, finalDF3
     
+def noiseComputeHistogramQuery2 (dfs, configFile):
+    noisyCountDf ={}
+    sensitivity = 2
+    epsilon = 0.1
+    for district in dfs:
+        scores = []
+        for col in dfs[district]:
+            scores = np.array(dfs[district][col]['count'].values)
+            b = sensitivity/epsilon
+            noise = np.random.laplace(0, b, len(scores))
+            dfs[district][col]['noise'] = noise
+            noisyScores = noise+scores
+            dfs[district][col]['noisyCount'] = noisyScores
+    '''
+            max_idx = np.argmax(noisyScores)
+            # Return the element corresponding to that index
+            selected_item = dfs[district][col].iloc[max_idx][0]
+            if district not in noisy_mode2.keys():
+                noisy_mode2[district] = {}
+            noisy_mode2[district][col] = selected_item
+            #noisy_mode[district] = pd.DataFrame(noisy_mode[district])
+            
+    finalDF3 = pd.DataFrame.from_dict(noisy_mode2, orient='index')
+    '''
+    return dfs
     
         
 
@@ -248,87 +285,60 @@ def test(dfNoiseQuery4, dfQuery4, configDict):
             print('\n\nPrinitng for RNM')
             print(pd.Series(x).value_counts() )
     
-'''
-def histogramQuery2(dataframe, configFile):
-    listToGrouped = configFile['groupByCols']
-    val1 = 'N_str'
-    val2 = 'N_num'
-    
-    newdf = pd.DataFrame()
-    
-    for colName in listToGrouped:
-        dfColName = colName + '_num'
-        
-        if len(newdf)==0:
-            newdf = dataframe.groupby(['village', 'district']).agg(                                
-                                dfColName=(dfColName,'mean')
-                               ).reset_index()
-            newdf = newdf.rename(columns={'dfColName': dfColName+' mean'})
-            
-        else:
-            print(dfColName)
-            tempdf = dataframe.groupby(['village', 'district']).agg(                                
-                                dfColName=(dfColName,'mean')
-                               ).reset_index()
-            print(tempdf)
-            tempdf = tempdf.rename(columns={'dfColName': dfColName+' mean'})
-            
-            newdf = pd.merge(newdf, tempdf)
-            
-            
-    dfGrouped = dataframe.groupby(['village', 'district']).agg(                                
-                                mean=('N_num','mean')
-                               ).reset_index()
-    
-    dfGrouped2 = dataframe.groupby([val1]).agg(
-                                count=(val2,'count'),
-                                max=(val2,'max'),
-                                min=(val2,'min')).reset_index()
-    
-    return newdf, dfGrouped2
-'''
 def noiseComputeHistogramQuery(dataframeDict, configFile):
     
     noisyDataframeDict = {}
     
-    for name, dataframe in dataframeDict.items():
-        bins = len(dataframe)
-        epsilon = configFile['PrivacyLossBudget'][0]
-        if bins == 1 :
-            sensitivity = 1
-        else:
-            sensitivity = 2    
-        b = sensitivity/epsilon
-        noisyHistogram = np.random.laplace(0, b, bins)
-        dataframe['Noise']=noisyHistogram
-        dataframe['noisyCount']=dataframe['Count']+noisyHistogram
-        noisyDataframeDict[name] = dataframe
+    for name, df in dataframeDict.items():
+        for pair, dataframe in df.items():
+            bins = len(dataframe)
+            epsilon = configFile['PrivacyLossBudget'][0]
+            if bins == 1 :
+                sensitivity = 1
+            else:
+                sensitivity = 2
+            b = sensitivity/epsilon
+            noisyHistogram = np.random.laplace(0, b, bins)  
+            dataframe['Noise']=noisyHistogram
+            dataframe['noisyCount']=dataframe['Count']+noisyHistogram
+            #noisyDataframeDict[name] = dataframe
+            if name not in noisyDataframeDict.keys():
+                noisyDataframeDict[name] = {}
+            noisyDataframeDict[name][pair] = dataframe.reset_index(drop = True)
       
     return noisyDataframeDict
     
-def printHistogram(df, name):
+def printHistogram(df, name, pair):
     
     # create figure and axis objects
     fig, ax = plt.subplots(dpi=800)
     
+    categories = list(df.iloc[:,0:2]) 
+    x_values = df[categories].apply(lambda x: '-'.join(x), axis=1)  # concatenate the values in the categorical columns
+    
     # plot original data as bars
-    original_bars = ax.bar(df.index, df['Count'], alpha=0.5, label='Original Count')
+    original_bars = ax.bar(x_values, df['Count'], alpha=0.5, label='Original Count')
     
     # calculate deviation of noisy data from original data
     deviation = df['roundedNoisyCount']
     
-    # plot deviation as dotted line
+    # plot deviation 
     noisy_points = ax.plot(df.index, deviation, 'x', markersize=2, color='red', label='Rounded Noisy Count')
     
     # set axis labels and title
     ax.set_xlabel('Index')
     ax.set_ylabel('Count')
-    ax.set_title('Original Count vs Rounded Noisy Count for ' + name)
+    ax.set_title('Count vs Rounded Noisy Count for ' + name + ' and pair: '+pair)
+    #ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     
     # add legend
     ax.legend()
-    
-    fig.savefig('../pipelineOutput/plots/'+name+'.png', dpi=800)
+   
+   # set x-axis tick labels at 45 degree angle
+    ax.set_xticks(range(len(x_values)))
+    ax.set_xticklabels(x_values, rotation=90, fontsize=5) 
+   
+    fig.savefig('../pipelineOutput/plots/'+name+'_'+pair+'.png', dpi=800)
 
     # show plot
     plt.show()
