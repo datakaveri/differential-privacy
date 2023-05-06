@@ -1,4 +1,4 @@
-{
+{	
 	"dataFile": "suratITMSDPtest.json",
 	"configFileName": "DPConfig.json",
 	"genType": "spatio-temporal",
@@ -19,25 +19,21 @@
     		"Fe",
     		"Cu", 
     		"Mn", 
-    		"B"
-		],
+    		"B"],
 		"suppressCols": [
 			"Farmer Name",
 			"Land Area",
 			"Khasra No./ Dag No.",
 			"Survey No.",
 			"Longitude",
-			"Latitude"
-		],
+			"Latitude"],
 		"groupByCols":[
     		"N",
     		"P",
-    		"K"
-		],
+    		"K"],
 		"ID":"Sample No.",
 		"cycleToDrop":[
-    		"2019-20-to-2020-2021"
-		],
+    		"2019-20-to-2020-2021"],
 		"cycleToKeep":"2017-18-to-2018-19",
 		"PrivacyLossBudget":[
     		0.01,
@@ -48,8 +44,7 @@
 	"spatio-temporal": {
 		"duplicateDetection": [
 			"trip_id",
-			"observationDateTime"
-		],
+			"observationDateTime"],
 		"suppressCols": [
 			"trip_direction",
 			"last_stop_arrival_time",
@@ -59,8 +54,7 @@
 			"vehicle_label",
 			"id",
 			"location.type",
-			"trip_id"
-		],
+			"trip_id"],
 		"locationCol": "location.coordinates",
 		"datetimeCol": "observationDateTime",
 		"trueValue": "speed",
@@ -72,17 +66,14 @@
     	"globalMinValue": 0, 
     	"privacyLossBudgetEpsQuery": [
 			5,
-			10
-		],
+			10],
 		"h3Resolution": 7,
 		"startTime": 9,
 		"endTime": 20,
 		"minEventOccurences": 30,
     	"trueValueThreshold": 35,
 		"mapeThreshold": 1,
-		"snrThreshold" : 3,
-		"snrUpperLimit" : 3,
-		"snrLowerLimit" : 0
+		"snrThreshold" : 3
 	},
 	"numeric": {
 		"duplicateDetection": [],
