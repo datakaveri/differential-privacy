@@ -32,8 +32,8 @@ groupByCol = configDict['groupByCol']
 lengthList = []
 dfCombined = pd.DataFrame()
 
-for file in file_names_list:
-# for file in file_names:
+# for file in file_names_list:
+for file in file_names:
     lengthList.append(file)
     with open(file, "r") as dfile:
             dataDict = json.load(dfile)
@@ -93,12 +93,24 @@ print('#########################################################################
 #filtering average num of occurences per day per HAT
 date = dfFinalGrouped["Date"].unique()
 minEventOccurencesPerDay = int(configDict["minEventOccurences"])
-#making the limit independent of date since we are looking at the dataframe on a per day basis
-limit = minEventOccurencesPerDay
-dfFiltered = dfFinalGrouped[dfFinalGrouped['count'] >= limit]
+limit = len(date) * minEventOccurencesPerDay
+dfFiltered = dfFinalGrouped.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
+# print('dfFiltered', dfFiltered)
+dfFiltered = dfFiltered.groupby(['HAT']).agg({'license_plate':'sum'}).reset_index()
+# print('dfFiltered with license plate sum', dfFiltered)
+dfFiltered.rename(columns={"license_plate": "license_plate_count"}, inplace=True)
+
+dfFiltered = dfFiltered[dfFiltered['license_plate_count'] >= limit]
+# print('dfFiltered after enforcing count', dfFiltered)
+# print('')
+# print('license_plate_count minimum value', dfFiltered['license_plate_count'].min())
+# print('license_plate_count maximum value', dfFiltered['license_plate_count'].max())
+
 dfFiltered = dfFinalGrouped["HAT"].isin(dfFiltered["HAT"])
 dfFinalGrouped = dfFinalGrouped[dfFiltered]
-
+dfFinalGrouped.to_csv('groupingTest.csv')
+# value = dfFinalGrouped.loc[(dfFinalGrouped['license_plate'] == 'GJ05BZ1535'), 'count']
+# print(value)
 print('Number of unique HATs left after filtering is: ' + str(dfFinalGrouped['HAT'].nunique()))
 print('########################################################################################')
 
