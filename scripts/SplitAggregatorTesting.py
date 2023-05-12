@@ -32,8 +32,9 @@ groupByCol = configDict['groupByCol']
 lengthList = []
 dfCombined = pd.DataFrame()
 
-# for file in file_names_list:
-for file in file_names:
+for file in file_names_list:
+# for file in file_names:  
+# //TODO call next file_name
     lengthList.append(file)
     with open(file, "r") as dfile:
             dataDict = json.load(dfile)
@@ -80,7 +81,10 @@ for file in file_names:
                                                     'min':'min'}).reset_index()
         dfFinalGrouped = dfGroupedCombined
         # dfFinalGrouped = dfCombined
-print('dfFinalGrouped before filtering', dfFinalGrouped)
+dfFinalGrouped['mean'] = np.round((dfFinalGrouped['sum']/dfFinalGrouped['count']), 2)
+print('')
+print('dfFinalGrouped before filtering', dfFinalGrouped) 
+
 # print('dfFinal Grouped and combined before filtering', dfFinalGroupedCombined)
 
 print('########################################################################################')
@@ -95,22 +99,13 @@ date = dfFinalGrouped["Date"].unique()
 minEventOccurencesPerDay = int(configDict["minEventOccurences"])
 limit = len(date) * minEventOccurencesPerDay
 dfFiltered = dfFinalGrouped.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
-# print('dfFiltered', dfFiltered)
+# //TODO license_plate to replaced with generic input from the config file
 dfFiltered = dfFiltered.groupby(['HAT']).agg({'license_plate':'sum'}).reset_index()
-# print('dfFiltered with license plate sum', dfFiltered)
 dfFiltered.rename(columns={"license_plate": "license_plate_count"}, inplace=True)
-
 dfFiltered = dfFiltered[dfFiltered['license_plate_count'] >= limit]
-# print('dfFiltered after enforcing count', dfFiltered)
-# print('')
-# print('license_plate_count minimum value', dfFiltered['license_plate_count'].min())
-# print('license_plate_count maximum value', dfFiltered['license_plate_count'].max())
-
 dfFiltered = dfFinalGrouped["HAT"].isin(dfFiltered["HAT"])
 dfFinalGrouped = dfFinalGrouped[dfFiltered]
-dfFinalGrouped.to_csv('groupingTest.csv')
-# value = dfFinalGrouped.loc[(dfFinalGrouped['license_plate'] == 'GJ05BZ1535'), 'count']
-# print(value)
+# dfFinalGrouped.to_csv('groupingTestMultiple.csv')
 print('Number of unique HATs left after filtering is: ' + str(dfFinalGrouped['HAT'].nunique()))
 print('########################################################################################')
 
