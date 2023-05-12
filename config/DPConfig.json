@@ -6,7 +6,7 @@
 		"duplicateDetection": [
     		"Sample No."
 		],
-		"queryPer":"subdistrict",
+		"queryPer":"district",
 		"splitCols":[
     		"pH",
     		"EC",
@@ -38,8 +38,8 @@
     		"2019-20-to-2020-2021"],
 		"cycleToKeep":"2017-18-to-2018-19",
 		"PrivacyLossBudget":[
-    		4,
-    		0.001],
+    		0.1,
+    		0.1],
 		"snrUpperLimit" : 3,
 		"snrLowerLimit" : 0
 	},

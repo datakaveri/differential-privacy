@@ -64,38 +64,41 @@ def runSpatioTemporalPipeline(dataframe, configDict):
     return dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2
 
 def runHistoPipeline(dataframe):
+
+    #------------------QUERY 1---------------------------------------------------
     #query building
     histQuery1 = cmod.histogramQuery1(dataframe, configDict)
     
     #compute noiseS
-    noiseHistQuery1 = cmod.noiseComputeHistogramQuery(histQuery1, configDict)   
+    noiseHistQuery1 = cmod.noiseComputeHistogramQuery1(histQuery1, configDict)   
     
-    #postprocessing and histogram display
-    for name, dfsNoise in noiseHistQuery1.items():
-        dfFinalHistQuery1 = cmod.postProcessing(dfsNoise.copy(), configDict, genType)        
-        cmod.printHistogram(dfFinalHistQuery1, name)
-        dfFinalHistQuery1 = dfFinalHistQuery1.drop(['Count','Noise'], axis = 1).reset_index(drop = True)
-        cmod.outputFile(dfFinalHistQuery1, 'dfNoisySoil1_' + name)
-        
+    #postprocessing
+    dfFinalQuery1 = cmod.postProcessingQuery(noiseHistQuery1, configDict, genType)
+           
+    #histogram and csv generation
+    cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
+    
     #signal to noise computation
-    for name, finalDF in noiseHistQuery1.items():
-        #signal assignment
-        signalQuery3 = finalDF['Count'].reset_index(drop = True)
+    cmod.snrQuery(noiseHistQuery1, configDict)       
         
-        #noise assignment
-        noiseQuery3 = finalDF['Noise'].reset_index(drop = True)
-        
-        #signal to noise computation
-        cmod.signalToNoise(signalQuery3, noiseQuery3, configDict)    
-        
-    histQuery2, histQuery2TrueModeDf = cmod.histogramQuery2(dataframe, configDict)
+    #------------------QUERY 2---------------------------------------------------
+    
+    histQuery2 = cmod.histogramQuery2(dataframe, configDict)
+    
+    noiseHistQuery2 = cmod.noiseComputeHistogramQuery2(histQuery2, configDict)
+    
+    #postprocessing
+    dfFinalQuery2 = cmod.postProcessingQuery(noiseHistQuery2, configDict, genType)
+    
+    cmod.snrQuery(noiseHistQuery2, configDict)     
+    
+    #histogram and csv generation
+    cmod.histogramAndOutputQuery(dfFinalQuery2, configDict, genType, query = 2)
 
-    noiseHistQuery2, dfFinalHistQuery2 = cmod.noiseComputeHistogramQuery2(histQuery2, configDict)
-    cmod.outputFile(dfFinalHistQuery2, 'dfNoisySoil2')    
-    
-    noiseHistQuery2Alt, histQuery2FinalDFAlt = cmod.reportNoisyMax(histQuery2, configDict)
-    
-    #cmod.test(noiseHistQuery2, histQuery2, configDict)
+    modeHistQuery2Alt, dfFinalHistQuery2Alt = cmod.exponentialMechanismHistogramQuery2(histQuery2, configDict)
+
+    postmod.outputFile(dfFinalHistQuery2Alt, 'dfNoisySoil2')        
+   
     return
 
 def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2, configDict, genType):
@@ -132,8 +135,8 @@ if genType == "spatio-temporal":
     # dataframe = spatioTemporalGeneralization(dataframe, configFile)
     dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2 = runSpatioTemporalPipeline(preProcessedDataframe, configDict)
 elif genType == "categorical":
-    # dataframe = categoricGeneralization(dataframe, configFile)
-    runHistoPipeline()
+    dataframe = cmod.categoricGeneralization(preProcessedDataframe, configDict)
+    runHistoPipeline(dataframe)
 
 #running postprocessing functions
-postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2, configDict, genType)
+#postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2, configDict, genType)
