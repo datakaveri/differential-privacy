@@ -12,7 +12,7 @@ def preProcessing():
     premod.schemaValidator('DPSchema.json', 'DPConfig.json')
 
     #reading the file and dropping any duplicates
-    df, configDict, genType = premod.readFile('DPConfig.json')
+    df, configDict, genType = premod.readFile('DPConfigITMS.json')
 
     #dropping duplicates
     df = premod.dropDuplicates(df, configDict)
@@ -60,7 +60,8 @@ def runSpatioTemporalPipeline(dataframe, configDict):
     print('\n################################################################\n')
     print('COMPUTING NOISE')
     dfNoiseQuery1, dfNoiseQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
-    
+    if configDict["optimized"] == True:
+        dfQuery1, signalQuery1, dfNoiseQuery1 = stmod.ITMSQuery1a(dfGrouped, K, configDict)
     return dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2
 
 def runHistoPipeline(dataframe):

@@ -3,13 +3,15 @@ import pandas as pd
 import numpy as np
 import json
 import jsonschema
-from pandas.io.json import json_normalize
+from pandas import json_normalize
 import matplotlib.pyplot as plt
 import h3
 # import itertools 
 import matplotlib.pyplot as plt
 from math import exp
-   
+
+from quantilemean.estimation import give_me_private_mean
+
 def spatioTemporalGeneralization(dataframe, configFile):
     # separating latitude and longitude from location
     lat_lon = dataframe[configFile['locationCol']]
@@ -117,6 +119,29 @@ def ITMSQuery1(dataframe):
     dfITMSQuery1 = dfITMSQuery1.to_frame().reset_index()
     dfITMSQuery1.rename(columns = {0:'queryOutput'}, inplace = True)
     return dfITMSQuery1
+
+def ITMSQuery1a(dataframe, K, configDict):
+    # print("REACHED Q1a", dataframe)
+    print("Running optimized Query1")
+    hats = np.unique(dataframe['HAT'])
+    eps_prime = configDict["privacyLossBudgetEpsQuery"][0] / K
+    dfITMSQuery1a, signalQuery1a, noiseQuery1a = [], [], []
+    for h in hats:
+        df_hat = dataframe[dataframe['HAT'] == h]
+        q, s, n = give_me_private_mean(df_hat, eps_prime)
+        dfITMSQuery1a.append(q)
+        signalQuery1a.append(s)
+        noiseQuery1a.append(n)
+    # noisytvals, signals, noises = ...
+    dfITMSQuery1a = pd.DataFrame(dfITMSQuery1a)
+    dfITMSQuery1a.rename(columns = {0:'queryOutput'}, inplace = True)
+    
+    signalQuery1a = pd.DataFrame(signalQuery1a)
+    
+    noiseQuery1a = pd.DataFrame(noiseQuery1a)
+    noiseQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
+    noiseQuery1a['queryOutput'] = dfITMSQuery1a['queryOutput']
+    return dfITMSQuery1a, signalQuery1a, noiseQuery1a
 
 def ITMSQuery2(dataframe, configDict):
     #average number of speed violations per HAT over all days

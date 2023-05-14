@@ -2,6 +2,7 @@
 	"dataFile": "suratITMSDPtest.json",
 	"genType": "spatio-temporal",
 	"spatio-temporal": {
+		"optimized": true,
 		"duplicateDetection": [
 			"trip_id",
 			"observationDateTime"

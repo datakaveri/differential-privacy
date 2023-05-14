@@ -1,0 +1,13 @@
+{   
+    "user_groupping" : "wrap",
+    "concentration_algorithm" : "quantiles",
+    "algorithm_parameters" : {
+        "coarse_mean" : {
+            "tau" : [-1],
+            "delta" : 0.2
+        },
+        "quantiles" : {
+            "lower_quantile" : 0.1
+        }
+    }
+}
