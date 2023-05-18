@@ -9,10 +9,10 @@ def preProcessing():
     print('PREPROCESSING')
 
     #validating the config file against the schema
-    premod.schemaValidator('DPSchema.json', 'DPConfig.json')
+    premod.schemaValidator('DPSchema.json', 'DPConfigITMS.json')
 
     #reading the file and dropping any duplicates
-    df, configDict, genType = premod.readFile('DPConfig.json')
+    df, configDict, genType = premod.readFile('DPConfigITMS.json')
 
     #dropping duplicates
     df = premod.dropDuplicates(df, configDict)
@@ -52,6 +52,7 @@ def runSpatioTemporalPipeline(dataframe, configDict):
     signalQuery2 = dfQuery2['queryOutput'].reset_index(drop = True)
 
     #compute sensitivity
+
     print('\n################################################################\n')
     print('COMPUTING SENSITIVITY')
     sensitivityITMSQuery1, sensitivityITMSQuery2 = stmod.sensitivityComputeITMSQuery(configDict, timeRange, dfCount)
@@ -139,4 +140,4 @@ elif genType == "categorical":
     runHistoPipeline(dataframe)
 
 #running postprocessing functions
-#postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2, configDict, genType)
+postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2, configDict, genType)
