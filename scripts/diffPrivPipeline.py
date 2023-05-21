@@ -60,8 +60,12 @@ def runSpatioTemporalPipeline(dataframe, configDict):
     print('\n################################################################\n')
     print('COMPUTING NOISE')
     dfNoiseQuery1, dfNoiseQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
+    print("Query1 columns", dfQuery1.columns)
+    print("noise df", dfNoiseQuery1.columns)
+    print(dfNoiseQuery1["queryOutput"])
+    print(signalQuery1)
     if configDict["optimized"] == True:
-        dfQuery1, signalQuery1, dfNoiseQuery1 = stmod.ITMSQuery1a(dfGrouped, K, configDict)
+        signalQuery1, dfNoiseQuery1 = stmod.ITMSQuery1a(dfGrouped, K, configDict)
     return dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2
 
 def runHistoPipeline(dataframe):
@@ -140,4 +144,4 @@ elif genType == "categorical":
     runHistoPipeline(dataframe)
 
 #running postprocessing functions
-#postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2, configDict, genType)
+postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2, configDict, genType)

@@ -34,7 +34,7 @@ def give_me_private_mean(data, epsilon):
             epsilon,
         )
     # print(final_estimate)
-    return final_estimate, signal, noise
+    return final_estimate, actual_mean, noise
 
 # if __name__ == "__main__":
 #     give_me_private_mean(None, 0.1)

@@ -134,14 +134,16 @@ def ITMSQuery1a(dataframe, K, configDict):
         noiseQuery1a.append(n)
     # noisytvals, signals, noises = ...
     dfITMSQuery1a = pd.DataFrame(dfITMSQuery1a)
-    dfITMSQuery1a.rename(columns = {0:'queryOutput'}, inplace = True)
+    dfITMSQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
+    dfITMSQuery1a['queryOutput'] = signalQuery1a
     
     signalQuery1a = pd.DataFrame(signalQuery1a)
     
-    noiseQuery1a = pd.DataFrame(noiseQuery1a)
-    noiseQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
-    noiseQuery1a['queryOutput'] = dfITMSQuery1a['queryOutput']
-    return dfITMSQuery1a, signalQuery1a, noiseQuery1a
+    
+    # noiseQuery1a = pd.DataFrame(noiseQuery1a)
+    # noiseQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
+    # noiseQuery1a['queryOutput'] = dfITMSQuery1a['queryOutput']
+    return signalQuery1a, dfITMSQuery1a
 
 def ITMSQuery2(dataframe, configDict):
     #average number of speed violations per HAT over all days
