@@ -7,8 +7,8 @@ def postProcessing(dfNoise, configDict, genType):
         globalMinValue = configDict['globalMinValue']
         dfFinalITMSQuery1 = dfNoise
         dfFinalITMSQuery1['queryNoisyOutput'].clip(globalMinValue, globalMaxValue, inplace = True)
-        dfFinalITMSQuery1.drop(['queryOutput'], axis = 1, inplace = True)
-        
+        if configDict['optimized'] == False:
+            dfFinalITMSQuery1.drop(['queryOutput'], axis = 1, inplace = True)        
         # #postprocessing ITMS Query 2
         # dfFinalITMSQuery2 = dfNoiseITMSQuery2
         # dfFinalITMSQuery2['query2NoisyOutput'].clip(0, np.inf, inplace = True)
@@ -23,13 +23,14 @@ def postProcessing(dfNoise, configDict, genType):
         dfFinal.drop(['noisyCount'], axis = 1, inplace = True)
         return dfFinal
 
-def signalToNoise(signal,noise,configDict):
+def signalToNoise(signal,noisySignal,configDict):
     # SNR Threshold
     snrUpperLimit = configDict['snrUpperLimit']
     snrLowerLimit = configDict['snrLowerLimit']
     # snr defined as signal mean over std of noise
     #signalPower/noisePower
-    snr = (np.mean(signal*signal))/(np.var(noise))
+    # //TODO: possible change to b value instead of laplacian
+    snr = (np.mean(signal*signal))/(np.var(noisySignal))
     if snr < snrLowerLimit :
         print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is below the bound.")
     elif snr > snrUpperLimit:

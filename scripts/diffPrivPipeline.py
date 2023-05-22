@@ -43,7 +43,13 @@ def runSpatioTemporalPipeline(dataframe, configDict):
     print('APPLYING DIFFERENTIAL PRIVACY')
 
     #query building
-    dfQuery1 = stmod.ITMSQuery1(dfGrouped)
+
+    # choosing appropriate query 1 from config file "optimized" value
+    if configDict["optimized"] == True:
+        dfQuery1, dfNoiseQuery1a = stmod.ITMSQuery1a(dfGrouped, K, configDict)
+    else:
+        dfQuery1 = stmod.ITMSQuery1(dfGrouped)
+
     dfQuery2 = stmod.ITMSQuery2(dfGrouped, configDict)
     # dfQuery1Weighted = stmod.ITMSQuery1Weighted(dfGrouped)
     
@@ -59,13 +65,19 @@ def runSpatioTemporalPipeline(dataframe, configDict):
     #compute noise 
     print('\n################################################################\n')
     print('COMPUTING NOISE')
-    dfNoiseQuery1, dfNoiseQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
-    print("Query1 columns", dfQuery1.columns)
-    print("noise df", dfNoiseQuery1.columns)
-    print(dfNoiseQuery1["queryOutput"])
-    print(signalQuery1)
-    if configDict["optimized"] == True:
-        signalQuery1, dfNoiseQuery1 = stmod.ITMSQuery1a(dfGrouped, K, configDict)
+
+
+    # //TODO: better implementation of assigning NoiseQuery1a 
+    if configDict["optimized"] == False:
+        dfNoiseQuery1, dfNoiseQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
+    else:
+        dfNoiseQuery1, dfNoiseQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
+        dfNoiseQuery1 = dfNoiseQuery1a
+
+    # print("Query1 columns", dfQuery1.columns)
+    # print("noise df", dfNoiseQuery1.columns)
+    # print(dfNoiseQuery1["queryOutput"])
+    # print(signalQuery1)
     return dfNoiseQuery1, dfNoiseQuery2, signalQuery1, signalQuery2
 
 def runHistoPipeline(dataframe):
