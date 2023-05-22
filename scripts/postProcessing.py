@@ -23,14 +23,14 @@ def postProcessing(dfNoise, configDict, genType):
         dfFinal.drop(['noisyCount'], axis = 1, inplace = True)
         return dfFinal
 
-def signalToNoise(signal,noisySignal,configDict):
+def signalToNoise(signal,bVariance,configDict):
     # SNR Threshold
     snrUpperLimit = configDict['snrUpperLimit']
     snrLowerLimit = configDict['snrLowerLimit']
     # snr defined as signal mean over std of noise
     #signalPower/noisePower
     # //TODO: possible change to b value instead of laplacian
-    snr = (np.mean(signal*signal))/(np.var(noisySignal))
+    snr = (np.mean(signal*signal))/(bVariance)
     if snr < snrLowerLimit :
         print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is below the bound.")
     elif snr > snrUpperLimit:

@@ -73,15 +73,18 @@ def histogramQuery1(dataframe, configFile):
 def noiseComputeHistogramQuery1(dataframeDict, configFile):    
     noisyDataframeDict = {}
     
+    
+    
     for name, df in dataframeDict.items():
         for pair, dataframe in df.items():
             bins = len(dataframe)
-            epsilon = configFile['PrivacyLossBudget'][0]/len(configFile['groupByPairs'])
+            epsilon = configFile['PrivacyLossBudget'][0]/len(configFile['groupByPairs'])  
             if bins == 1 :
                 sensitivity = 1
             else:
                 sensitivity = 2
             b = sensitivity/epsilon
+            
             noisyHistogram = np.random.laplace(0, b, bins)  
             dataframe['Noise']=noisyHistogram
             dataframe['noisyCount']=dataframe['Count']+noisyHistogram
@@ -90,7 +93,9 @@ def noiseComputeHistogramQuery1(dataframeDict, configFile):
                 noisyDataframeDict[name] = {}
             noisyDataframeDict[name][pair] = dataframe.reset_index(drop = True)
     
-    return noisyDataframeDict
+    bVarianceQuery1 = 2*b*b
+    
+    return noisyDataframeDict, bVarianceQuery1
     
 
 def histogramQuery2(dataframe, configFile):
@@ -126,17 +131,18 @@ def histogramQuery2(dataframe, configFile):
 def noiseComputeHistogramQuery2(dfs, configFile):
     sensitivity = 2
     epsilon = configFile['PrivacyLossBudget'][1]/len(dfs['Adilabad'])
+    b = sensitivity/epsilon
+    bVarianceQuery2 = 2*b*b
     for district in dfs:
         scores = []
         for col in dfs[district]:
             scores = np.array(dfs[district][col]['Count'].values)
-            b = sensitivity/epsilon
             noise = np.random.laplace(0, b, len(scores))
             dfs[district][col]['Noise'] = noise
             noisyScores = noise+scores
             dfs[district][col]['noisyCount'] = noisyScores
 
-    return dfs
+    return dfs, bVarianceQuery2
 
 
 def exponentialMechanismHistogramQuery2 (dfs, configFile):
@@ -254,7 +260,7 @@ def histogramAndOutputQuery(dfFinalQuery, configDict, genType, query):
             dfOutput = df.drop(['Count','Noise'], axis = 1).reset_index(drop = True)
             postmod.outputFile(dfOutput, 'dfNoisySoil1_'+name+'_'+pair)
             
-def snrQuery(noiseHistQuery, configDict):
+def snrQuery(noiseHistQuery, bVariance, configDict):
     for name, noisyDfs in noiseHistQuery.items():
         for pair, finalDF in noisyDfs.items():
             print('For '+name+ ' and elements ' + pair + ' ', end='')
@@ -262,8 +268,8 @@ def snrQuery(noiseHistQuery, configDict):
             signalQuery = finalDF['Count'].reset_index(drop = True)
             
             #noise assignment
-            noiseQuery = finalDF['Noise'].reset_index(drop = True)
+            #noiseQuery = finalDF['Noise'].reset_index(drop = True)
             
             #signal to noise computation
-            postmod.signalToNoise(signalQuery, noiseQuery, configDict)
+            postmod.signalToNoise(signalQuery, bVariance, configDict)
 

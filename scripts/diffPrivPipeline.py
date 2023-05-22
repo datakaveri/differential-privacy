@@ -12,7 +12,7 @@ def preProcessing():
     premod.schemaValidator('DPSchema.json', 'DPConfig.json')
 
     #reading the file and dropping any duplicates
-    df, configDict, genType = premod.readFile('DPConfigITMS.json')
+    df, configDict, genType = premod.readFile('DPConfig.json')
 
     #dropping duplicates
     df = premod.dropDuplicates(df, configDict)
@@ -87,7 +87,7 @@ def runHistoPipeline(dataframe):
     histQuery1 = cmod.histogramQuery1(dataframe, configDict)
     
     #compute noiseS
-    noiseHistQuery1 = cmod.noiseComputeHistogramQuery1(histQuery1, configDict)   
+    noiseHistQuery1, bVarianceQuery1 = cmod.noiseComputeHistogramQuery1(histQuery1, configDict)   
     
     #postprocessing
     dfFinalQuery1 = cmod.postProcessingQuery(noiseHistQuery1, configDict, genType)
@@ -96,18 +96,18 @@ def runHistoPipeline(dataframe):
     cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
     
     #signal to noise computation
-    cmod.snrQuery(noiseHistQuery1, configDict)       
+    cmod.snrQuery(noiseHistQuery1, bVarianceQuery1, configDict)       
         
     #------------------QUERY 2---------------------------------------------------
     
     histQuery2 = cmod.histogramQuery2(dataframe, configDict)
     
-    noiseHistQuery2 = cmod.noiseComputeHistogramQuery2(histQuery2, configDict)
+    noiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(histQuery2, configDict)
     
     #postprocessing
     dfFinalQuery2 = cmod.postProcessingQuery(noiseHistQuery2, configDict, genType)
     
-    cmod.snrQuery(noiseHistQuery2, configDict)     
+    cmod.snrQuery(noiseHistQuery2, bVarianceQuery2, configDict)     
     
     #histogram and csv generation
     cmod.histogramAndOutputQuery(dfFinalQuery2, configDict, genType, query = 2)

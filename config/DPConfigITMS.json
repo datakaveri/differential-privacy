@@ -1,6 +1,6 @@
 {
-	"dataFile": "suratITMSDPtest.json",
-	"genType": "spatio-temporal",
+	"dataFile": "CombinedThreeDistricts.json",
+	"genType": "categorical",
 	"spatio-temporal": {
 		"optimized": true,
 		"duplicateDetection": [
