@@ -23,21 +23,22 @@ def postProcessing(dfNoise, configDict, genType):
         dfFinal.drop(['noisyCount'], axis = 1, inplace = True)
         return dfFinal
 
-def signalToNoise(signal,bVariance,configDict):
+def signalToNoise(snrAverage, configDict):
     # SNR Threshold
     snrUpperLimit = configDict['snrUpperLimit']
     snrLowerLimit = configDict['snrLowerLimit']
-    # snr defined as signal mean over std of noise
-    #signalPower/noisePower
-    # //TODO: possible change to b value instead of laplacian
-    snr = (np.mean(signal*signal))/(bVariance)
-    if snr < snrLowerLimit :
-        print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is below the bound.")
-    elif snr > snrUpperLimit:
-        print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is above the bound.")
+    # # snr defined as signal mean over std of noise
+    # #signalPower/noisePower
+    # # //TODO: possible change to b value instead of laplacian
+    # snr = (np.mean(signal*signal))/(bVariance)
+    if snrAverage < snrLowerLimit :
+        print("Your Signal to Noise Ratio of " + str(round(snrAverage,3)) + " is below the bound.")
+    elif snrAverage > snrUpperLimit:
+        print("Your Signal to Noise Ratio of " + str(round(snrAverage,3)) + " is above the bound.")
     else:
-        print("Your Signal to Noise Ratio of " + str(round(snr,3)) + " is within the bounds.")
-    return snr
+        print("Your Signal to Noise Ratio of " + str(round(snrAverage,3)) + " is within the bounds.")
+    return snrAverage
+
 
 def cumulativeEpsilon(configDict):
 

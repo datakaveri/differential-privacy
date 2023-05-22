@@ -212,17 +212,24 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
 
     # computing noise weighted query 1
     bITMSQuery1 = sensitivityITMSQuery1/epsPrimeQuery1
-    bVariance = 2 * (bITMSQuery1 * bITMSQuery1)
+    bITMSQueryVariance1 = 2 * (bITMSQuery1 * bITMSQuery1)
     noiseITMSQuery1 = np.random.laplace(0, bITMSQuery1)
 
     # computing noise query 2
     bITMSQuery2 = sensitivityITMSQuery2/epsPrimeQuery2
+    bITMSQueryVariance2 = 2 * (bITMSQuery2 * bITMSQuery2)
+    bITMSQueryVariance2 = [bITMSQueryVariance2]
     noiseITMSQuery2 = np.random.laplace(0, bITMSQuery2, len(dfNoiseITMSQuery2))
 
     # adding noise to the true value
     dfNoiseITMSQuery1['queryNoisyOutput'] = dfNoiseITMSQuery1['queryOutput'] + noiseITMSQuery1
     dfNoiseITMSQuery2['queryNoisyOutput'] = dfNoiseITMSQuery2['queryOutput'] + noiseITMSQuery2
-    # dfNoiseITMSQuery1Weighted['queryNoisyOutput'] = dfNoiseITMSQuery1Weighted['queryOutput'] + noiseITMSQuery1Weighted
+ 
+    return dfNoiseITMSQuery1, dfNoiseITMSQuery2, bITMSQueryVariance1, bITMSQueryVariance2
 
-    return dfNoiseITMSQuery1, dfNoiseITMSQuery2
-
+def snrCompute(signal, bVariance):
+    snr = []
+    for bVar in bVariance:
+        snr.append((np.mean(signal*signal))/(bVar))
+    snrAverage = np.mean(snr)
+    return snrAverage
