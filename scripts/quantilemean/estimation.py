@@ -25,7 +25,7 @@ def give_me_private_mean(data, epsilon):
     lower_bound = config["spatio-temporal"]["globalMinValue"]
     # print("Actual mean: ", actual_mean)
     
-    final_estimate, signal, noise = private_estimation(
+    final_estimate, clipped_signal, noise, var = private_estimation(
             user_group_means,
             L,
             K,
@@ -34,7 +34,7 @@ def give_me_private_mean(data, epsilon):
             epsilon,
         )
     # print(final_estimate)
-    return final_estimate, actual_mean, noise
+    return final_estimate, actual_mean, noise, var
 
 # if __name__ == "__main__":
 #     give_me_private_mean(None, 0.1)

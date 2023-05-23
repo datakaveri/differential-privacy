@@ -125,13 +125,14 @@ def ITMSQuery1a(dataframe, K, configDict):
     print("Running optimized Query1")
     hats = np.unique(dataframe['HAT'])
     eps_prime = configDict["privacyLossBudgetEpsQuery"][0] / K
-    dfITMSQuery1a, signalQuery1a, noiseQuery1a = [], [], []
+    dfITMSQuery1a, signalQuery1a, noiseQuery1a, bVarianceQuery1a = [], [], [], []
     for h in hats:
         df_hat = dataframe[dataframe['HAT'] == h]
-        q, s, n = give_me_private_mean(df_hat, eps_prime)
+        q, s, n, b = give_me_private_mean(df_hat, eps_prime)
         dfITMSQuery1a.append(q)
         signalQuery1a.append(s)
         noiseQuery1a.append(n)
+        bVarianceQuery1a.append(b)
     # noisytvals, signals, noises = ...
     dfITMSQuery1a = pd.DataFrame(dfITMSQuery1a)
     dfITMSQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
@@ -140,8 +141,8 @@ def ITMSQuery1a(dataframe, K, configDict):
     signalQuery1a.rename(columns = {0:'queryOutput'}, inplace = True)
     noiseQuery1a = dfITMSQuery1a
 
-    print('dfITMSQuery1a', dfITMSQuery1a)
-    print("signalQuery1a", signalQuery1a)
+    # print('dfITMSQuery1a', dfITMSQuery1a)
+    # print("signalQuery1a", signalQuery1a)
     # print("noisyOutput", noiseQuery1a)
     # noiseQuery1a = dfITMSQuery1a['queryNoisyOutput']
     # signalQuery1a = pd.DataFrame(signalQuery1a)
@@ -150,7 +151,7 @@ def ITMSQuery1a(dataframe, K, configDict):
     # noiseQuery1a = pd.DataFrame(noiseQuery1a)x
     # noiseQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
     # noiseQuery1a['queryOutput'] = dfITMSQuery1a['queryOutput']
-    return signalQuery1a, noiseQuery1a
+    return signalQuery1a, noiseQuery1a,bVarianceQuery1a
 
 def ITMSQuery2(dataframe, configDict):
     #average number of speed violations per HAT over all days
@@ -229,6 +230,8 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
 
 def snrCompute(signal, bVariance):
     snr = []
+    print("Variances: ", bVariance)
+    print("Mean of variances: ", np.mean(bVariance))
     for bVar in bVariance:
         snr.append((np.mean(signal*signal))/(bVar))
     snrAverage = np.mean(snr)

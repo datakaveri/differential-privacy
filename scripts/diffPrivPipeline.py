@@ -46,7 +46,7 @@ def runSpatioTemporalPipeline(dataframe, configDict):
 
     # choosing appropriate query 1 from config file "optimized" value
     if configDict["optimized"] == True:
-        dfQuery1, dfNoiseQuery1a = stmod.ITMSQuery1a(dfGrouped, K, configDict)
+        dfQuery1, dfNoiseQuery1a, bVarianceQuery1a = stmod.ITMSQuery1a(dfGrouped, K, configDict)
     else:
         dfQuery1 = stmod.ITMSQuery1(dfGrouped)
 
@@ -71,8 +71,9 @@ def runSpatioTemporalPipeline(dataframe, configDict):
     if configDict["optimized"] == False:
         dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
     else:
-        dfNoiseQuery1, dfNoiseQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
+        dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
         dfNoiseQuery1 = dfNoiseQuery1a
+        bVarianceQuery1 = bVarianceQuery1a
 
     # print("Query1 columns", dfQuery1.columns)
     # print("noise df", dfNoiseQuery1.columns)
