@@ -69,7 +69,6 @@ def histogramQuery1(dataframe, configFile):
             
     return histogramDfs
 
-
 def noiseComputeHistogramQuery1(dataframeDict, configFile):    
     noisyDataframeDict = {}
     
@@ -97,7 +96,6 @@ def noiseComputeHistogramQuery1(dataframeDict, configFile):
     
     return noisyDataframeDict, bVarianceQuery1
     
-
 def histogramQuery2(dataframe, configFile):
     allCols = configFile['splitCols']
     computedCols = configFile['groupByPairs']
@@ -143,7 +141,6 @@ def noiseComputeHistogramQuery2(dfs, configFile):
             dfs[district][col]['noisyCount'] = noisyScores
 
     return dfs, bVarianceQuery2
-
 
 def exponentialMechanismHistogramQuery2 (dfs, configFile):
     noisy_mode = {}

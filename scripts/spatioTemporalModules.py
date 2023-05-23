@@ -229,10 +229,12 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
     return dfNoiseITMSQuery1, dfNoiseITMSQuery2, bITMSQueryVariance1, bITMSQueryVariance2
 
 def snrCompute(signal, bVariance):
-    snr = []
-    print("Variances: ", bVariance)
-    print("Mean of variances: ", np.mean(bVariance))
-    for bVar in bVariance:
-        snr.append((np.mean(signal*signal))/(bVar))
+    snr =[]
+    if (len(bVariance) == 1):
+        for i in range(0, len(signal)):
+            snr.append((signal[i]*signal[i])/(bVariance[0]))
+    else:
+        for i in range (0, len(signal)):
+            snr.append((signal[i]*signal[i])/(bVariance[i]))
     snrAverage = np.mean(snr)
     return snrAverage
