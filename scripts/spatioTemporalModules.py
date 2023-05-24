@@ -190,7 +190,7 @@ def KCompute(dataframe):
 def sensitivityComputeITMSQuery(configDict, timeRange, dfCount):
     maxValue = configDict['globalMaxValue']
     minValue = configDict['globalMinValue']
-
+    print(dfCount)
     # sensitivity for weighted query 1
     sensitivityITMSQuery1 = ((dfCount['max']*(maxValue - minValue))/(dfCount['sum']))
 

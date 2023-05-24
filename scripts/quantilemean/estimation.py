@@ -19,7 +19,7 @@ def give_me_private_mean(data, epsilon):
     # print("L: ", L)
     user_arrays, K = get_user_arrays(data, L)
     # print("K:", K)
-    actual_mean = np.mean(data["mean"].values)
+    actual_mean = (np.sum(data["mean"]*data["count"]))/data["count"].sum()
     user_group_means = [np.mean(x) for x in user_arrays]
     upper_bound = config["spatio-temporal"]["globalMaxValue"]
     lower_bound = config["spatio-temporal"]["globalMinValue"]

@@ -52,6 +52,7 @@ def private_estimation(user_group_means, L, K, ub, lb, epsilon):
     projected_vals = np.clip(user_group_means, q1, q2)
     mean_of_projected_vals = np.mean(projected_vals)
     b = ( ((q2-q1)*factor) / (K * (epsilon/2))  )
+    
     noise_projected_vals = np.random.laplace(0, b)
     final_estimate = mean_of_projected_vals + noise_projected_vals
     return final_estimate, mean_of_projected_vals, noise_projected_vals, 2*b*b

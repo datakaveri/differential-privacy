@@ -24,6 +24,6 @@ def get_user_arrays(data, L):
             user_arrays[array_idx_to_fill].append(user_data[counter])
             counter += 1
                 
-        K = len(user_arrays)
+    K = len(user_arrays)
         
     return user_arrays, K
