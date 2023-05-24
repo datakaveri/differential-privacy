@@ -128,17 +128,18 @@ def histogramQuery2(dataframe, configFile):
 
 def noiseComputeHistogramQuery2(dfs, configFile):
     sensitivity = 2
-    epsilon = configFile['PrivacyLossBudget'][1]/len(dfs['Adilabad'])
-    b = sensitivity/epsilon
-    bVarianceQuery2 = 2*b*b
-    for district in dfs:
+   
+    for df in dfs:
+        epsilon = configFile['PrivacyLossBudget'][1]/len(df)
+        b = sensitivity/epsilon
+        bVarianceQuery2 = 2*b*b
         scores = []
-        for col in dfs[district]:
-            scores = np.array(dfs[district][col]['Count'].values)
+        for col in dfs[df]:
+            scores = np.array(dfs[df][col]['Count'].values)
             noise = np.random.laplace(0, b, len(scores))
-            dfs[district][col]['Noise'] = noise
+            dfs[df][col]['Noise'] = noise
             noisyScores = noise+scores
-            dfs[district][col]['noisyCount'] = noisyScores
+            dfs[df][col]['noisyCount'] = noisyScores
 
     return dfs, bVarianceQuery2
 
@@ -274,5 +275,10 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
             listOfSNR.append(snr)
         
         snrAverage = np.mean(listOfSNR)
-        postmod.signalToNoise(snrAverage, configDict)
+        snrVariance = np.var(listOfSNR)
+        print('\nAverage : ' +  str(snrAverage), end='')
+        #postmod.signalToNoise(snrAverage, configDict)
+        print('Variance : ' + str(snrVariance))
+        #postmod.signalToNoise(snrVariance, configDict)
+
             

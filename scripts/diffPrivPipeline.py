@@ -12,7 +12,7 @@ def preProcessing():
     premod.schemaValidator('DPSchema.json', 'DPConfig.json')
 
     #reading the file and dropping any duplicates
-    df, configDict, genType = premod.readFile('DPConfigITMS.json')
+    df, configDict, genType = premod.readFile('DPConfig.json')
 
     #dropping duplicates
     df = premod.dropDuplicates(df, configDict)
@@ -92,12 +92,14 @@ def runHistoPipeline(dataframe):
     
     #postprocessing
     dfFinalQuery1 = cmod.postProcessingQuery(noiseHistQuery1, configDict, genType)
-           
-    #histogram and csv generation
-    cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
     
     #signal to noise computation
     cmod.snrQuery(noiseHistQuery1, bVarianceQuery1, configDict)       
+       
+    #histogram and csv generation
+    cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
+    
+    
         
     #------------------QUERY 2---------------------------------------------------
     
@@ -168,4 +170,4 @@ elif genType == "categorical":
     runHistoPipeline(dataframe)
 
 #running postprocessing functions
-postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, genType)
+#postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, genType)
