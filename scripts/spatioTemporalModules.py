@@ -190,7 +190,6 @@ def KCompute(dataframe):
 def sensitivityComputeITMSQuery(configDict, timeRange, dfCount):
     maxValue = configDict['globalMaxValue']
     minValue = configDict['globalMinValue']
-    print(dfCount)
     # sensitivity for weighted query 1
     sensitivityITMSQuery1 = ((dfCount['max']*(maxValue - minValue))/(dfCount['sum']))
 
@@ -238,3 +237,8 @@ def snrCompute(signal, bVariance):
             snr.append((signal[i]*signal[i])/(bVariance[i]))
     snrAverage = np.mean(snr)
     return snrAverage
+
+def maeCompute(signal, estimate):
+    mae = np.mean(np.abs(signal - estimate))
+    print("MAE: ", mae)
+    return mae

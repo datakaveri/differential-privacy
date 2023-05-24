@@ -131,10 +131,19 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     noiseQuery2 = dfNoiseQuery2['queryNoisyOutput'].reset_index(drop = True)
     
     #signal to noise computation
-    snrAverageQuery1 = stmod.snrCompute(signalQuery1, bVarianceQuery1)
-    snrAverageQuery2 = stmod.snrCompute(signalQuery2, bVarianceQuery2)
-    postmod.signalToNoise(snrAverageQuery1, configDict)
-    postmod.signalToNoise(snrAverageQuery2, configDict)
+    if configDict["optimized"] == False:
+        snrAverageQuery1 = stmod.snrCompute(signalQuery1, bVarianceQuery1)
+        snrAverageQuery2 = stmod.snrCompute(signalQuery2, bVarianceQuery2)
+        postmod.signalToNoise(snrAverageQuery1, configDict)
+        postmod.signalToNoise(snrAverageQuery2, configDict)
+        maeQuery1 = stmod.maeCompute(signalQuery1, noiseQuery1)
+        maeQuery2 = stmod.maeCompute(signalQuery2, noiseQuery2)
+        
+    else:
+        maeQuery1 = stmod.maeCompute(signalQuery1, noiseQuery1)
+        maeQuery2 = stmod.maeCompute(signalQuery2, noiseQuery2)
+        snrAverageQuery2 = stmod.snrCompute(signalQuery2, bVarianceQuery2)
+        postmod.signalToNoise(snrAverageQuery2, configDict)
     
     #computing and displaying cumulative epsilon
     postmod.cumulativeEpsilon(configDict)
