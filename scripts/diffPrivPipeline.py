@@ -87,7 +87,7 @@ def runHistoPipeline(dataframe):
     #query building
     histQuery1 = cmod.histogramQuery1(dataframe, configDict)
     
-    #compute noiseS
+    #compute noise
     noiseHistQuery1, bVarianceQuery1 = cmod.noiseComputeHistogramQuery1(histQuery1, configDict)   
     
     #postprocessing
@@ -103,21 +103,24 @@ def runHistoPipeline(dataframe):
         
     #------------------QUERY 2---------------------------------------------------
     
+    #query building
     histQuery2 = cmod.histogramQuery2(dataframe, configDict)
     
+    #compute noise
     noiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(histQuery2, configDict)
     
     #postprocessing
     dfFinalQuery2 = cmod.postProcessingQuery(noiseHistQuery2, configDict, genType)
     
+    #signal to noise computation
     cmod.snrQuery(noiseHistQuery2, bVarianceQuery2, configDict)     
     
     #histogram and csv generation
     cmod.histogramAndOutputQuery(dfFinalQuery2, configDict, genType, query = 2)
 
-    modeHistQuery2Alt, dfFinalHistQuery2Alt = cmod.exponentialMechanismHistogramQuery2(histQuery2, configDict)
+    #modeHistQuery2Alt, dfFinalHistQuery2Alt = cmod.exponentialMechanismHistogramQuery2(histQuery2, configDict)
 
-    postmod.outputFile(dfFinalHistQuery2Alt, 'dfNoisySoil2')        
+    #postmod.outputFile(dfFinalHistQuery2Alt, 'dfNoisySoil2')        
    
     return
 

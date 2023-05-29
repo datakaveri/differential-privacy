@@ -276,9 +276,9 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
         
         snrAverage = np.mean(listOfSNR)
         snrVariance = np.var(listOfSNR)
-        print('\nAverage : ' +  str(snrAverage), end='')
+        print('\nSNR Average : ' +  str(np.round(snrAverage,3)), end=' ')
         #postmod.signalToNoise(snrAverage, configDict)
-        print('Variance : ' + str(snrVariance))
+        print('SNR Variance : ' + str(np.round(snrVariance, 3)))
         #postmod.signalToNoise(snrVariance, configDict)
 
             
