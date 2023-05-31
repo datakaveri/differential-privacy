@@ -72,6 +72,7 @@ def runSpatioTemporalPipeline(dataframe, configDict):
     signalQuery2 = dfQuery2['queryOutput'].reset_index(drop = True)
 
     #compute sensitivity
+
     print('\n################################################################\n')
     print('COMPUTING SENSITIVITY')
     sensitivityITMSQuery1, sensitivityITMSQuery2 = stmod.sensitivityComputeITMSQuery(configDict, timeRange, dfCount)
@@ -196,5 +197,4 @@ elif genType == "categorical":
     histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2 = runCategoricalPipeline(preProcessedDataframe, configDict)
     postProcessingCategorical(histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2, configDict, genType)
 
-#running postprocessing functions
 

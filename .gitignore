@@ -1,3 +1,8 @@
+# Ignoring deprecated files from config and scripts
+/scripts/modules.py
+/config/DPConfig.json
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
