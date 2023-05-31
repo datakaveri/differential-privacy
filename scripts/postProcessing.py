@@ -41,7 +41,7 @@ def cumulativeEpsilon(configDict):
     privacyLossBudgetQuery1 = configDict['privacyLossBudgetEpsQuery'][0]
     privacyLossBudgetQuery2 = configDict['privacyLossBudgetEpsQuery'][1]
     cumulativeEpsilon = privacyLossBudgetQuery1 + privacyLossBudgetQuery2
-    print('Your Cumulative Epsilon for the displayed queries is: ' + str(cumulativeEpsilon))
+    print('\nYour Cumulative Epsilon for the displayed queries is: ' + str(cumulativeEpsilon))
     return cumulativeEpsilon
 
 def outputFile(dfFinal, dataframeName):

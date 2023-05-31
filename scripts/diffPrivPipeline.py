@@ -6,9 +6,11 @@ import postProcessing as postmod
 
 def preProcessing():
     #validating the config file against the schema
-    print('Select the desired configuration file: ')
+    print('\n####################################################################\n')
+    print('\nSelect the desired configuration file: ')
     print('\n1. SpatioTemporal Config')
     print('2. Categorical Config')
+    print('\n####################################################################\n')
 
     configNum = int(input('Enter a number: '))
 
@@ -137,6 +139,9 @@ def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVa
     
     #histogram and csv generation
     cmod.histogramAndOutputQuery(dfFinalQuery2, configDict, genType, query = 2)
+    
+    print('\nDifferentially Private output generated. Please check the pipelineOutput folder.')
+    return
 
 def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, genType):
     print('\n################################################################\n')
@@ -153,11 +158,15 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     if configDict["optimized"] == False:
         snrAverageQuery1 = stmod.snrCompute(signalQuery1, bVarianceQuery1)
         snrAverageQuery2 = stmod.snrCompute(signalQuery2, bVarianceQuery2)
+        print('\n\nFor Query 1: ')
         postmod.signalToNoise(snrAverageQuery1, configDict)
-        postmod.signalToNoise(snrAverageQuery2, configDict)
         maeQuery1 = stmod.maeCompute(signalQuery1, noiseQuery1)
+        print("The MAE is: ", maeQuery1)
+        print('\n\nFor Query 2: ')
+        postmod.signalToNoise(snrAverageQuery2, configDict)
         maeQuery2 = stmod.maeCompute(signalQuery2, noiseQuery2)
-        
+        print("The MAE is: ", maeQuery2)
+
     else:
         maeQuery1 = stmod.maeCompute(signalQuery1, noiseQuery1)
         maeQuery2 = stmod.maeCompute(signalQuery2, noiseQuery2)

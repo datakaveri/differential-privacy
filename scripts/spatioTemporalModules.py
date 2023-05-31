@@ -240,5 +240,4 @@ def snrCompute(signal, bVariance):
 
 def maeCompute(signal, estimate):
     mae = np.mean(np.abs(signal - estimate))
-    print("MAE: ", mae)
     return mae
