@@ -126,7 +126,7 @@ def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVa
     #signal to noise computation
     print('\n\nSNR for Query 1: ')
     cmod.snrQuery(noiseHistQuery1, bVarianceQuery1, configDict)       
-       
+
     #histogram and csv generation
     cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
 

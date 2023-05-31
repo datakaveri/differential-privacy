@@ -64,12 +64,9 @@ def baseline_estimation(data, ub, lb, epsilons, num_exp):
     sum_contrib = np.sum(data_grouped["Value"])
     print("Max contribution: ", max_contrib)
     print("Sum of contributions: ", sum_contrib)
-    f_base = './results/baseline/epsilon_{}/'
     for e in epsilons:
         b = ((ub - lb) * max_contrib) / (sum_contrib * e)
         noise = np.random.laplace(0, b, num_exp)
-        os.makedirs(f_base.format(e), exist_ok=True)
-        np.save(f_base.format(e) + 'losses.npy', np.abs(noise))
 
     
     
