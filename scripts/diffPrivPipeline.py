@@ -5,14 +5,26 @@ import postProcessing as postmod
 
 
 def preProcessing():
+    #validating the config file against the schema
+    print('Select the desired configuration file: ')
+    print('\n1. SpatioTemporal Config')
+    print('2. Categorical Config')
+
+    configNum = int(input('Enter a number: '))
+
+    if configNum == 1:
+        configFileName = 'DPConfigSpatioTemporal.json'
+        schemaFileName = 'DPSchemaSpatioTemporal.json'
+    elif configNum == 2:
+        configFileName = 'DPConfigCategorical.json'
+        schemaFileName = 'DPSchemaCategorical.json'
+    
     print('\n####################################################################\n')
     print('PREPROCESSING')
-
-    #validating the config file against the schema
-    premod.schemaValidator('DPSchema.json', 'DPConfig.json')
+    premod.schemaValidator(schemaFileName, configFileName)
 
     #reading the file and dropping any duplicates
-    df, configDict, genType = premod.readFile('DPConfig.json')
+    df, configDict, genType = premod.readFile(configFileName)
 
     #dropping duplicates
     df = premod.dropDuplicates(df, configDict)
@@ -67,7 +79,6 @@ def runSpatioTemporalPipeline(dataframe, configDict):
     print('COMPUTING NOISE')
 
 
-    # //TODO: better implementation of assigning NoiseQuery1a 
     if configDict["optimized"] == False:
         dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
     else:
@@ -75,31 +86,18 @@ def runSpatioTemporalPipeline(dataframe, configDict):
         dfNoiseQuery1 = dfNoiseQuery1a
         bVarianceQuery1 = bVarianceQuery1a
 
-    # print("Query1 columns", dfQuery1.columns)
-    # print("noise df", dfNoiseQuery1.columns)
-    # print(dfNoiseQuery1["queryOutput"])
-    # print(signalQuery1)
     return dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2
 
-def runHistoPipeline(dataframe):
+def runCategoricalPipeline(df, configDict):
+
+    dataframe = cmod.categoricGeneralization(df, configDict)
 
     #------------------QUERY 1---------------------------------------------------
     #query building
     histQuery1 = cmod.histogramQuery1(dataframe, configDict)
     
     #compute noise
-    noiseHistQuery1, bVarianceQuery1 = cmod.noiseComputeHistogramQuery1(histQuery1, configDict)   
-    
-    #postprocessing
-    dfFinalQuery1 = cmod.postProcessingQuery(noiseHistQuery1, configDict, genType)
-    
-    #signal to noise computation
-    cmod.snrQuery(noiseHistQuery1, bVarianceQuery1, configDict)       
-       
-    #histogram and csv generation
-    cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
-    
-    
+    noiseHistQuery1, bVarianceQuery1 = cmod.noiseComputeHistogramQuery1(histQuery1, configDict)       
         
     #------------------QUERY 2---------------------------------------------------
     
@@ -107,22 +105,38 @@ def runHistoPipeline(dataframe):
     histQuery2 = cmod.histogramQuery2(dataframe, configDict)
     
     #compute noise
-    noiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(histQuery2, configDict)
-    
-    #postprocessing
-    dfFinalQuery2 = cmod.postProcessingQuery(noiseHistQuery2, configDict, genType)
-    
-    #signal to noise computation
-    cmod.snrQuery(noiseHistQuery2, bVarianceQuery2, configDict)     
-    
-    #histogram and csv generation
-    cmod.histogramAndOutputQuery(dfFinalQuery2, configDict, genType, query = 2)
+    noiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(histQuery2, configDict)    
 
     #modeHistQuery2Alt, dfFinalHistQuery2Alt = cmod.exponentialMechanismHistogramQuery2(histQuery2, configDict)
 
     #postmod.outputFile(dfFinalHistQuery2Alt, 'dfNoisySoil2')        
    
-    return
+    return histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2
+
+def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2, configDict, genType):
+    print('\n################################################################\n')
+    print('POSTPROCESSING')
+    #Query 1
+    #postprocessing
+    dfFinalQuery1 = cmod.postProcessingQuery(noiseHistQuery1, configDict, genType)
+    
+    #signal to noise computation
+    print('\n\nSNR for Query 1: ')
+    cmod.snrQuery(noiseHistQuery1, bVarianceQuery1, configDict)       
+       
+    #histogram and csv generation
+    cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
+
+    #Query 2
+    #postprocessing
+    dfFinalQuery2 = cmod.postProcessingQuery(noiseHistQuery2, configDict, genType)
+    
+    #signal to noise computation
+    print('\n\nSNR for Query 2: ')
+    cmod.snrQuery(noiseHistQuery2, bVarianceQuery2, configDict)     
+    
+    #histogram and csv generation
+    cmod.histogramAndOutputQuery(dfFinalQuery2, configDict, genType, query = 2)
 
 def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, genType):
     print('\n################################################################\n')
@@ -168,9 +182,10 @@ preProcessedDataframe, configDict, genType = preProcessing()
 if genType == "spatio-temporal":
     # dataframe = spatioTemporalGeneralization(dataframe, configFile)
     dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2 = runSpatioTemporalPipeline(preProcessedDataframe, configDict)
+    postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, genType)
 elif genType == "categorical":
-    dataframe = cmod.categoricGeneralization(preProcessedDataframe, configDict)
-    runHistoPipeline(dataframe)
+    histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2 = runCategoricalPipeline(preProcessedDataframe, configDict)
+    postProcessingCategorical(histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2, configDict, genType)
 
 #running postprocessing functions
-#postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, genType)
+

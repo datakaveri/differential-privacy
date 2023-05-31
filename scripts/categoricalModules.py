@@ -234,8 +234,9 @@ def printHistogram(df, name, pair, query):
    
     fig.savefig('../pipelineOutput/plots/'+name+'_'+pair+'.png', dpi=800)
 
+    plt.close()
     # show plot
-    plt.show()
+    #plt.show()
 
 def postProcessingQuery(noiseHistQuery, configDict, genType,):
     
@@ -256,12 +257,12 @@ def histogramAndOutputQuery(dfFinalQuery, configDict, genType, query):
         for pair, df in dfs.items():            
             printHistogram(df, name, pair, query)
             dfOutput = df.drop(['Count','Noise'], axis = 1).reset_index(drop = True)
-            postmod.outputFile(dfOutput, 'dfNoisySoil1_'+name+'_'+pair)
+            postmod.outputFile(dfOutput, 'dfNoisySoil_'+str(query)+name+'_'+pair)
             
 def snrQuery(noiseHistQuery, bVariance, configDict):
     for name, noisyDfs in noiseHistQuery.items():
         listOfSNR = []
-        print('For '+name+ ' ', end='')
+        print('For '+name+ ': ', end='')
         for pair, finalDF in noisyDfs.items():
             
             #signal assignment
@@ -278,7 +279,7 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
         snrVariance = np.var(listOfSNR)
         print('\nSNR Average : ' +  str(np.round(snrAverage,3)), end=' ')
         #postmod.signalToNoise(snrAverage, configDict)
-        print('SNR Variance : ' + str(np.round(snrVariance, 3)))
+        print('|| SNR Variance : ' + str(np.round(snrVariance, 3)))
         #postmod.signalToNoise(snrVariance, configDict)
 
             

@@ -27,10 +27,7 @@ def signalToNoise(snrAverage,configDict):
     # SNR Threshold
     snrUpperLimit = configDict['snrUpperLimit']
     snrLowerLimit = configDict['snrLowerLimit']
-    # snr defined as signal mean over std of noise
-    #signalPower/noisePower
-    # //TODO: possible change to b value instead of laplacian
-    #snr = (np.mean(signal*signal))/(bVariance)
+
     if snrAverage < snrLowerLimit :
         print("Your Signal to Noise Ratio of " + str(round(snrAverage,3)) + " is below the bound.")
     elif snrAverage > snrUpperLimit:
@@ -48,6 +45,5 @@ def cumulativeEpsilon(configDict):
     return cumulativeEpsilon
 
 def outputFile(dfFinal, dataframeName):
-    # dataframeName = input('What would you like to name the output dataframe?')
     dfFinal.to_csv('../pipelineOutput/' + dataframeName + '.csv')
     return

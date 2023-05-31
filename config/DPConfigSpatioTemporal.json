@@ -2,7 +2,7 @@
 	"dataFile": "suratITMSDPtest.json",
 	"genType": "spatio-temporal",
 	"spatio-temporal": {
-		"optimized": true,
+		"optimized": false,
 		"duplicateDetection": [
 			"trip_id",
 			"observationDateTime"
@@ -36,15 +36,7 @@
 		"endTime": 20,
 		"minEventOccurences": 30,
     	"trueValueThreshold": 35,
-		"mapeThreshold": 1,
-		"snrThreshold" : 3,
 		"snrUpperLimit" : 3,
 		"snrLowerLimit" : 0
-	},
-	"numeric": {
-		"duplicateDetection": [],
-		"suppressCols": [],
-		"minEventOccurences": 20,
-		"groupyByCol": "license_plate"
 	}
 }
