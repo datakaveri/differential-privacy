@@ -70,7 +70,7 @@
         "privacyLossBudgetEpsQuery": {
           "type": "array",
           "items": {
-            "type": "integer"  
+            "type": "number"  
           },
           "maximum": 100,
           "minimum": 0
@@ -82,12 +82,12 @@
         },
         "startTime": {
           "minimum": 0,
-          "maximum": 24,
+          "maximum": 23,
           "type": "integer"
         },
         "endTime": {
           "minimum": 0,
-          "maximum": 24,
+          "maximum": 23,
           "type": "integer"
         },
         "minEventOccurences": {
@@ -96,14 +96,10 @@
         "trueValueThreshold": {
           "type": "integer"
         },
-        "mapeThreshold": {
-          "maximum": 1,
-          "minimum": 0,
+        "snrUpperLimit": {
           "type": "integer"
         },
-        "snrThreshold": {
-          "maximum": 3,
-          "minimum": 0,
+        "snrLowerLimit": {
           "type": "integer"
         }
       },
@@ -124,40 +120,14 @@
         "endTime",
         "minEventOccurences",
         "trueValueThreshold",
-        "mapeThreshold",
-        "snrThreshold"
-      ]
-    },
-    "numeric": {
-      "type": "object",
-      "properties": {
-        "duplicateDetection": {
-          "type": "array",
-          "items": {}
-        },
-        "suppressCols": {
-          "type": "array",
-          "items": {}
-        },
-        "minEventOccurences": {
-          "type": "integer"
-        },
-        "groupyByCol": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "duplicateDetection",
-        "suppressCols",
-        "minEventOccurences",
-        "groupyByCol"
+        "snrLowerLimit",
+        "snrUpperLimit"
       ]
     }
   },
   "required": [
     "dataFile",
     "genType",
-    "spatio-temporal",
-    "numeric"
+    "spatio-temporal"
   ]
 }

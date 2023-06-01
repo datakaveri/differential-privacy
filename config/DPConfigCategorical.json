@@ -1,6 +1,5 @@
 {
 	"dataFile": "CombinedThreeDistricts.json",
-	"configFileName": "DPConfig.json",
 	"genType": "categorical",
 	"categorical":{
 		"duplicateDetection": [
@@ -34,12 +33,9 @@
 		],
 		"groupByPairs":[["N","P"], ["Zn","Fe"],["N","pH"],["OC","EC"]],
 		"ID":"Sample No.",
-		"cycleToDrop":[
-    		"2019-20-to-2020-2021"],
-		"cycleToKeep":"2017-18-to-2018-19",
-		"PrivacyLossBudget":[
-    		0.1,
-    		0.1],
+		"cycleToDrop":["2019-20-to-2020-2021"],
+		"cycleToKeep":["2017-18-to-2018-19"],
+		"PrivacyLossBudget":[0.1, 0.1],
 		"snrUpperLimit" : 3,
 		"snrLowerLimit" : 0
 	}

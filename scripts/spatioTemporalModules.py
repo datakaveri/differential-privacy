@@ -1,9 +1,18 @@
 # Modules used to run Differential-Privacy Pipeline
 import pandas as pd
 import numpy as np
+import json
+import jsonschema
+from pandas import json_normalize
 import matplotlib.pyplot as plt
 import h3
-   
+# import itertools 
+import matplotlib.pyplot as plt
+from math import exp
+
+from quantilemean.estimation import give_me_private_mean
+
+
 def spatioTemporalGeneralization(dataframe, configFile):
     # separating latitude and longitude from location
     lat_lon = dataframe[configFile['locationCol']]
@@ -139,6 +148,39 @@ def ITMSQuery1(dataframe):
     dfITMSQuery1.rename(columns = {0:'queryOutput'}, inplace = True)
     return dfITMSQuery1
 
+def ITMSQuery1a(dataframe, K, configDict):
+    # print("REACHED Q1a")
+    print("Running optimized Query1")
+    hats = np.unique(dataframe['HAT'])
+    eps_prime = configDict["privacyLossBudgetEpsQuery"][0] / K
+    dfITMSQuery1a, signalQuery1a, noiseQuery1a, bVarianceQuery1a = [], [], [], []
+    for h in hats:
+        df_hat = dataframe[dataframe['HAT'] == h]
+        q, s, n, b = give_me_private_mean(df_hat, eps_prime)
+        dfITMSQuery1a.append(q)
+        signalQuery1a.append(s)
+        noiseQuery1a.append(n)
+        bVarianceQuery1a.append(b)
+    # noisytvals, signals, noises = ...
+    dfITMSQuery1a = pd.DataFrame(dfITMSQuery1a)
+    dfITMSQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
+    signalQuery1a = pd.DataFrame(signalQuery1a)
+    noiseQuery1a = pd.DataFrame(noiseQuery1a)
+    signalQuery1a.rename(columns = {0:'queryOutput'}, inplace = True)
+    noiseQuery1a = dfITMSQuery1a
+
+    # print('dfITMSQuery1a', dfITMSQuery1a)
+    # print("signalQuery1a", signalQuery1a)
+    # print("noisyOutput", noiseQuery1a)
+    # noiseQuery1a = dfITMSQuery1a['queryNoisyOutput']
+    # signalQuery1a = pd.DataFrame(signalQuery1a)
+    
+    
+    # noiseQuery1a = pd.DataFrame(noiseQuery1a)x
+    # noiseQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
+    # noiseQuery1a['queryOutput'] = dfITMSQuery1a['queryOutput']
+    return signalQuery1a, noiseQuery1a,bVarianceQuery1a
+
 def ITMSQuery2(dataframe, configDict):
     #average number of speed violations per HAT over all days
 
@@ -176,7 +218,6 @@ def KCompute(dataframe):
 def sensitivityComputeITMSQuery(configDict, timeRange, dfCount):
     maxValue = configDict['globalMaxValue']
     minValue = configDict['globalMinValue']
-
     # sensitivity for weighted query 1
     sensitivityITMSQuery1 = ((dfCount['max_count']*(maxValue - minValue))/(dfCount['sum_count']))
 
@@ -200,16 +241,32 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
 
     # computing noise weighted query 1
     bITMSQuery1 = sensitivityITMSQuery1/epsPrimeQuery1
+    bITMSQueryVariance1 = 2 * (bITMSQuery1 * bITMSQuery1)
     noiseITMSQuery1 = np.random.laplace(0, bITMSQuery1)
     
     # computing noise query 2
     bITMSQuery2 = sensitivityITMSQuery2/epsPrimeQuery2
+    bITMSQueryVariance2 = 2 * (bITMSQuery2 * bITMSQuery2)
+    bITMSQueryVariance2 = [bITMSQueryVariance2]
     noiseITMSQuery2 = np.random.laplace(0, bITMSQuery2, len(dfNoiseITMSQuery2))
 
     # adding noise to the true value
     dfNoiseITMSQuery1['queryNoisyOutput'] = dfNoiseITMSQuery1['queryOutput'] + noiseITMSQuery1
     dfNoiseITMSQuery2['queryNoisyOutput'] = dfNoiseITMSQuery2['queryOutput'] + noiseITMSQuery2
-    # dfNoiseITMSQuery1Weighted['queryNoisyOutput'] = dfNoiseITMSQuery1Weighted['queryOutput'] + noiseITMSQuery1Weighted
+ 
+    return dfNoiseITMSQuery1, dfNoiseITMSQuery2, bITMSQueryVariance1, bITMSQueryVariance2
 
-    return dfNoiseITMSQuery1, dfNoiseITMSQuery2
+def snrCompute(signal, bVariance):
+    snr =[]
+    if (len(bVariance) == 1):
+        for i in range(0, len(signal)):
+            snr.append((signal[i]*signal[i])/(bVariance[0]))
+    else:
+        for i in range (0, len(signal)):
+            snr.append((signal[i]*signal[i])/(bVariance[i]))
+    snrAverage = np.mean(snr)
+    return snrAverage
 
+def maeCompute(signal, estimate):
+    mae = np.mean(np.abs(signal - estimate))
+    return mae
