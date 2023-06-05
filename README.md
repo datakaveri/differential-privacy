@@ -75,18 +75,29 @@ git clone https://github.com/datakaveri/differential-privacy.git
 
 This sets up a directory with the structure seen below:
 ```
-differential-privacy
+differential-privacy/
+├── DataDeidentificationPipelineReadme.pdf
+├── README.md
 ├── config/
-│   │   ├── DPConfig.json
-│   │   ├── DPSchema.json
+│   ├── DPConfigCategorical.json
+│   ├── DPConfigSpatioTemporal.json
+│   ├── DPSchemaCategorical.json
+│   └── DPSchemaSpatioTemporal.json
 ├── data/
 ├── pipelineOutput/
-├── scripts/
-│   │   ├── .gitkeep
-│   │   ├── h3testing.py
-│   │   └── modules.py
 ├── requirements.txt
-└── README.md
+└── scripts/
+    ├── categoricalModules.py
+    ├── diffPrivPipeline.py
+    ├── modules.py.orig
+    ├── postProcessing.py
+    ├── preProcessing.py
+    ├── quantilemean
+    │   ├── algo.py
+    │   ├── algo_utils.py
+    │   ├── estimation.py
+    │   └── groupping.py
+    └── spatioTemporalModules.py
 ```
 ### Workspace Components
 #### config/
