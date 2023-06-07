@@ -10,6 +10,7 @@ def preProcessing():
     print('\nSelect the desired configuration file: ')
     print('\n1. SpatioTemporal Config')
     print('2. Categorical Config')
+    print('3. NLP Config')
     print('\n####################################################################\n')
 
     configNum = int(input('Enter a number: '))
@@ -20,6 +21,9 @@ def preProcessing():
     elif configNum == 2:
         configFileName = 'DPConfigCategorical.json'
         schemaFileName = 'DPSchemaCategorical.json'
+    elif configNum == 3:
+        configFileName = 'DPConfigNLP.json'
+        schemaFileName = 'DPSchemaNLP.json'
     
     print('\n####################################################################\n')
     print('PREPROCESSING')
