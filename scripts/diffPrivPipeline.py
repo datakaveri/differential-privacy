@@ -1,5 +1,6 @@
 import spatioTemporalModules as stmod
 import categoricalModules as cmod
+import nlpModules as nlpmod
 import preProcessing as premod
 import postProcessing as postmod
 
@@ -27,10 +28,11 @@ def preProcessing():
     
     print('\n####################################################################\n')
     print('PREPROCESSING')
-    premod.schemaValidator(schemaFileName, configFileName)
+    # premod.schemaValidator(schemaFileName, configFileName)
 
     #reading the file and dropping any duplicates
     df, configDict, genType = premod.readFile(configFileName)
+
 
     #dropping duplicates
     df = premod.dropDuplicates(df, configDict)
@@ -38,6 +40,9 @@ def preProcessing():
     #supressing any columns that may not be required in the final output
     preProcessedDataframe = premod.suppress(df, configDict)
 
+    #outputting the preprocessed dataframe
+    postmod.outputFile(preProcessedDataframe, 'dfPreProcessed')
+    
     return preProcessedDataframe, configDict, genType
 
 def runSpatioTemporalPipeline(dataframe, configDict):
@@ -89,7 +94,7 @@ def runSpatioTemporalPipeline(dataframe, configDict):
     if configDict["optimized"] == False:
         dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
     else:
-        dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
+        dfNoiseQuery1, dfNoiseQuery2, bVarianceQ3uery1, bVarianceQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
         dfNoiseQuery1 = dfNoiseQuery1a
         bVarianceQuery1 = bVarianceQuery1a
 
@@ -119,6 +124,13 @@ def runCategoricalPipeline(df, configDict):
     #postmod.outputFile(dfFinalHistQuery2Alt, 'dfNoisySoil2')        
    
     return histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2
+
+def runNLPpipeline(df, configDict):
+    #nlpmod.predict_severity()
+    df = nlpmod.nlpModel(df, configDict)
+    df = nlpmod.naturalLanguageGeneralization(df, configDict)
+    print(df)
+    return df
 
 def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2, configDict, genType):
     print('\n################################################################\n')
@@ -200,5 +212,6 @@ if genType == "spatio-temporal":
 elif genType == "categorical":
     histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2 = runCategoricalPipeline(preProcessedDataframe, configDict)
     postProcessingCategorical(histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2, configDict, genType)
-
+elif genType == "NLP":
+    runNLPpipeline(preProcessedDataframe, configDict)
 

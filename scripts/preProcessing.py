@@ -38,7 +38,7 @@ def readFile(configFileName):
         dataframe = pd.read_json(dataFileName)
     elif configDict['genType']=='NLP':
         dataframe = pd.read_json(dataFileName)
-        dataframe['comments']=dataframe['comments'].str[0]
+        # dataframe['comments']=dataframe['comments'].str[0]
         
     pd.set_option('mode.chained_assignment', None)
     print('The loaded file is: ' + dataFileName + ' with shape ' + str(dataframe.shape))
