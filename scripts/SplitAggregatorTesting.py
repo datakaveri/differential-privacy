@@ -5,6 +5,8 @@ import json
 import spatioTemporalModules as stmod  
 import numpy as np
 import h3
+# importing the datetime package  
+import datetime  
 
 # creating a list of file names
 
@@ -19,7 +21,12 @@ file_names_list = ['../data/split_file_0.json',
               '../data/split_file_8.json',
               '../data/split_file_9.json']
 
-file_names = ['../data/suratITMSDPtest.json']
+
+# file_names_list = ['../data/file-1.json',
+#               '../data/file-2.json',
+#               '../data/file-3.json',]
+
+# file_names = ['../data/suratITMSDPtest.json']
 
 configFile = '../config/DPConfigITMS.json'
 with open(configFile, "r") as cfile:
@@ -32,15 +39,22 @@ groupByCol = configDict['groupByCol']
 lengthList = []
 dfCombined = pd.DataFrame()
 
+
 for file in file_names_list:
 # for file in file_names:  
 # //TODO call next file_name
     lengthList.append(file)
     with open(file, "r") as dfile:
             dataDict = json.load(dfile)
+            # dataDict = [json.loads(line) for line in open(file, 'r')]
+
             #loading data
             dataframe = pd.json_normalize(dataDict)
      
+    #epoch time to datetime
+    # dataframe['observationDateTime'] = pd.to_datetime(dataframe['observationDateTime'], unit='ms')
+    print(dataframe.head())
+
     #drop dupes
     dataframe = premod.dropDuplicates(dataframe, configDict)
 
@@ -69,23 +83,20 @@ for file in file_names_list:
                                 min=(groupByCol,'min')).reset_index()
                 
         dfGrouped = pd.concat([dfGrouped, dfFinalGrouped],  ignore_index=True)
-        dfCombined = pd.concat([dfGrouped, dfCombined],  ignore_index=True)
-        dfCombined.drop_duplicates(subset = ['HAT', 'Date', 'license_plate'], inplace = True)
         print(file)
-        print('dfCombined', dfCombined)
+        print('dfGrouped')
+        print(dfGrouped)
 
-        dfGroupedCombined = dfCombined.groupby(['HAT','Date','license_plate']).agg({
+        dfGroupedCombined = dfGrouped.groupby(['HAT','Date','license_plate']).agg({
                                                     'count': 'sum',
                                                     'sum': 'sum',
                                                     'max':'max',
                                                     'min':'min'}).reset_index()
         dfFinalGrouped = dfGroupedCombined
-        # dfFinalGrouped = dfCombined
 dfFinalGrouped['mean'] = np.round((dfFinalGrouped['sum']/dfFinalGrouped['count']), 2)
 print('')
-print('dfFinalGrouped before filtering', dfFinalGrouped) 
-
-# print('dfFinal Grouped and combined before filtering', dfFinalGroupedCombined)
+print('dfFinalGrouped before filtering')
+print(dfFinalGrouped) 
 
 print('########################################################################################')
 print('The length of the grouped dataframe is: ', len(dfFinalGrouped))
