@@ -38,7 +38,7 @@ groupByCol = configDict['groupByCol']
 
 lengthList = []
 dfCombined = pd.DataFrame()
-
+dfFinalGrouped = pd.DataFrame()
 
 for file in file_names_list:
 # for file in file_names:  
@@ -46,13 +46,16 @@ for file in file_names_list:
     lengthList.append(file)
     with open(file, "r") as dfile:
             dataDict = json.load(dfile)
-            # dataDict = [json.loads(line) for line in open(file, 'r')]
 
             #loading data
             dataframe = pd.json_normalize(dataDict)
+    # dataframe = pd.read_json(file)
+            # dataframe = pd.DataFrame(dataDict)
+
      
     #epoch time to datetime
     # dataframe['observationDateTime'] = pd.to_datetime(dataframe['observationDateTime'], unit='ms')
+    print(dataframe['location.type'][1], dataframe['location.coordinates'][1])
     print(dataframe.head())
 
     #drop dupes
