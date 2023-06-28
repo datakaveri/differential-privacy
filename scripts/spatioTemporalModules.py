@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import json
 import jsonschema
-from pandas.io.json import json_normalize
+from pandas import json_normalize
 import matplotlib.pyplot as plt
 import h3
 # import itertools 
