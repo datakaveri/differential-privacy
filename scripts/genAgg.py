@@ -1,20 +1,17 @@
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline   
 # TODO: Generalization
 # TODO: Filtering
 # TODO: Aggregating
 # TODO: query creation
 
-
+'''
 def predict_severity(text):
         severity_index = pipeline.predict([text])[0]
         print("text:- ",text)
         print(" Severity Index:", severity_index)
-        return severity_index
+        return severity_index'''
 
-trainDF = pd.read_excel('../data/traindata.xlsx')
+'''trainDF = pd.read_excel('../data/traindata.xlsx')
 comments = trainDF['Comment'].tolist()
 severities = trainDF['Severity'].tolist()
 # Combine the columns into a list of tuples
@@ -31,14 +28,11 @@ pipeline = Pipeline([
         ('classifier', LogisticRegression(max_iter=100))
     ])
     # Train the model
-pipeline.fit(X, y)
-
-def nlpModel(dataframe, configFile):
-    dataframe['Index']=dataframe['comments'].apply(predict_severity)
-    return dataframe
+pipeline.fit(X, y)'''
 
 
-def naturalLanguageGeneralization(dataframe, configFile):
+
+def Generalization(dataframe, configFile):
     #separating year and month and creating aggregate year_month column
     year = pd.to_datetime(dataframe[configFile["datetimeCol"]]).dt.year
     month = pd.to_datetime(dataframe[configFile["datetimeCol"]]).dt.month
@@ -46,10 +40,11 @@ def naturalLanguageGeneralization(dataframe, configFile):
 
     # create a ward + year month generalization
     # WAYM = Ward At a Year Month
-    dataframe['WAYM'] = dataframe['yearMonth'] + ' ' + dataframe['wardID'].astype(str)
-
+    dataframe['WAYMD'] = dataframe['yearMonth'] + ' ' + dataframe['wardID'].astype(str) + ' ' +dataframe['department']
+    WAYMDCounts=dataframe.pivot_table(index='WAYMD', columns='resolutionStatus', aggfunc='size', fill_value=0).reset_index()
+    WAYMDCounts.to_csv('output.csv', index=False)
     #filtering to enforce minimum number of records per WAYM
-    eventThreshold = configFile['eventThreshold']
+    '''eventThreshold = configFile['eventThreshold']
     dataframe = dataframe.groupby('WAYM').agg({'reportID': 'count'}).reset_index()
-    dataframe = dataframe[dataframe['reportID'] >= eventThreshold] 
-    return dataframe
+    dataframe = dataframe[dataframe['reportID'] >= eventThreshold] '''
+    return dataframe,WAYMDCounts

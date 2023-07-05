@@ -1,6 +1,6 @@
 import spatioTemporalModules as stmod
 import categoricalModules as cmod
-import nlpModules as nlpmod
+import genAgg as genAgg
 import preProcessing as premod
 import postProcessing as postmod
 
@@ -11,7 +11,7 @@ def preProcessing():
     print('\nSelect the desired configuration file: ')
     print('\n1. SpatioTemporal Config')
     print('2. Categorical Config')
-    print('3. NLP Config')
+    print('3. genAgg Config')
     print('\n####################################################################\n')
 
     configNum = int(input('Enter a number: '))
@@ -23,8 +23,8 @@ def preProcessing():
         configFileName = 'DPConfigCategorical.json'
         schemaFileName = 'DPSchemaCategorical.json'
     elif configNum == 3:
-        configFileName = 'DPConfigNLP.json'
-        schemaFileName = 'DPSchemaNLP.json'
+        configFileName = 'DPConfigGenAgg.json'
+        schemaFileName = 'DPSchemaGenAgg.json'
     
     print('\n####################################################################\n')
     print('PREPROCESSING')
@@ -125,11 +125,8 @@ def runCategoricalPipeline(df, configDict):
    
     return histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2
 
-def runNLPpipeline(df, configDict):
-    #nlpmod.predict_severity()
-    df = nlpmod.nlpModel(df, configDict)
-    df = nlpmod.naturalLanguageGeneralization(df, configDict)
-    print(df)
+def runGenAggpipeline(df, configDict):
+    df ,WAYMD= genAgg.Generalization(df, configDict)
     return df
 
 def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2, configDict, genType):
@@ -212,6 +209,6 @@ if genType == "spatio-temporal":
 elif genType == "categorical":
     histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2 = runCategoricalPipeline(preProcessedDataframe, configDict)
     postProcessingCategorical(histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2, configDict, genType)
-elif genType == "NLP":
-    runNLPpipeline(preProcessedDataframe, configDict)
+elif genType == "genAgg":
+    runGenAggpipeline(preProcessedDataframe, configDict)
 

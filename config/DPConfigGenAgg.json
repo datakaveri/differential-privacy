@@ -1,7 +1,7 @@
 {
 	"dataFile": "vado_final.json",
-	"genType": "NLP",
-	"NLP":{
+	"genType": "genAgg",
+	"genAgg":{
 		"duplicateDetection": ["reportID"],
 		"queryPer":"wardID",
 		"suppressCols": ["subCategory"],

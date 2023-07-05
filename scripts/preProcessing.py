@@ -36,7 +36,7 @@ def readFile(configFileName):
         
     elif configDict['genType']=='categorical':
         dataframe = pd.read_json(dataFileName)
-    elif configDict['genType']=='NLP':
+    elif configDict['genType']=='genAgg':
         dataframe = pd.read_json(dataFileName)
         # dataframe['comments']=dataframe['comments'].str[0]
         
