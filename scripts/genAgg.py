@@ -42,7 +42,7 @@ def Generalization(dataframe, configFile):
     # WAYM = Ward At a Year Month
     dataframe['WAYMD'] = dataframe['yearMonth'] + ' ' + dataframe['wardID'].astype(str) + ' ' +dataframe['department']
     WAYMDCounts=dataframe.pivot_table(index='WAYMD', columns='resolutionStatus', aggfunc='size', fill_value=0).reset_index()
-    WAYMDCounts.to_csv('output.csv', index=False)
+    WAYMDCounts.to_csv('../pipelineOutput/genAggOutput.csv', index=False)
     #filtering to enforce minimum number of records per WAYM
     '''eventThreshold = configFile['eventThreshold']
     dataframe = dataframe.groupby('WAYM').agg({'reportID': 'count'}).reset_index()
