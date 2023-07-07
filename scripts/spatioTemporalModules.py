@@ -9,7 +9,10 @@ import h3
 # import itertools 
 import matplotlib.pyplot as plt
 from math import exp
-   
+
+from quantilemean.estimation import give_me_private_mean
+
+
 def spatioTemporalGeneralization(dataframe, configFile):
     # separating latitude and longitude from location
     lat_lon = dataframe[configFile['locationCol']]
@@ -45,15 +48,17 @@ def spatioTemporalGeneralization(dataframe, configFile):
     df1 = (dataframe.groupby(["HAT", "Date"]).agg({groupByColumn: "nunique"}).reset_index())
     df2 = df1.groupby(["HAT"]).agg({groupByColumn: "sum"}).reset_index()
 
+    # //TODO move filtering to post aggregation as per test file 
+    
     #filtering average num of occurences per day per HAT
-    date = dataframe["Date"].unique()
-    minEventOccurencesPerDay = int(configFile["minEventOccurences"])
-    limit = len(date) * minEventOccurencesPerDay
-    df3 = df2[df2[groupByColumn] >= limit]
-    df = dataframe["HAT"].isin(df3["HAT"])
-    dataframe = dataframe[df]
+    # date = dataframe["Date"].unique()
+    # minEventOccurencesPerDay = int(configFile["minEventOccurences"])
+    # limit = len(date) * minEventOccurencesPerDay
+    # df3 = df2[df2[groupByColumn] >= limit]
+    # df = dataframe["HAT"].isin(df3["HAT"])
+    # dataframe = dataframe[df]
 
-    print('Number of unique HATs left after filtering is: ' + str(dataframe['HAT'].nunique()))
+    # print('Number of unique HATs left after filtering is: ' + str(dataframe['HAT'].nunique()))
 
     return dataframe
 
@@ -73,7 +78,7 @@ def aggregator(dataframe, configDict):
     dfThreshold = dataframe
 
     #winsorizing the values of the chosen column
-    lowClip = dfThreshold[groupByCol].quantile(winsorizeLower) * (1 - localityFactor)
+    lowClip = dfThreshold[groupByCol].quantile(winsorizeLower) * (1 -   localityFactor)
     highClip = dfThreshold[groupByCol].quantile(winsorizeUpper) * (1 + localityFactor)
     dfThreshold[groupByCol].clip(lower=lowClip, upper=highClip, inplace = True)
         
@@ -81,23 +86,48 @@ def aggregator(dataframe, configDict):
         dfGrouped = dfThreshold.groupby(['HAT','Date','license_plate']).agg(
                                 count=(groupByCol,'count'),
                                 sum=(groupByCol,'sum'),
-                                mean=(groupByCol,'mean'),
                                 max=(groupByCol,'max'),
                                 min=(groupByCol,'min')).reset_index()
         
-        # aggFunctionCount = {groupByCol: ['count']}
-        dfSensitivity = dfThreshold.groupby(['HAT', 'license_plate', 'Date']).agg({groupByCol: ['count']})
+        # //TODO check mean compute with secureEnclaveTesting
+        # dfGrouped['mean'] = np.round((dfGrouped['sum']/dfGrouped['count']), 2)
+
+        # //TODO moving to post filtering
+        # dfSensitivity = dfGrouped.groupby(['HAT', 'license_plate', 'Date']).agg({'count': ['count']})
+        # dfSensitivity.columns = dfSensitivity.columns.droplevel(0)
+        # dfSensitivity.reset_index(inplace = True)
+
+        # dfCount = dfSensitivity.groupby(['HAT']).agg(
+        #                         max_count=('count', 'max'),
+        #                         sum_count=('count', 'sum'))
+        # dfCount.reset_index(inplace = True)
+        # print('dfCount', len(dfCount))
+
+        #filtering average num of occurences per day per HAT
+        date = dfGrouped["Date"].unique()
+        minEventOccurencesPerDay = int(configDict["minEventOccurences"])
+        limit = len(date) * minEventOccurencesPerDay
+        dfFiltered = dfGrouped.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
+        # //TODO license_plate to be replaced with generic input from the config file
+        dfFiltered = dfFiltered.groupby(['HAT']).agg({'license_plate':'sum'}).reset_index()
+        dfFiltered.rename(columns={"license_plate": "license_plate_count"}, inplace=True)
+        dfFiltered = dfFiltered[dfFiltered['license_plate_count'] >= limit]
+        dfFiltered = dfGrouped["HAT"].isin(dfFiltered["HAT"])
+        dfGrouped = dfGrouped[dfFiltered]
+        # dfFinalGrouped.to_csv('groupingTestMultiple.csv')
+        print('Number of unique HATs left after filtering is: ' + str(dfGrouped['HAT'].nunique()))
+        print('########################################################################################')
+        print('dfFinal Grouped after filtering', dfGrouped)
+
+        dfSensitivity = dfGrouped.groupby(['HAT', 'license_plate', 'Date']).agg({'count': ['count']})
         dfSensitivity.columns = dfSensitivity.columns.droplevel(0)
         dfSensitivity.reset_index(inplace = True)
-        # print(dfSensitivity)
 
-        # dfCount = dfSensitivity.groupby(['HAT'], as_index=False).agg(['max', 'sum'])
         dfCount = dfSensitivity.groupby(['HAT']).agg(
-                                max=('count', 'max'),
-                                sum=('count', 'sum'))
-        # dfCount.columns = dfCount.columns.droplevel(0)
+                                max_count=('count', 'max'),
+                                sum_count=('count', 'sum'))
         dfCount.reset_index(inplace = True)
-        # print(dfCount['max'])
+        print('dfCount', len(dfCount))
 
     else:
         dfGrouped = dfThreshold.groupby(['HAT']).agg(
@@ -117,6 +147,39 @@ def ITMSQuery1(dataframe):
     dfITMSQuery1 = dfITMSQuery1.to_frame().reset_index()
     dfITMSQuery1.rename(columns = {0:'queryOutput'}, inplace = True)
     return dfITMSQuery1
+
+def ITMSQuery1a(dataframe, K, configDict):
+    # print("REACHED Q1a")
+    print("Running optimized Query1")
+    hats = np.unique(dataframe['HAT'])
+    eps_prime = configDict["privacyLossBudgetEpsQuery"][0] / K
+    dfITMSQuery1a, signalQuery1a, noiseQuery1a, bVarianceQuery1a = [], [], [], []
+    for h in hats:
+        df_hat = dataframe[dataframe['HAT'] == h]
+        q, s, n, b = give_me_private_mean(df_hat, eps_prime)
+        dfITMSQuery1a.append(q)
+        signalQuery1a.append(s)
+        noiseQuery1a.append(n)
+        bVarianceQuery1a.append(b)
+    # noisytvals, signals, noises = ...
+    dfITMSQuery1a = pd.DataFrame(dfITMSQuery1a)
+    dfITMSQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
+    signalQuery1a = pd.DataFrame(signalQuery1a)
+    noiseQuery1a = pd.DataFrame(noiseQuery1a)
+    signalQuery1a.rename(columns = {0:'queryOutput'}, inplace = True)
+    noiseQuery1a = dfITMSQuery1a
+
+    # print('dfITMSQuery1a', dfITMSQuery1a)
+    # print("signalQuery1a", signalQuery1a)
+    # print("noisyOutput", noiseQuery1a)
+    # noiseQuery1a = dfITMSQuery1a['queryNoisyOutput']
+    # signalQuery1a = pd.DataFrame(signalQuery1a)
+    
+    
+    # noiseQuery1a = pd.DataFrame(noiseQuery1a)x
+    # noiseQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
+    # noiseQuery1a['queryOutput'] = dfITMSQuery1a['queryOutput']
+    return signalQuery1a, noiseQuery1a,bVarianceQuery1a
 
 def ITMSQuery2(dataframe, configDict):
     #average number of speed violations per HAT over all days
@@ -155,11 +218,11 @@ def KCompute(dataframe):
 def sensitivityComputeITMSQuery(configDict, timeRange, dfCount):
     maxValue = configDict['globalMaxValue']
     minValue = configDict['globalMinValue']
-
     # sensitivity for weighted query 1
-    sensitivityITMSQuery1 = ((dfCount['max']*(maxValue - minValue))/(dfCount['sum']))
+    sensitivityITMSQuery1 = ((dfCount['max_count']*(maxValue - minValue))/(dfCount['sum_count']))
 
     # sensitivity for query 2
+    # sensitivity is computed per day, number of violations per HAT can only change by 1, so max change per day is 1/no. of days
     sensitivityITMSQuery2 = 1/timeRange
 
     return sensitivityITMSQuery1, sensitivityITMSQuery2
@@ -178,16 +241,32 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
 
     # computing noise weighted query 1
     bITMSQuery1 = sensitivityITMSQuery1/epsPrimeQuery1
+    bITMSQueryVariance1 = 2 * (bITMSQuery1 * bITMSQuery1)
     noiseITMSQuery1 = np.random.laplace(0, bITMSQuery1)
-
+    
     # computing noise query 2
     bITMSQuery2 = sensitivityITMSQuery2/epsPrimeQuery2
+    bITMSQueryVariance2 = 2 * (bITMSQuery2 * bITMSQuery2)
+    bITMSQueryVariance2 = [bITMSQueryVariance2]
     noiseITMSQuery2 = np.random.laplace(0, bITMSQuery2, len(dfNoiseITMSQuery2))
 
     # adding noise to the true value
     dfNoiseITMSQuery1['queryNoisyOutput'] = dfNoiseITMSQuery1['queryOutput'] + noiseITMSQuery1
     dfNoiseITMSQuery2['queryNoisyOutput'] = dfNoiseITMSQuery2['queryOutput'] + noiseITMSQuery2
-    # dfNoiseITMSQuery1Weighted['queryNoisyOutput'] = dfNoiseITMSQuery1Weighted['queryOutput'] + noiseITMSQuery1Weighted
+ 
+    return dfNoiseITMSQuery1, dfNoiseITMSQuery2, bITMSQueryVariance1, bITMSQueryVariance2
 
-    return dfNoiseITMSQuery1, dfNoiseITMSQuery2
+def snrCompute(signal, bVariance):
+    snr =[]
+    if (len(bVariance) == 1):
+        for i in range(0, len(signal)):
+            snr.append((signal[i]*signal[i])/(bVariance[0]))
+    else:
+        for i in range (0, len(signal)):
+            snr.append((signal[i]*signal[i])/(bVariance[i]))
+    snrAverage = np.mean(snr)
+    return snrAverage
 
+def maeCompute(signal, estimate):
+    mae = np.mean(np.abs(signal - estimate))
+    return mae
