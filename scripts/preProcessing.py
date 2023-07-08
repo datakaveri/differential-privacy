@@ -19,30 +19,22 @@ def schemaValidator(schemaFile, configFile):
     jsonschema.validate(instance=document, schema=schema)
     return
 
-def readFile(configFileName):
-    #reading config
-    configFile = '../config/' + configFileName
-    with open(configFile, "r") as cfile:
-        configDict = json.load(cfile)
-    dataFileName = '../data/' + configDict['dataFile']
+# def readFile(configFileName):
+#     #reading config
+#     configFile = '../config/' + configFileName
+#     with open(configFile, "r") as cfile:
+#         configDict = json.load(cfile)
+#     dataFileName = '../data/' + configDict['dataFile']
+        
+#     with open(dataFileName, "r") as dfile:
+#         dataDict = json.load(dfile)        
+#     #loading data
+#     dataframe = pd.json_normalize(dataDict)
+        
+#     pd.set_option('mode.chained_assignment', None)
+#     print('The loaded file is: ' + dataFileName + ' with shape ' + str(dataframe.shape))
     
-    if configDict['genType']=='spatio-temporal':        
-        #reading datafile
-        
-        with open(dataFileName, "r") as dfile:
-            dataDict = json.load(dfile)        
-        #loading data
-        dataframe = pd.json_normalize(dataDict)
-        
-    elif configDict['genType']=='categorical':
-        dataframe = pd.read_json(dataFileName)
-        
-    pd.set_option('mode.chained_assignment', None)
-    print('The loaded file is: ' + dataFileName + ' with shape ' + str(dataframe.shape))
-    
-    genType = configDict['genType']
-    configDict = configDict[genType]
-    return dataframe, configDict, genType
+#     return dataframe, configDict
 
 def dropDuplicates(dataframe, configDict):
 

@@ -1,27 +1,19 @@
 import numpy as np
 
-def postProcessing(dfNoise, configDict, genType):
-    if genType == 'spatio-temporal':
-        #postprocessing ITMSQuery1
-        globalMaxValue = configDict['globalMaxValue']
-        globalMinValue = configDict['globalMinValue']
-        dfFinalITMSQuery1 = dfNoise
-        dfFinalITMSQuery1['queryNoisyOutput'].clip(globalMinValue, globalMaxValue, inplace = True)
-        if configDict['optimized'] == False:
-            dfFinalITMSQuery1.drop(['queryOutput'], axis = 1, inplace = True)        
-        # #postprocessing ITMS Query 2
-        # dfFinalITMSQuery2 = dfNoiseITMSQuery2
-        # dfFinalITMSQuery2['query2NoisyOutput'].clip(0, np.inf, inplace = True)
-        # dfFinalITMSQuery2.drop(['query2Output'], axis = 1, inplace = True)
-        
-        return dfFinalITMSQuery1
+def postProcessing(dfNoise, configDict):
+    #postprocessing ITMSQuery1
+    globalMaxValue = configDict['globalMaxValue']
+    globalMinValue = configDict['globalMinValue']
+    dfFinalITMSQuery1 = dfNoise
+    dfFinalITMSQuery1['queryNoisyOutput'].clip(globalMinValue, globalMaxValue, inplace = True)
+    # if configDict['optimized'] == False:
+    #     dfFinalITMSQuery1.drop(['queryOutput'], axis = 1, inplace = True)        
+    # #postprocessing ITMS Query 2
+    # dfFinalITMSQuery2 = dfNoiseITMSQuery2
+    # dfFinalITMSQuery2['query2NoisyOutput'].clip(0, np.inf, inplace = True)
+    # dfFinalITMSQuery2.drop(['query2Output'], axis = 1, inplace = True)
     
-    elif genType == 'categorical':
-        dfFinal = dfNoise
-        dfFinal['roundedNoisyCount'] = dfFinal['noisyCount'].round()
-        dfFinal['roundedNoisyCount'].clip(0, np.inf, inplace = True)
-        dfFinal.drop(['noisyCount'], axis = 1, inplace = True)
-        return dfFinal
+    return dfFinalITMSQuery1
 
 def signalToNoise(snrAverage,configDict):
     # SNR Threshold

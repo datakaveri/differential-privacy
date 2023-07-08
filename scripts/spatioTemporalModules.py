@@ -69,6 +69,83 @@ def timeRange(dataframe):
     timeRange = 1 + (endDay - startDay).days
     return timeRange
 
+def chunkedAggregator(dataframe, configDict, fileNamesList, lengthList, file):
+    groupByCol = configDict['groupByCol']
+    print('The length of the list at this stage is: ', (len(lengthList)))
+    print('########################################################################################')
+    if len(lengthList) == 1:
+        dfGrouped = dataframe.groupby(['HAT','Date','license_plate']).agg(
+                                count=(groupByCol,'count'),
+                                sum=(groupByCol,'sum'),
+                                max=(groupByCol,'max'),
+                                min=(groupByCol,'min')).reset_index()
+                
+        dfFinalGrouped = dfGrouped  
+        print(file)
+    elif (len(lengthList) > 1):
+        dfGrouped = dataframe.groupby(['HAT','Date','license_plate']).agg(
+                                count=(groupByCol,'count'),
+                                sum=(groupByCol,'sum'),
+                                max=(groupByCol,'max'),
+                                min=(groupByCol,'min')).reset_index()
+                
+        dfGrouped = pd.concat([dfGrouped, dfFinalGrouped],  ignore_index=True)
+        print(file)
+        print('dfGrouped')
+        print(dfGrouped)
+
+        dfGroupedCombined = dfGrouped.groupby(['HAT','Date','license_plate']).agg({
+                                                    'count': 'sum',
+                                                    'sum': 'sum',
+                                                    'max':'max',
+                                                    'min':'min'}).reset_index()
+        dfFinalGrouped = dfGroupedCombined
+    dfFinalGrouped['mean'] = np.round((dfFinalGrouped['sum']/dfFinalGrouped['count']), 2)
+    print('')
+    print('dfFinalGrouped before filtering')
+    print(dfFinalGrouped) 
+
+    print('########################################################################################')
+    print('The length of the grouped dataframe is: ', len(dfFinalGrouped))
+    print('No. of Unique HATs of the grouped dataframe is: ', dfFinalGrouped['HAT'].nunique())
+    print('The number of unique license plates in the grouped dataframe is: ', dfFinalGrouped['license_plate'].nunique())
+    print('########################################################################################')
+    return dfFinalGrouped
+
+def filtering(dataframe, configDict):
+     #filtering average num of occurences per day per HAT
+    dfFinalGrouped = dataframe
+    date = dfFinalGrouped["Date"].unique()
+    minEventOccurencesPerDay = int(configDict["minEventOccurences"])
+    limit = len(date) * minEventOccurencesPerDay
+    dfFiltered = dfFinalGrouped.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
+    # //TODO license_plate to be replaced with generic input from the config file
+    dfFiltered = dfFiltered.groupby(['HAT']).agg({'license_plate':'sum'}).reset_index()
+    dfFiltered.rename(columns={"license_plate": "license_plate_count"}, inplace=True)
+    dfFiltered = dfFiltered[dfFiltered['license_plate_count'] >= limit]
+    dfFiltered = dfFinalGrouped["HAT"].isin(dfFiltered["HAT"])
+    dfFinalGrouped = dfFinalGrouped[dfFiltered]
+    # dfFinalGrouped.to_csv('groupingTestMultiple.csv')
+    print('Number of unique HATs left after filtering is: ' + str(dfFinalGrouped['HAT'].nunique()))
+    print('########################################################################################')
+    print('dfFinalGrouped after filtering')
+    print(dfFinalGrouped)
+    return dfFinalGrouped
+
+def sensitivityFrame(dataframe):
+    dfSensitivity = dataframe.groupby(['HAT', 'license_plate', 'Date']).agg({'count': ['count']})
+    dfSensitivity.columns = dfSensitivity.columns.droplevel(0)
+    dfSensitivity.reset_index(inplace = True)
+
+    dfCount = dfSensitivity.groupby(['HAT']).agg(
+                            max_count=('count', 'max'),
+                            sum_count=('count', 'sum'))
+    dfCount.reset_index(inplace = True)
+    print('dfCount', len(dfCount))
+
+    return dfSensitivity, dfCount
+
+
 def aggregator(dataframe, configDict):
     #initializing variables from config file
     groupByCol = configDict['groupByCol']
@@ -213,6 +290,7 @@ def KCompute(dataframe):
     #finding 'K', the maximum number of HATs a bus passes through per day
     dfK = dataframe.groupby(['Date','license_plate']).agg({'HAT':'nunique'}).reset_index()
     K = dfK['HAT'].max()
+    print('K', K)
     return K
 
 def sensitivityComputeITMSQuery(configDict, timeRange, dfCount):
