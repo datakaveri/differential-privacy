@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import json 
 
 def postProcessing(dfNoise, configDict, genType):
     if genType == 'spatio-temporal':
@@ -53,20 +54,14 @@ def createNestedJSON(dataframe, parent_col):
     result = []
     for _, row in dataframe.iterrows():
         current = result
-        for i, col in enumerate(dataframe.columns):
+        for col in dataframe.columns:
             if col == parent_col:
+                if not any(d.get(parent_col) == row[parent_col] for d in current):
+                    current.append({parent_col: row[parent_col]})
                 continue
-            if i == len(dataframe.columns) - 1:
-                current.append(row[col])
-            else:
-                value = row[col]
+            if pd.notnull(row[col]):
                 if col not in current[-1]:
-                    current[-1][col] = {}
-                current = current[-1][col]
-                if isinstance(value, pd.DataFrame):
-                    current[col] = createNestedJSON(value, parent_col)
-                else:
-                    current[col] = value
+                    current[-1][col] = row[col]
     return result
 
 def outputFile(dfFinalQuery1, dfFinalQuery2):
@@ -74,7 +69,9 @@ def outputFile(dfFinalQuery1, dfFinalQuery2):
     dfFinal['HAT'] = dfFinalQuery1['HAT']
     dfFinal['query1NoisyOutput'] = dfFinalQuery1['queryNoisyOutput']
     dfFinal['query2NoisyOutput'] = dfFinalQuery2['queryNoisyOutput']
-    print(dfFinal)
-    createNestedJSON(dfFinal, 'HAT')
-    dfFinal.to_json('../pipelineOutput/' + 'noisyOutput' + '.json')
+    dfFinal = createNestedJSON(dfFinal, 'HAT')
+    outputFile = 'noisyOutput.json'
+    with open(outputFile, 'w') as file:
+        json.dump(dfFinal, file, indent=4)
+    # dfFinal.to_json('../pipelineOutput/' + 'noisyOutput' + '.json')
     return

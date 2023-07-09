@@ -181,10 +181,6 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     postmod.cumulativeEpsilon(configDict)
     
     #creating the output files
-    print('dfFinalQuery1')
-    print(dfFinalQuery1)
-    print('dfFinalQuery2')
-    print(dfFinalQuery2)
     postmod.outputFile(dfFinalQuery1, dfFinalQuery2)
     
     print('Differentially Private output generated. Please check the pipelineOutput folder.')
