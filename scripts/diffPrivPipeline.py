@@ -161,6 +161,8 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     print('\n################################################################\n')
     print('POSTPROCESSING')
     #postprocessing
+    dfNoiseQuery1.name = 'dfFinalQuery1'
+    dfNoiseQuery2.name = 'dfFinalQuery2'
     dfFinalQuery1 = postmod.postProcessing(dfNoiseQuery1, configDict, genType)
     dfFinalQuery2 = postmod.postProcessing(dfNoiseQuery2, configDict, genType)
     
@@ -178,6 +180,7 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
         print("The MAE is: ", maeQuery1)
         print('\n\nFor Query 2: ')
         postmod.signalToNoise(snrAverageQuery2, configDict)
+
         maeQuery2 = stmod.maeCompute(signalQuery2, noiseQuery2)
         print("The MAE is: ", maeQuery2)
 
@@ -191,8 +194,7 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     postmod.cumulativeEpsilon(configDict)
     
     #creating the output files
-    postmod.outputFile(dfFinalQuery1, 'dfNoisyITMS1')
-    postmod.outputFile(dfFinalQuery2, 'dfNoisyITMS2')
+    postmod.outputFile(dfFinalQuery1, dfFinalQuery2)
     
     print('Differentially Private output generated. Please check the pipelineOutput folder.')
     print('\n################################################################\n')

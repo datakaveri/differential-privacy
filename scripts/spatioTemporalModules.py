@@ -213,6 +213,7 @@ def KCompute(dataframe):
     #finding 'K', the maximum number of HATs a bus passes through per day
     dfK = dataframe.groupby(['Date','license_plate']).agg({'HAT':'nunique'}).reset_index()
     K = dfK['HAT'].max()
+    print('K:', K)
     return K
 
 def sensitivityComputeITMSQuery(configDict, timeRange, dfCount):
