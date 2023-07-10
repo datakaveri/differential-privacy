@@ -23,8 +23,9 @@ def postProcessing(dfNoise, configDict, genType):
 
     elif genType == 'categorical':
         dfFinal = dfNoise
+        dfFinal['noisyCount'].clip(0, np.inf, inplace = True)
         dfFinal['roundedNoisyCount'] = dfFinal['noisyCount'].round()
-        dfFinal['roundedNoisyCount'].clip(0, np.inf, inplace = True)
+        #dfFinal['roundedNoisyCount'].clip(0, np.inf, inplace = True)
         dfFinal.drop(['noisyCount'], axis = 1, inplace = True)
         return dfFinal
 
@@ -64,7 +65,7 @@ def createNestedJSON(dataframe, parent_col):
                     current[-1][col] = row[col]
     return result
 
-def outputFile(dfFinalQuery1, dfFinalQuery2):
+def outputFileSpatioTemporal(dfFinalQuery1, dfFinalQuery2):
     dfFinal = pd.DataFrame()
     dfFinal['HAT'] = dfFinalQuery1['HAT']
     dfFinal['query1NoisyOutput'] = dfFinalQuery1['queryNoisyOutput']
@@ -74,4 +75,8 @@ def outputFile(dfFinalQuery1, dfFinalQuery2):
     with open(outputFile, 'w') as file:
         json.dump(dfFinal, file, indent=4)
     # dfFinal.to_json('../pipelineOutput/' + 'noisyOutput' + '.json')
+    return
+
+def outputFile(dfFinal, dataframeName):
+    dfFinal.to_csv('../pipelineOutput/' + dataframeName + '.csv')
     return
