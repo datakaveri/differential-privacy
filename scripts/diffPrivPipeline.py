@@ -221,6 +221,8 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     print('\n################################################################\n')
     print('POSTPROCESSING')
     #postprocessing
+    dfNoiseQuery1.name = 'dfFinalQuery1'
+    dfNoiseQuery2.name = 'dfFinalQuery2'
     dfFinalQuery1 = postmod.postProcessing(dfNoiseQuery1, configDict)
     dfFinalQuery2 = postmod.postProcessing(dfNoiseQuery2, configDict)
     
