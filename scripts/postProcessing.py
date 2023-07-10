@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+import json
 
 def postProcessing(dfNoise, configDict):
     #postprocessing ITMSQuery1
@@ -36,6 +38,28 @@ def cumulativeEpsilon(configDict):
     print('\nYour Cumulative Epsilon for the displayed queries is: ' + str(cumulativeEpsilon))
     return cumulativeEpsilon
 
-def outputFile(dfFinal, dataframeName):
-    dfFinal.to_csv('../pipelineOutput/' + dataframeName + '.csv')
+def createNestedJSON(dataframe, parent_col):
+    result = []
+    for _, row in dataframe.iterrows():
+        current = result
+        for col in dataframe.columns:
+            if col == parent_col:
+                if not any(d.get(parent_col) == row[parent_col] for d in current):
+                    current.append({parent_col: row[parent_col]})
+                continue
+            if pd.notnull(row[col]):
+                if col not in current[-1]:
+                    current[-1][col] = row[col]
+    return result
+
+def outputFile(dfFinalQuery1, dfFinalQuery2):
+    dfFinal = pd.DataFrame()
+    dfFinal['HAT'] = dfFinalQuery1['HAT']
+    dfFinal['query1NoisyOutput'] = dfFinalQuery1['queryNoisyOutput']
+    dfFinal['query2NoisyOutput'] = dfFinalQuery2['queryNoisyOutput']
+    dfFinal = createNestedJSON(dfFinal, 'HAT')
+    outputFile = 'noisyOutput.json'
+    with open(outputFile, 'w') as file:
+        json.dump(dfFinal, file, indent=4)
+    # dfFinal.to_json('../pipelineOutput/' + 'noisyOutput' + '.json')
     return
