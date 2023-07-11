@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from math import exp
 import matplotlib.ticker as ticker
 import postProcessing as postmod
+import json
 
 def categoricGeneralization(dataframe, configFile):
     
@@ -124,13 +125,13 @@ def histogramQuery2(dataframe, configFile):
                 groupedCountDfs[key] = {}
             groupedCountDfs[key][col] = vc_df
             
-    return groupedCountDfs
+    return groupedCountDfs, allCols
 
-def noiseComputeHistogramQuery2(dfs, configFile):
+def noiseComputeHistogramQuery2(dfs, allCols, configFile):
     sensitivity = 2
-   
+# TODO   
     for df in dfs:
-        epsilon = configFile['PrivacyLossBudget'][1]/len(df)
+        epsilon = configFile['PrivacyLossBudget'][1]/len(allCols)
         b = sensitivity/epsilon
         bVarianceQuery2 = 2*b*b
         scores = []
@@ -255,9 +256,10 @@ def postProcessingQuery(noiseHistQuery, configDict, genType,):
 def histogramAndOutputQuery(dfFinalQuery, configDict, genType, query):
     for name, dfs in dfFinalQuery.items():
         for pair, df in dfs.items():            
-            printHistogram(df, name, pair, query)
-            dfOutput = df.drop(['Count','Noise'], axis = 1).reset_index(drop = True)
-            postmod.outputFile(dfOutput, 'dfNoisySoil_'+str(query)+name+'_'+pair)
+            #printHistogram(df, name, pair, query)
+            dfFinalQuery[name][pair] = df.drop(['Count','Noise'], axis = 1).reset_index(drop = True)
+            postmod.outputFile(dfFinalQuery[name][pair], 'dfNoisySoil_'+str(query)+name+'_'+pair)
+    return dfFinalQuery
             
 def snrQuery(noiseHistQuery, bVariance, configDict):
     for name, noisyDfs in noiseHistQuery.items():
@@ -282,4 +284,17 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
         print('|| SNR Variance : ' + str(np.round(snrVariance, 3)))
         #postmod.signalToNoise(snrVariance, configDict)
 
-            
+def mergeDicts(dfs1, dfs2):
+    outputDFs = {}
+    outputDFs['Query1']=dfs1
+    outputDFs['Query2']=dfs2
+    jsonDict = {}
+    for query, df in outputDFs.items():
+        jsonDict[query] = {}
+        for subdistrict, df2 in df.items():
+            jsonDict[query][subdistrict] = {}
+            for pair, df3 in df2.items():
+                jsonDict[query][subdistrict][pair] = df3.to_dict(orient = 'records')
+    with open('../pipelineOutput/noisyOutputCategorical.json', 'w') as fp:
+        json.dump(jsonDict, fp, indent=4)
+    
