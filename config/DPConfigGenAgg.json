@@ -2,10 +2,8 @@
 	"dataFile": "vado_final.json",
 	"genType": "genAgg",
 	"genAgg":{
-		"duplicateDetection": ["reportID"],
-		"queryPer":"wardID",
-		"suppressCols": ["subCategory"],
-		"datetimeCol": "observationDateTime",
-		"eventThreshold": 100
+		"duplicateDetection": [],
+		"suppressCols": ["subCategory","comments"],
+		"datetimeCol": "observationDateTime"
 	}
 }
