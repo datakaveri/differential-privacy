@@ -10,9 +10,6 @@ import h3
 import matplotlib.pyplot as plt
 from math import exp
 
-from quantilemean.estimation import give_me_private_mean
-
-
 def spatioTemporalGeneralization(dataframe, configFile):
     # separating latitude and longitude from location
     lat_lon = dataframe[configFile['locationCol']]
@@ -225,7 +222,7 @@ def ITMSQuery1(dataframe):
     dfITMSQuery1.rename(columns = {0:'queryOutput'}, inplace = True)
     return dfITMSQuery1
 
-def ITMSQuery1a(dataframe, K, configDict):
+# def ITMSQuery1a(dataframe, K, configDict):
     # print("REACHED Q1a")
     print("Running optimized Query1")
     hats = np.unique(dataframe['HAT'])
@@ -245,17 +242,6 @@ def ITMSQuery1a(dataframe, K, configDict):
     noiseQuery1a = pd.DataFrame(noiseQuery1a)
     signalQuery1a.rename(columns = {0:'queryOutput'}, inplace = True)
     noiseQuery1a = dfITMSQuery1a
-
-    # print('dfITMSQuery1a', dfITMSQuery1a)
-    # print("signalQuery1a", signalQuery1a)
-    # print("noisyOutput", noiseQuery1a)
-    # noiseQuery1a = dfITMSQuery1a['queryNoisyOutput']
-    # signalQuery1a = pd.DataFrame(signalQuery1a)
-    
-    
-    # noiseQuery1a = pd.DataFrame(noiseQuery1a)x
-    # noiseQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
-    # noiseQuery1a['queryOutput'] = dfITMSQuery1a['queryOutput']
     return signalQuery1a, noiseQuery1a,bVarianceQuery1a
 
 def ITMSQuery2(dataframe, configDict):
