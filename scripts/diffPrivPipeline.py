@@ -157,7 +157,7 @@ def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVa
     
     
     #final output file generation
-    cmod.mergeDicts(dfFinalQuery1, dfFinalQuery2)
+    postmod.outputFileCategorical(dfFinalQuery1, dfFinalQuery2)
     print('\nDifferentially Private output generated. Please check the pipelineOutput folder.')
     return dfFinalQuery1, dfFinalQuery2
 

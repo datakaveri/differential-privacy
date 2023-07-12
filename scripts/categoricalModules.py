@@ -34,7 +34,7 @@ def histogramQuery1(dataframe, configFile):
     for listToGrouped in configFile['groupByPairs']:
         for name, DF in dfs.items():
 
-            #newDataframe = df.groupby(list_to_grouped).size().reset_index(name='Count')   
+            #newDataframe = DF.groupby(listToGrouped).size().reset_index(name='Count')   
             crosstab = pd.crosstab(index=configFile['ID'], columns=[DF[col] for col in listToGrouped])
             crosstab = crosstab.reindex()
 
@@ -255,10 +255,9 @@ def postProcessingQuery(noiseHistQuery, configDict, genType,):
 
 def histogramAndOutputQuery(dfFinalQuery, configDict, genType, query):
     for name, dfs in dfFinalQuery.items():
-        for pair, df in dfs.items():            
-            #printHistogram(df, name, pair, query)
+        for pair, df in dfs.items():
             dfFinalQuery[name][pair] = df.drop(['Count','Noise'], axis = 1).reset_index(drop = True)
-            postmod.outputFile(dfFinalQuery[name][pair], 'dfNoisySoil_'+str(query)+name+'_'+pair)
+            #postmod.outputFile(dfFinalQuery[name][pair], 'dfNoisySoil_'+str(query)+name+'_'+pair)
     return dfFinalQuery
             
 def snrQuery(noiseHistQuery, bVariance, configDict):
@@ -284,17 +283,5 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
         print('|| SNR Variance : ' + str(np.round(snrVariance, 3)))
         #postmod.signalToNoise(snrVariance, configDict)
 
-def mergeDicts(dfs1, dfs2):
-    outputDFs = {}
-    outputDFs['Query1']=dfs1
-    outputDFs['Query2']=dfs2
-    jsonDict = {}
-    for query, df in outputDFs.items():
-        jsonDict[query] = {}
-        for subdistrict, df2 in df.items():
-            jsonDict[query][subdistrict] = {}
-            for pair, df3 in df2.items():
-                jsonDict[query][subdistrict][pair] = df3.to_dict(orient = 'records')
-    with open('../pipelineOutput/noisyOutputCategorical.json', 'w') as fp:
-        json.dump(jsonDict, fp, indent=4)
+
     

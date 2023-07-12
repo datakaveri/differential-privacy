@@ -86,6 +86,23 @@ def outputFileGenAgg(dict):
     with open(outputFile, 'w') as fp:
         json.dump(nested_json, fp, indent=4)
     return 
+
+def outputFileCategorical(dfs1, dfs2):
+    outputDFs = {}
+    outputDFs['Query1']=dfs1
+    outputDFs['Query2']=dfs2
+    jsonDict = {}
+    for query, df in outputDFs.items():
+        jsonDict[query] = {}
+        for subdistrict, df2 in df.items():
+            jsonDict[query][subdistrict] = {}
+            for pair, df3 in df2.items():
+                jsonDict[query][subdistrict][pair] = df3.to_dict(orient = 'records')
+    with open('../pipelineOutput/noisyOutputCategorical.json', 'w') as fp:
+        json.dump(jsonDict, fp, indent=4)
+
+'''
 def outputFile(dfFinal, dataframeName):
     dfFinal.to_csv('../pipelineOutput/' + dataframeName + '.csv')
     return
+'''
