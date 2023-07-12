@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 # TODO: Generalization
 # TODO: Filtering
 # TODO: Aggregating
@@ -40,10 +41,9 @@ def Generalization(dataframe, configFile):
 
     # create a ward + year month generalization
     # WAYM = Ward At a Year Month
-    dataframe['WAYMD'] = dataframe['yearMonth'] + ' ' + dataframe['wardID'].astype(str) + ' ' +dataframe['department']
-    WAYMDCounts=dataframe.pivot_table(index='WAYMD', columns='resolutionStatus', aggfunc='size', fill_value=0).reset_index()
-    #filtering to enforce minimum number of records per WAYM
-    '''eventThreshold = configFile['eventThreshold']
-    dataframe = dataframe.groupby('WAYM').agg({'reportID': 'count'}).reset_index()
-    dataframe = dataframe[dataframe['reportID'] >= eventThreshold] '''
-    return WAYMDCounts
+    dataframe['WAYM'] = dataframe['yearMonth'] + ' ' + dataframe['wardID'].astype(str) 
+    WAYMD_dict = {}
+    for WAYM, group in dataframe.groupby('WAYM'):
+        df = group.pivot_table(index='department', columns='resolutionStatus', aggfunc='size', fill_value=0)
+        WAYMD_dict[WAYM] = df
+    return WAYMD_dict

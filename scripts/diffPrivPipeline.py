@@ -123,8 +123,8 @@ def runCategoricalPipeline(df, configDict):
     return histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2
 
 def runGenAggpipeline(df, configDict):
-    WAYMDCounts= genAgg.Generalization(df, configDict)
-    return WAYMDCounts
+    WAYMDCounts_dict= genAgg.Generalization(df, configDict)
+    return WAYMDCounts_dict
 
 def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2, configDict, genType):
     print('\n################################################################\n')
@@ -203,8 +203,8 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     print('Differentially Private output generated. Please check the pipelineOutput folder.')
     print('\n################################################################\n')
     return
-def postProcessingGenAgg(dataframe):
-    postmod.outputFileGenAgg(dataframe)
+def postProcessingGenAgg(dict):
+    postmod.outputFileGenAgg(dict)
     print('Generalized Aggregated output generated. Please check the pipelineOutput folder.')
     print('\n################################################################\n')
 #running predefined functions
@@ -219,6 +219,6 @@ elif genType == "categorical":
     histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2 = runCategoricalPipeline(preProcessedDataframe, configDict)
     dfFinalQuery1, dfFinalQuery2 = postProcessingCategorical(histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2, configDict, genType)
 elif genType == "genAgg":
-    WAYMDCounts=runGenAggpipeline(preProcessedDataframe, configDict)
-    postProcessingGenAgg(WAYMDCounts)
+    WAYMDCounts_dict=runGenAggpipeline(preProcessedDataframe, configDict)
+    postProcessingGenAgg(WAYMDCounts_dict)
 

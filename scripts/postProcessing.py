@@ -76,11 +76,15 @@ def outputFileSpatioTemporal(dfFinalQuery1, dfFinalQuery2):
         json.dump(dfFinal, file, indent=4)
     # dfFinal.to_json('../pipelineOutput/' + 'noisyOutput' + '.json')
     return
-def outputFileGenAgg(dataframe):
-    dfFinal=createNestedJSON(dataframe,'WAYMD')
+def outputFileGenAgg(dict):
     outputFile = '../pipelineOutput/genAggOutput.json'
-    with open(outputFile, 'w') as file:
-        json.dump(dfFinal, file, indent=4)
+    nested_json = {}
+    for WAYM, df in dict.items():
+        nested_json[WAYM] = {}
+        for department, counts in df.iterrows():
+            nested_json[WAYM][department] = counts.to_dict()
+    with open(outputFile, 'w') as fp:
+        json.dump(nested_json, fp, indent=4)
     return 
 def outputFile(dfFinal, dataframeName):
     dfFinal.to_csv('../pipelineOutput/' + dataframeName + '.csv')
