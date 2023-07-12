@@ -23,8 +23,9 @@ def postProcessing(dfNoise, configDict, genType):
 
     elif genType == 'categorical':
         dfFinal = dfNoise
+        dfFinal['noisyCount'].clip(0, np.inf, inplace = True)
         dfFinal['roundedNoisyCount'] = dfFinal['noisyCount'].round()
-        dfFinal['roundedNoisyCount'].clip(0, np.inf, inplace = True)
+        #dfFinal['roundedNoisyCount'].clip(0, np.inf, inplace = True)
         dfFinal.drop(['noisyCount'], axis = 1, inplace = True)
         return dfFinal
 
@@ -74,3 +75,33 @@ def outputFileSpatioTemporal(dfFinalQuery1, dfFinalQuery2):
     with open(outputFile, 'w') as file:
         json.dump(dfFinal, file, indent=4)
     return
+def outputFileGenAgg(dict):
+    outputFile = '../pipelineOutput/genAggOutput.json'
+    nested_json = {}
+    for WAYM, df in dict.items():
+        nested_json[WAYM] = {}
+        for department, counts in df.iterrows():
+            nested_json[WAYM][department] = counts.to_dict()
+    with open(outputFile, 'w') as fp:
+        json.dump(nested_json, fp, indent=4)
+    return 
+
+def outputFileCategorical(dfs1, dfs2):
+    outputDFs = {}
+    outputDFs['Query1']=dfs1
+    outputDFs['Query2']=dfs2
+    jsonDict = {}
+    for query, df in outputDFs.items():
+        jsonDict[query] = {}
+        for subdistrict, df2 in df.items():
+            jsonDict[query][subdistrict] = {}
+            for pair, df3 in df2.items():
+                jsonDict[query][subdistrict][pair] = df3.to_dict(orient = 'records')
+    with open('../pipelineOutput/noisyOutputCategorical.json', 'w') as fp:
+        json.dump(jsonDict, fp, indent=4)
+
+'''
+def outputFile(dfFinal, dataframeName):
+    dfFinal.to_csv('../pipelineOutput/' + dataframeName + '.csv')
+    return
+'''

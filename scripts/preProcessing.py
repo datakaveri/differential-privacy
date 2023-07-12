@@ -36,6 +36,9 @@ def readFile(configFileName):
         
     elif configDict['genType']=='categorical':
         dataframe = pd.read_json(dataFileName)
+    elif configDict['genType']=='genAgg':
+        dataframe = pd.read_json(dataFileName)
+        dataframe['comments']=dataframe['comments'].str[0]
         
     pd.set_option('mode.chained_assignment', None)
     print('The loaded file is: ' + dataFileName + ' with shape ' + str(dataframe.shape))
@@ -65,7 +68,7 @@ def dropDuplicates(dataframe, configDict):
         print(str(dupeCount) + ' duplicate rows have been removed.') 
         print(str(dfDrop.shape) + ' is the shape of the deduplicated dataframe .')
         dataframe = dfDrop  
-        return dataframe
+    return dataframe
 
 def suppress(dataframe, configDict):
     dataframe = dataframe.drop(columns = configDict['suppressCols'])
