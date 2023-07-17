@@ -289,4 +289,5 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
         return SNR
 
 
+
     

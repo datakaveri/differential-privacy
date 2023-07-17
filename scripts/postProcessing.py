@@ -31,6 +31,7 @@ def postProcessing(dfNoise, configDict, genType):
         dfFinal.drop(['noisyCount'], axis = 1, inplace = True)
         return dfFinal
 
+
 def signalToNoise(snrAverage,configDict):
     # SNR Threshold
     snrUpperLimit = configDict['snrUpperLimit']
@@ -109,7 +110,6 @@ def RMSEGraph(snr,epsilon,filename):
     # Save the plot to a file (e.g., PNG format)
     plt.savefig('../pipelineOutput/'+filename)
 
-
 def createNestedJSON(dataframe, parent_col):
     result = []
     for _, row in dataframe.iterrows():
@@ -159,12 +159,3 @@ def outputFileCategorical(dfs1, dfs2):
                 jsonDict[query][subdistrict][pair] = df3.to_dict(orient = 'records')
     with open('../pipelineOutput/noisyOutputCategorical.json', 'w') as fp:
         json.dump(jsonDict, fp, indent=4)
-
-'''
-    # Show the plot
-    plt.show()
-    return 
-def outputFile(dfFinal, dataframeName):
-    dfFinal.to_csv('../pipelineOutput/' + dataframeName + '.csv')
-    return
-'''
