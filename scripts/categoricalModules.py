@@ -261,6 +261,7 @@ def histogramAndOutputQuery(dfFinalQuery, configDict, genType, query):
     return dfFinalQuery
             
 def snrQuery(noiseHistQuery, bVariance, configDict):
+    SNR=[]
     for name, noisyDfs in noiseHistQuery.items():
         listOfSNR = []
         print('For '+name+ ': ', end='')
@@ -273,8 +274,11 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
             #noiseQuery = finalDF['Noise'].reset_index(drop = True)
             
             #signal to noise computation
-            snr = (np.mean(signal*signal))/(bVariance)
-            listOfSNR.append(snr)
+            snr = ((signal*signal))/(bVariance)
+            for i in snr:
+                SNR.append(i)
+            snr_avg = (np.mean(signal*signal))/(bVariance)
+            listOfSNR.append(snr_avg)
         
         snrAverage = np.mean(listOfSNR)
         snrVariance = np.var(listOfSNR)
@@ -282,6 +286,7 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
         #postmod.signalToNoise(snrAverage, configDict)
         print('|| SNR Variance : ' + str(np.round(snrVariance, 3)))
         #postmod.signalToNoise(snrVariance, configDict)
+        return SNR
 
 
     

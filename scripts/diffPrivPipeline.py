@@ -135,8 +135,8 @@ def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVa
     
     #signal to noise computation
     print('\n\nSNR for Query 1: ')
-    cmod.snrQuery(noiseHistQuery1, bVarianceQuery1, configDict)       
-
+    snr1=cmod.snrQuery(noiseHistQuery1, bVarianceQuery1, configDict)       
+    #postmod.RMSEGraph(snr1,configDict["PrivacyLossBudget"][0],'categoricalQuery1.png')
     #histogram and csv generation
     dfFinalQuery1 = cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
     
@@ -150,8 +150,8 @@ def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVa
     
     #signal to noise computation
     print('\n\nSNR for Query 2: ')
-    cmod.snrQuery(noiseHistQuery2, bVarianceQuery2, configDict)     
-    
+    snr2=cmod.snrQuery(noiseHistQuery2, bVarianceQuery2, configDict)     
+    #postmod.RMSEGraph(snr2,configDict["PrivacyLossBudget"][1],'categoricalQuery2.png')
     #histogram and csv generation
     dfFinalQuery2 = cmod.histogramAndOutputQuery(dfFinalQuery2, configDict, genType, query = 2)
     
@@ -176,13 +176,15 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     
     #signal to noise computation
     if configDict["optimized"] == False:
-        snrAverageQuery1 = stmod.snrCompute(signalQuery1, bVarianceQuery1)
-        snrAverageQuery2 = stmod.snrCompute(signalQuery2, bVarianceQuery2)
+        snrAverageQuery1,snr1 = stmod.snrCompute(signalQuery1, bVarianceQuery1)
+        snrAverageQuery2,snr2 = stmod.snrCompute(signalQuery2, bVarianceQuery2)
         print('\n\nFor Query 1: ')
+        postmod.RMSEGraph(snr1,configDict["privacyLossBudgetEpsQuery"][0],'spatioQuery1.png')
         postmod.signalToNoise(snrAverageQuery1, configDict)
         maeQuery1 = stmod.maeCompute(signalQuery1, noiseQuery1)
         print("The MAE is: ", maeQuery1)
         print('\n\nFor Query 2: ')
+        postmod.RMSEGraph(snr2,configDict["privacyLossBudgetEpsQuery"][1],'spatioQuery2.png')
         postmod.signalToNoise(snrAverageQuery2, configDict)
 
         maeQuery2 = stmod.maeCompute(signalQuery2, noiseQuery2)
