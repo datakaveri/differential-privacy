@@ -57,7 +57,7 @@ def dropDuplicates(dataframe, configDict):
         print(str(dupeCount) + ' duplicate rows have been removed.') 
         print(str(dfDrop.shape) + ' is the shape of the deduplicated dataframe .')
         dataframe = dfDrop  
-        return dataframe
+    return dataframe
 
 def suppress(dataframe, configDict):
     dataframe = dataframe.drop(columns = configDict['suppressCols'])

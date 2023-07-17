@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import json
+import json 
 
 def postProcessing(dfNoise, configDict):
     #postprocessing ITMSQuery1
@@ -38,6 +38,7 @@ def cumulativeEpsilon(configDict):
     print('\nYour Cumulative Epsilon for the displayed queries is: ' + str(cumulativeEpsilon))
     return cumulativeEpsilon
 
+
 def createNestedJSON(dataframe, parent_col):
     result = []
     for _, row in dataframe.iterrows():
@@ -63,3 +64,33 @@ def outputFile(dfFinalQuery1, dfFinalQuery2):
         json.dump(dfFinal, file, indent=4)
     # dfFinal.to_json('../pipelineOutput/' + 'noisyOutput' + '.json')
     return
+def outputFileGenAgg(dict):
+    outputFile = '../pipelineOutput/genAggOutput.json'
+    nested_json = {}
+    for WAYM, df in dict.items():
+        nested_json[WAYM] = {}
+        for department, counts in df.iterrows():
+            nested_json[WAYM][department] = counts.to_dict()
+    with open(outputFile, 'w') as fp:
+        json.dump(nested_json, fp, indent=4)
+    return 
+
+def outputFileCategorical(dfs1, dfs2):
+    outputDFs = {}
+    outputDFs['Query1']=dfs1
+    outputDFs['Query2']=dfs2
+    jsonDict = {}
+    for query, df in outputDFs.items():
+        jsonDict[query] = {}
+        for subdistrict, df2 in df.items():
+            jsonDict[query][subdistrict] = {}
+            for pair, df3 in df2.items():
+                jsonDict[query][subdistrict][pair] = df3.to_dict(orient = 'records')
+    with open('../pipelineOutput/noisyOutputCategorical.json', 'w') as fp:
+        json.dump(jsonDict, fp, indent=4)
+
+'''
+def outputFile(dfFinal, dataframeName):
+    dfFinal.to_csv('../pipelineOutput/' + dataframeName + '.csv')
+    return
+'''

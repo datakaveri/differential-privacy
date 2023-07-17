@@ -281,5 +281,6 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
         #postmod.signalToNoise(snrAverage, configDict)
         print('|| SNR Variance : ' + str(np.round(snrVariance, 3)))
         #postmod.signalToNoise(snrVariance, configDict)
+        return listOfSNR
 
             
