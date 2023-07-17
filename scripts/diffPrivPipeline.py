@@ -1,6 +1,6 @@
 import spatioTemporalModules as stmod
 import categoricalModules as cmod
-import genAgg as genAgg
+import genAggModules as genAgg
 import preProcessing as premod
 import postProcessing as postmod
 
@@ -136,7 +136,7 @@ def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVa
     #signal to noise computation
     print('\n\nSNR for Query 1: ')
     snr1=cmod.snrQuery(noiseHistQuery1, bVarianceQuery1, configDict)       
-    #postmod.RMSEGraph(snr1,configDict["PrivacyLossBudget"][0],'categoricalQuery1.png')
+    postmod.RMSEGraph(snr1,configDict["PrivacyLossBudget"][0],'categoricalQuery1.png')
     #histogram and csv generation
     dfFinalQuery1 = cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
     
@@ -151,7 +151,7 @@ def postProcessingCategorical(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVa
     #signal to noise computation
     print('\n\nSNR for Query 2: ')
     snr2=cmod.snrQuery(noiseHistQuery2, bVarianceQuery2, configDict)     
-    #postmod.RMSEGraph(snr2,configDict["PrivacyLossBudget"][1],'categoricalQuery2.png')
+    postmod.RMSEGraph(snr2,configDict["PrivacyLossBudget"][1],'categoricalQuery2.png')
     #histogram and csv generation
     dfFinalQuery2 = cmod.histogramAndOutputQuery(dfFinalQuery2, configDict, genType, query = 2)
     

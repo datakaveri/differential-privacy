@@ -71,7 +71,11 @@ def RMSEGraph(snr,epsilon,filename):
     for snr in snr_final:
         rmse=[]
         for value in snr:
-            rmse.append(1.0/math.sqrt(value))
+            if value==0:
+                rmse.append(pow(10,10)*0.2)
+            else:
+                rmse.append(1.0/math.sqrt(value))
+            
         RMSE.append(rmse)
     error_10=[]
     error_25=[]
@@ -101,9 +105,9 @@ def RMSEGraph(snr,epsilon,filename):
     # Add a vertical dotted line at the x position epsilon
     plt.axvline(x=epsilon, linestyle='dotted', color='gray',label=f'ε={epsilon}')
     # Set the plot title and labels
-    plt.title('RRMSE graph')
+    plt.title('Relative RMSE graph')
     plt.xlabel('Epsilons')
-    plt.ylabel('Percentage of samples whose RMSE error is less than x ')
+    plt.ylabel('Percentage of samples whose Relative RMSE  is less than x ')
     plt.legend()
     plt.grid(True)
     # Save the plot to a file (e.g., PNG format)
