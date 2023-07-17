@@ -1,6 +1,5 @@
 import spatioTemporalModules as stmod
 import categoricalModules as cmod
-import genAgg as genAgg
 import preProcessing as premod
 import postProcessing as postmod
 import json
@@ -18,6 +17,7 @@ def chunkHandling():
               '../data/split_file_7.json',
               '../data/split_file_8.json',
               '../data/split_file_9.json']
+
     
     # #validating the config file against the schema
     # print('\n####################################################################\n')
@@ -42,9 +42,8 @@ def chunkHandling():
     dfFinalGrouped = pd.DataFrame()
 
     groupByCol = configDict['groupByCol']
-    
-    for file in file_names_list:
 
+    for file in file_names_list:
 
         lengthList.append(file)
         with open(file,"r") as dfile:
@@ -179,10 +178,10 @@ def runSpatioTemporalPipeline(dataframe, configDict, K):
     #------------------QUERY 2---------------------------------------------------
     
     #query building
-    histQuery2, allCols = cmod.histogramQuery2(dataframe, configDict)
+    histQuery2 = cmod.histogramQuery2(dataframe, configDict)
     
     #compute noise
-    noiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(histQuery2, allCols, configDict)    
+    noiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(histQuery2, configDict)    
 
     #modeHistQuery2Alt, dfFinalHistQuery2Alt = cmod.exponentialMechanismHistogramQuery2(histQuery2, configDict)
 
@@ -200,16 +199,10 @@ def runSpatioTemporalPipeline(dataframe, configDict, K):
     #signal to noise computation
     print('\n\nSNR for Query 1: ')
     snr1=cmod.snrQuery(noiseHistQuery1, bVarianceQuery1, configDict)       
-
-    #postmod.RMSEGraph(snr1,configDict["PrivacyLossBudget"][0],'categoricalQuery1.png')
-
+    postmod.RMSEGraph(snr1,configDict["PrivacyLossBudget"][0],'categoricalQuery1.png')
     #histogram and csv generation
-    dfFinalQuery1 = cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
-    
-    
+    cmod.histogramAndOutputQuery(dfFinalQuery1, configDict, genType, query = 1)
 
-    #----------------------QUERY 2------------------------------------------------
-    
     #Query 2
     #postprocessing
     dfFinalQuery2 = cmod.postProcessingQuery(noiseHistQuery2, configDict, genType)
@@ -217,16 +210,12 @@ def runSpatioTemporalPipeline(dataframe, configDict, K):
     #signal to noise computation
     print('\n\nSNR for Query 2: ')
     snr2=cmod.snrQuery(noiseHistQuery2, bVarianceQuery2, configDict)     
-    #postmod.RMSEGraph(snr2,configDict["PrivacyLossBudget"][1],'categoricalQuery2.png')
-
+    postmod.RMSEGraph(snr2,configDict["PrivacyLossBudget"][1],'categoricalQuery2.png')
     #histogram and csv generation
-    dfFinalQuery2 = cmod.histogramAndOutputQuery(dfFinalQuery2, configDict, genType, query = 2)
+    cmod.histogramAndOutputQuery(dfFinalQuery2, configDict, genType, query = 2)
     
-    
-    #final output file generation
-    postmod.outputFileCategorical(dfFinalQuery1, dfFinalQuery2)
     print('\nDifferentially Private output generated. Please check the pipelineOutput folder.')
-    return dfFinalQuery1, dfFinalQuery2
+    return
 
 def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict):
     print('\n################################################################\n')
@@ -243,15 +232,13 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     
     #signal to noise computation
     if configDict["optimized"] == False:
-        snrAverageQuery1,snr1 = stmod.snrCompute(signalQuery1, bVarianceQuery1)
-        snrAverageQuery2,snr2 = stmod.snrCompute(signalQuery2, bVarianceQuery2)
+        snrAverageQuery1 = stmod.snrCompute(signalQuery1, bVarianceQuery1)
+        snrAverageQuery2 = stmod.snrCompute(signalQuery2, bVarianceQuery2)
         print('\n\nFor Query 1: ')
-        postmod.RMSEGraph(snr1,configDict["privacyLossBudgetEpsQuery"][0],'spatioQuery1.png')
         postmod.signalToNoise(snrAverageQuery1, configDict)
         maeQuery1 = stmod.maeCompute(signalQuery1, noiseQuery1)
         print("The MAE is: ", maeQuery1)
         print('\n\nFor Query 2: ')
-        postmod.RMSEGraph(snr2,configDict["privacyLossBudgetEpsQuery"][1],'spatioQuery2.png')
         postmod.signalToNoise(snrAverageQuery2, configDict)
 
         maeQuery2 = stmod.maeCompute(signalQuery2, noiseQuery2)
@@ -266,19 +253,23 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     #computing and displaying cumulative epsilon
     postmod.cumulativeEpsilon(configDict)
     
+    #creating the output files
     postmod.outputFile(dfFinalQuery1, dfFinalQuery2)
     
     print('Differentially Private output generated. Please check the pipelineOutput folder.')
     print('\n################################################################\n')
     return
-def postProcessingGenAgg(dict):
-    postmod.outputFileGenAgg(dict)
-    print('Generalized Aggregated output generated. Please check the pipelineOutput folder.')
-    print('\n################################################################\n')
-    
+
 #running predefined functions
 preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K = chunkHandling()
+
+#choosing pipeline based on dataset type
+# if genType == "spatio-temporal":
+    # dataframe = spatioTemporalGeneralization(dataframe, configFile)
 dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2 = runSpatioTemporalPipeline(preProcessedDataframe, configDict, K)
 postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict)
+# elif genType == "categorical":
+#     histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2 = runCategoricalPipeline(preProcessedDataframe, configDict)
+#     postProcessingCategorical(histQuery1, histQuery2, bVarianceQuery1, bVarianceQuery2, noiseHistQuery1, noiseHistQuery2, configDict, genType)
 
 

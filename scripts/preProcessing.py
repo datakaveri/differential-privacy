@@ -26,12 +26,10 @@ def schemaValidator(schemaFile, configFile):
 #         configDict = json.load(cfile)
 #     dataFileName = '../data/' + configDict['dataFile']
         
-    elif configDict['genType']=='categorical':
-        dataframe = pd.read_json(dataFileName)
-    elif configDict['genType']=='genAgg':
-        dataframe = pd.read_json(dataFileName)
-        dataframe['comments']=dataframe['comments'].str[0]
-
+#     with open(dataFileName, "r") as dfile:
+#         dataDict = json.load(dfile)        
+#     #loading data
+#     dataframe = pd.json_normalize(dataDict)
         
 #     pd.set_option('mode.chained_assignment', None)
 #     print('The loaded file is: ' + dataFileName + ' with shape ' + str(dataframe.shape))
