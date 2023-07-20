@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 from math import exp
 import matplotlib.ticker as ticker
 import postProcessing as postmod
+import json
 
-def categoricGeneralization(dataframe, configFile):
-    
+def categoricGeneralization(df, configFile):
+    dataframe = df.copy()
     dataframe = dataframe.dropna(subset=[configFile['ID']])    
 
     # Split the individual values into categories
@@ -15,6 +16,22 @@ def categoricGeneralization(dataframe, configFile):
     dataframe[listToSplit] = dataframe[listToSplit].apply(lambda x: x.str.split().str[-1])   
 
     return dataframe
+
+
+def merge_dicts(dict1, dict2):
+    for district, inner_dict in dict2.items():
+        if district in dict1:
+            for pair, df2 in inner_dict.items():
+                if pair in dict1[district]:
+                    df1 = dict1[district][pair]
+                    column_names = [column for column in df1.columns if column != 'Count']
+                    dict1[district][pair] = pd.concat([df1, df2]).groupby(column_names).sum().reset_index()
+                else:
+                    dict1[district][pair] = df2
+        else:
+            dict1[district] = inner_dict
+
+    return dict1
 
 def histogramQuery1(dataframe, configFile):       
     
@@ -33,7 +50,7 @@ def histogramQuery1(dataframe, configFile):
     for listToGrouped in configFile['groupByPairs']:
         for name, DF in dfs.items():
 
-            #newDataframe = df.groupby(list_to_grouped).size().reset_index(name='Count')   
+            #newDataframe = DF.groupby(listToGrouped).size().reset_index(name='Count')   
             crosstab = pd.crosstab(index=configFile['ID'], columns=[DF[col] for col in listToGrouped])
             crosstab = crosstab.reindex()
 
@@ -97,7 +114,7 @@ def noiseComputeHistogramQuery1(dataframeDict, configFile):
     return noisyDataframeDict, bVarianceQuery1
     
 def histogramQuery2(dataframe, configFile):
-    allCols = configFile['splitCols']
+    allCols = configFile['splitCols'].copy()
     computedCols = configFile['groupByPairs']
     grouped = dataframe.groupby(configFile['queryPer'])
 
@@ -127,10 +144,10 @@ def histogramQuery2(dataframe, configFile):
     return groupedCountDfs
 
 def noiseComputeHistogramQuery2(dfs, configFile):
+    allCols = configFile['splitCols'].copy()
     sensitivity = 2
-   
     for df in dfs:
-        epsilon = configFile['PrivacyLossBudget'][1]/len(df)
+        epsilon = configFile['PrivacyLossBudget'][1]/len(allCols)
         b = sensitivity/epsilon
         bVarianceQuery2 = 2*b*b
         scores = []
@@ -142,6 +159,57 @@ def noiseComputeHistogramQuery2(dfs, configFile):
             dfs[df][col]['noisyCount'] = noisyScores
 
     return dfs, bVarianceQuery2
+
+def postProcessingQuery(noiseHistQuery, configDict, genType,):
+    
+    dfsFinal = {}
+    
+    for name, dfs in noiseHistQuery.items():
+        for pair, dfsNoise in dfs.items():
+            dfFinalHistQuery = postmod.postProcessing(dfsNoise, configDict, genType)
+            
+            if name not in dfsFinal.keys():
+                dfsFinal[name] = {}
+            dfsFinal[name][pair] = dfFinalHistQuery.reset_index(drop = True)
+            
+    return dfsFinal
+
+def histogramOutputQuery(dfFinalQuery):
+    for name, dfs in dfFinalQuery.items():
+        for pair, df in dfs.items():
+            dfFinalQuery[name][pair] = df.drop(['Count','Noise'], axis = 1).reset_index(drop = True)
+    return dfFinalQuery
+            
+def snrQuery(noiseHistQuery, bVariance, configDict):
+    SNR=[]
+    for name, noisyDfs in noiseHistQuery.items():
+        listOfSNR = []
+        print('For '+name+ ': ', end='')
+        for pair, finalDF in noisyDfs.items():
+            
+            #signal assignment
+            signal = finalDF['Count'].reset_index(drop = True)
+            
+            #noise assignment
+            #noiseQuery = finalDF['Noise'].reset_index(drop = True)
+            
+            #signal to noise computation
+            snr = ((signal*signal))/(bVariance)
+            for i in snr:
+                SNR.append(i)
+            snr_avg = (np.mean(signal*signal))/(bVariance)
+            listOfSNR.append(snr_avg)
+        
+        snrAverage = np.mean(listOfSNR)
+        snrVariance = np.var(listOfSNR)
+        print('\nSNR Average : ' +  str(np.round(snrAverage,3)), end=' ')
+        #postmod.signalToNoise(snrAverage, configDict)
+        print('|| SNR Variance : ' + str(np.round(snrVariance, 3)))
+        #postmod.signalToNoise(snrVariance, configDict)
+        return SNR
+
+#dormant functions:
+"""
 
 def exponentialMechanismHistogramQuery2 (dfs, configFile):
     noisy_mode = {}
@@ -238,49 +306,5 @@ def printHistogram(df, name, pair, query):
     # show plot
     #plt.show()
 
-def postProcessingQuery(noiseHistQuery, configDict, genType,):
+"""
     
-    dfsFinal = {}
-    
-    for name, dfs in noiseHistQuery.items():
-        for pair, dfsNoise in dfs.items():
-            dfFinalHistQuery = postmod.postProcessing(dfsNoise, configDict, genType)
-            
-            if name not in dfsFinal.keys():
-                dfsFinal[name] = {}
-            dfsFinal[name][pair] = dfFinalHistQuery.reset_index(drop = True)
-            
-    return dfsFinal
-
-def histogramAndOutputQuery(dfFinalQuery, configDict, genType, query):
-    for name, dfs in dfFinalQuery.items():
-        for pair, df in dfs.items():            
-            printHistogram(df, name, pair, query)
-            dfOutput = df.drop(['Count','Noise'], axis = 1).reset_index(drop = True)
-            postmod.outputFile(dfOutput, 'dfNoisySoil_'+str(query)+name+'_'+pair)
-            
-def snrQuery(noiseHistQuery, bVariance, configDict):
-    for name, noisyDfs in noiseHistQuery.items():
-        listOfSNR = []
-        print('For '+name+ ': ', end='')
-        for pair, finalDF in noisyDfs.items():
-            
-            #signal assignment
-            signal = finalDF['Count'].reset_index(drop = True)
-            
-            #noise assignment
-            #noiseQuery = finalDF['Noise'].reset_index(drop = True)
-            
-            #signal to noise computation
-            snr = (np.mean(signal*signal))/(bVariance)
-            listOfSNR.append(snr)
-        
-        snrAverage = np.mean(listOfSNR)
-        snrVariance = np.var(listOfSNR)
-        print('\nSNR Average : ' +  str(np.round(snrAverage,3)), end=' ')
-        #postmod.signalToNoise(snrAverage, configDict)
-        print('|| SNR Variance : ' + str(np.round(snrVariance, 3)))
-        #postmod.signalToNoise(snrVariance, configDict)
-        return listOfSNR
-
-            
