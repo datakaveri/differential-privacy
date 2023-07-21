@@ -1,5 +1,5 @@
 import SECategoricalPipeline as SEC
-import SEspatioTemporalPipeline as SES
+import SESpatioTemporalPipeline as SES
 import SEGenAggPipeline  as SEG
 import json 
 
