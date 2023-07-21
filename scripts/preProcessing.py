@@ -50,7 +50,8 @@ def suppress(dataframe, configDict):
     print(str(dataframe.shape) + ' is the shape of the dataframe after suppression.\n\nThe number of unique rows are:\n' + str(dataframe.shape[0]))
     return dataframe
 
-def pseudonymize(dataframe, configDict):
+def pseudonymize(df, configDict):
+    dataframe = df.copy()
     pseudoCol = configDict['pseudoCol']
     uniquePlates = dataframe[pseudoCol].unique()
     pseudonymizedCol = {}

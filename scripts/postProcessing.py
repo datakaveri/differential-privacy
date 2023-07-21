@@ -65,12 +65,12 @@ def createNestedJSON(dataframe, parent_col):
 def outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2 = None):
     if dataTapChoice == 1:
         # dfFinal = dfFinalQuery1.to_dict(orient='records')
-        dfFinal = dfFinalQuery1
+        dfFinal = dfFinalQuery1.copy()
         # dfFinal['Date'] = pd.to_datetime(dfFinal['Date']).astype(str)
-        dfFinal['Date'] = dfFinal['Date'].astype(str)
+        dfFinal['Date'] = dfFinalQuery1['Date'].astype(str)
         grouped_data = dfFinal.groupby(['Date', 'license_plate']).apply(lambda x: x.drop(['Date', 'license_plate'], axis=1).to_dict('records')).reset_index(name='data')
         nested_json_data = grouped_data.groupby('Date').apply(lambda x: x.set_index('license_plate')['data'].to_dict()).to_dict()
-        outputFile = '../pipelineOutput/pseudonymizedAggOutput.json'
+        outputFile = '../pipelineOutput/pseudonymizedAggOutputSpatioTemporal.json'
         with open(outputFile, 'w') as file:
             json.dump(nested_json_data, file, indent=4)
         print('Pseudonymized and aggregated query output generated. Please check the pipelineOutput folder.')
@@ -81,7 +81,7 @@ def outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2 = None)
         dfFinal['query1CleanOutput'] = dfFinalQuery1['queryOutput']
         dfFinal['query2CleanOutput'] = dfFinalQuery2['queryOutput']
         dfFinal = createNestedJSON(dfFinal, 'HAT')
-        outputFile = '../pipelineOutput/cleanOutput.json'
+        outputFile = '../pipelineOutput/cleanOutputSpatioTemporal.json'
         with open(outputFile, 'w') as file:
             json.dump(dfFinal, file, indent=4)
         print('Clean query output generated. Please check the pipelineOutput folder.')
@@ -92,7 +92,7 @@ def outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2 = None)
         dfFinal['query1NoisyOutput'] = dfFinalQuery1['queryNoisyOutput']
         dfFinal['query2NoisyOutput'] = dfFinalQuery2['queryNoisyOutput']
         dfFinal = createNestedJSON(dfFinal, 'HAT')
-        outputFile = '../pipelineOutput/noisyOutput.json'
+        outputFile = '../pipelineOutput/noisyOutputSpatioTemporal.json'
         with open(outputFile, 'w') as file:
             json.dump(dfFinal, file, indent=4)
         print('Differentially private query output generated. Please check the pipelineOutput folder.')

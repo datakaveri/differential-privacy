@@ -65,7 +65,6 @@ def filtering(dataframe, configDict):
     # dfFinalGrouped.to_csv('groupingTestMultiple.csv')
     print('Number of unique HATs left after filtering is: ' + str(dfFinalGrouped['HAT'].nunique()))
     print('########################################################################################')
-    print('dfFinalGrouped after filtering')
     # print(dfFinalGrouped)
     return dfFinalGrouped
 
@@ -79,7 +78,7 @@ def sensitivityFrame(dataframe):
                             max_count=('count', 'max'),
                             sum_count=('count', 'sum'))
     dfCount.reset_index(inplace = True)
-    print('dfCount', len(dfCount))
+    # print('dfCount', len(dfCount))
 
     return dfSensitivity, dfCount
 
@@ -149,7 +148,6 @@ def KCompute(dataframe):
     #finding 'K', the maximum number of HATs a bus passes through per day
     dfK = dataframe.groupby(['Date','license_plate']).agg({'HAT':'nunique'}).reset_index()
     K = dfK['HAT'].max()
-    print('K', K)
     return K
 
 def sensitivityComputeITMSQuery(configDict, timeRange, dfCount):

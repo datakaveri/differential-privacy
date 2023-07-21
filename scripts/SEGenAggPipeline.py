@@ -1,14 +1,15 @@
 import pandas as pd
 import numpy as np
 import json
-import jsonschema
+#import jsonschema
 import preProcessing as premod
 import postProcessing as postmod
-import GenAggModules as  gamod
+import genAggModules as  gamod
 from pandas import json_normalize
+
 def chunkHandling():
-    with open("../config/configFile.json", "r") as config_file:
-        file_names_list = json.load(config_file)
+    with open("../config/genAggFNList.json", "r") as config_file:
+            file_names_list = json.load(config_file)
     configFileName = '../config/SEGenAggConfig.json'
     with open(configFileName, "r") as cfile:
         configDict = json.load(cfile)
@@ -34,6 +35,7 @@ def chunkHandling():
         #reading the file and dropping any duplicates
         # dataframe, configDict = premod.readFile(configFileName)
         #dropping duplicates
+        dataframe['comments']=dataframe['comments'].astype(str)
         dataframe = premod.dropDuplicates(dataframe, configDict)
 
         #supressing any columns that may not be required in the final output
@@ -59,5 +61,10 @@ def chunkHandling():
         # dataframe, dfSensitivity, dfCount = stmod.chunkedAggregator(dataframe, configDict)
     return dfFinalGrouped_dict
 
-data_dict=chunkHandling()
-postmod.outputFileGenAgg(data_dict)
+def main():
+    data_dict=chunkHandling()
+    postmod.outputFileGenAgg(data_dict)
+    
+if __name__ == "__main__":
+    main()
+    

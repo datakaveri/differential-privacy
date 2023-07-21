@@ -10,7 +10,7 @@ import numpy as np
 # //TODO: Write a wrapper function to ensure that the correct pipeline file is run
 # //TODO: Include file names list handling within the wrapper file
 # //TODO: Handle data tapping within the individual pipeline files
-file_names_list = ['../data/split_file_0.json',
+'''file_names_list = ['../data/split_file_0.json',
             '../data/split_file_1.json',
             '../data/split_file_2.json',
             '../data/split_file_3.json',
@@ -19,8 +19,7 @@ file_names_list = ['../data/split_file_0.json',
             '../data/split_file_6.json',
             '../data/split_file_7.json',
             '../data/split_file_8.json',
-            '../data/split_file_9.json']
-
+            '../data/split_file_9.json']'''
 
 def chunkHandling(config, schema, fileList, dataTapChoice):
     with open(config, "r") as cfile:
@@ -40,8 +39,6 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
             dataframe = pd.json_normalize(dataDict)
             print('The loaded file is: ' + file + ' with shape ' + str(dataframe.shape))
             configDict['dataFile'] == file
-
-        premod.schemaValidator(schemaFileName, configFileName)
 
         #dropping duplicates
         dataframe = premod.dropDuplicates(dataframe, configDict)
@@ -223,20 +220,23 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     postmod.outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2)
     return
 
-#running predefined functions
-configFileName = '../config/SEspatioTemporalConfig.json'
-with open(configFileName, "r") as cfile:
-    configDict = json.load(cfile)
-schemaFileName = 'SEspatioTemporalSchema.json'
+def main():
+    with open("../config/spatioTemporalFNList.json", "r") as config_file:
+        file_names_list = json.load(config_file)
 
-def main(configDict):
+    #running predefined functions
+    configFileName = '../config/SEspatioTemporalConfig.json'
+    with open(configFileName, "r") as cfile:
+        configDict = json.load(cfile)
+    schemaFileName = 'SEspatioTemporalSchema.json'
+    premod.schemaValidator(schemaFileName, configFileName)
+
+
     # handling the choice for data tapping, including validation of choice
     validChoice = 0
     while validChoice == 0: 
         print("Select type of output file: ")
-        print('''1. Pseudonymized and Aggregated Output (Non-DP) \
-        2. Clean Query Output \
-        3. Noisy Query Output ''')
+        print('''1. Pseudonymized and Aggregated Output (Non-DP) \n2. Clean Query Output \n3. Noisy Query Output ''')
         dataTapChoice = int(input("Enter a number to make your selection: "))
         if dataTapChoice == 1:
             configDict['outputOptions'] = 1
@@ -257,4 +257,4 @@ def main(configDict):
     postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, dataTapChoice)
 
 if __name__ == '__main__':
-    main(configDict)
+    main()
