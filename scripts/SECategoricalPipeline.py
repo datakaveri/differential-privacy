@@ -21,9 +21,6 @@ with open(configFileName, "r") as cfile:
 schemaFileName = 'SECategoricalSchema.json'
 premod.schemaValidator(schemaFileName, configFileName)
 
-genType = configDict['genType']
-configDict = configDict[genType]
-
 def chunkHandling(configDict):
 
     #initializing variables to manage flow of chunks 
@@ -52,7 +49,7 @@ def chunkHandling(configDict):
     
     return query1Dict, query2Dict
        
-def categoricalDP(query1Dict, query2Dict, genType, configDict):
+def categoricalDP(query1Dict, query2Dict, configDict):
     #compute noise
     chunkedNoiseHistQuery1, bVarianceQuery1 = cmod.noiseComputeHistogramQuery1(query1Dict, configDict)
     chunkedNoiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(query2Dict, configDict)
@@ -62,8 +59,8 @@ def categoricalDP(query1Dict, query2Dict, genType, configDict):
     cmod.snrQuery(chunkedNoiseHistQuery2, bVarianceQuery2, configDict)
     
     #post processing 
-    roundedHistQuery1 = cmod.postProcessingQuery(chunkedNoiseHistQuery1, configDict, genType)
-    roundedHistQuery2 = cmod.postProcessingQuery(chunkedNoiseHistQuery2, configDict, genType)
+    roundedHistQuery1 = cmod.postProcessingQuery(chunkedNoiseHistQuery1, configDict)
+    roundedHistQuery2 = cmod.postProcessingQuery(chunkedNoiseHistQuery2, configDict)
 
     dfFinalQuery1 = cmod.histogramOutputQuery(roundedHistQuery1)
     dfFinalQuery2 = cmod.histogramOutputQuery(roundedHistQuery2)
@@ -73,7 +70,7 @@ def categoricalDP(query1Dict, query2Dict, genType, configDict):
 def outputFileGeneration(dfFinalQuery1, dfFinalQuery2, configDict):
     #final output file generation
     postmod.outputFileCategorical(dfFinalQuery1, dfFinalQuery2, configDict)
-    print('\nDifferentially Private output generated. Please check the pipelineOutput folder.')
+    print('\nOutput generated. Please check the pipelineOutput folder.')
 
 # handling the choice for data tapping, including validation of choice
 validChoice = 0
@@ -95,7 +92,7 @@ query1Dict, query2Dict = chunkHandling(configDict)
 if configDict['outputOptions'] == 1:
     outputFileGeneration(query1Dict, query2Dict, configDict)
 elif configDict['outputOptions'] == 2:
-    dfFinalQuery1, dfFinalQuery2 = categoricalDP(query1Dict, query2Dict, genType, configDict)
+    dfFinalQuery1, dfFinalQuery2 = categoricalDP(query1Dict, query2Dict, configDict)
     outputFileGeneration(dfFinalQuery1, dfFinalQuery2, configDict)
     
     

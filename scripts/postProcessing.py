@@ -19,11 +19,10 @@ def postProcessing(dfNoise, configDict):
         # dfFinalITMSQuery2.drop(['queryOutput'], axis = 1, inplace = True)
         return dfFinalITMSQuery2
 
-    elif genType == 'categorical':
+def postProcessingCategorical(dfNoise):
         dfFinal = dfNoise
         dfFinal['noisyCount'].clip(0, np.inf, inplace = True)
         dfFinal['roundedNoisyCount'] = dfFinal['noisyCount'].round()
-        #dfFinal['roundedNoisyCount'].clip(0, np.inf, inplace = True)
         dfFinal.drop(['noisyCount'], axis = 1, inplace = True)
         return dfFinal
 

@@ -1,102 +1,202 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "properties": {
-      "dataFile": {
-        "type": "string"
-      },
-      "genType": {
-        "type": "string"
-      },
-      "categorical": {
-        "type": "object",
-        "properties": {
-          "duplicateDetection": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "queryPer": {
-            "type": "string"
-          },
-          "splitCols": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "suppressCols": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "groupByCols": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "groupByPairs": {
-            "type": "array",
-            "items": {
-              "type": "array",
-                "maxItems": 2,
-                "minItems": 2,
-                "uniqueItems": true,
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          "ID": {
-            "type": "string"
-          },
-          "cycleToDrop": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "cycleToKeep": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "PrivacyLossBudget": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          },
-          "snrUpperLimit": {
-            "type": "integer"
-          },
-          "snrLowerLimit": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "duplicateDetection",
-          "queryPer",
-          "splitCols",
-          "suppressCols",
-          "groupByCols",
-          "groupByPairs",
-          "ID",
-          "cycleToDrop",
-          "cycleToKeep",
-          "PrivacyLossBudget",
-          "snrUpperLimit",
-          "snrLowerLimit"
-        ]
-      }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "dataFile": {
+      "type": "string"
     },
-    "required": [
-      "dataFile",
-      "genType",
-      "categorical"
-    ]
-  }
+    "duplicateDetection": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "queryPer": {
+      "type": "string"
+    },
+    "splitCols": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "suppressCols": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "groupByCols": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "groupByPairs": {
+      "type": "array",
+      "items": [
+        {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    "ID": {
+      "type": "string"
+    },
+    "cycleToDrop": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "cycleToKeep": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "PrivacyLossBudget": {
+      "type": "array",
+      "items": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        }
+      ]
+    },
+    "snrUpperLimit": {
+      "type": "integer"
+    },
+    "snrLowerLimit": {
+      "type": "integer"
+    },
+    "outputOptions": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "dataFile",
+    "duplicateDetection",
+    "queryPer",
+    "splitCols",
+    "suppressCols",
+    "groupByCols",
+    "groupByPairs",
+    "ID",
+    "cycleToDrop",
+    "cycleToKeep",
+    "PrivacyLossBudget",
+    "snrUpperLimit",
+    "snrLowerLimit",
+    "outputOptions"
+  ]
+}

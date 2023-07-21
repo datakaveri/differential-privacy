@@ -1,9 +1,9 @@
 import pandas as pd
 import itertools 
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from math import exp
-import matplotlib.ticker as ticker
+#import matplotlib.ticker as ticker
 import postProcessing as postmod
 import json
 
@@ -160,13 +160,13 @@ def noiseComputeHistogramQuery2(dfs, configFile):
 
     return dfs, bVarianceQuery2
 
-def postProcessingQuery(noiseHistQuery, configDict, genType,):
+def postProcessingQuery(noiseHistQuery, configDict):
     
     dfsFinal = {}
     
     for name, dfs in noiseHistQuery.items():
         for pair, dfsNoise in dfs.items():
-            dfFinalHistQuery = postmod.postProcessing(dfsNoise, configDict, genType)
+            dfFinalHistQuery = postmod.postProcessingCategorical(dfsNoise)
             
             if name not in dfsFinal.keys():
                 dfsFinal[name] = {}
