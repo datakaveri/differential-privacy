@@ -230,10 +230,10 @@ def main():
         file_names_list = json.load(config_file)
 
     #running predefined functions
-    configFileName = '../config/SEspatioTemporalConfig.json'
+    configFileName = '../config/SESpatioTemporalConfig.json'
     with open(configFileName, "r") as cfile:
         configDict = json.load(cfile)
-    schemaFileName = 'SEspatioTemporalSchema.json'
+    schemaFileName = 'SESpatioTemporalSchema.json'
     premod.schemaValidator(schemaFileName, configFileName)
 
 
