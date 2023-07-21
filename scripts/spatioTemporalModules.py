@@ -40,23 +40,6 @@ def spatioTemporalGeneralization(dataframe, configFile):
     endTime = configFile["endTime"]
     groupByColumn = 'license_plate'
     dataframe = dataframe[(dataframe["Timeslot"] >= startTime) & (dataframe["Timeslot"] <= endTime) ]
-
-    # Selecting h3 indices where a min number of events occur in all timeslots of the day
-    df1 = (dataframe.groupby(["HAT", "Date"]).agg({groupByColumn: "nunique"}).reset_index())
-    df2 = df1.groupby(["HAT"]).agg({groupByColumn: "sum"}).reset_index()
-
-    # //TODO move filtering to post aggregation as per test file 
-    
-    #filtering average num of occurences per day per HAT
-    # date = dataframe["Date"].unique()
-    # minEventOccurencesPerDay = int(configFile["minEventOccurences"])
-    # limit = len(date) * minEventOccurencesPerDay
-    # df3 = df2[df2[groupByColumn] >= limit]
-    # df = dataframe["HAT"].isin(df3["HAT"])
-    # dataframe = dataframe[df]
-
-    # print('Number of unique HATs left after filtering is: ' + str(dataframe['HAT'].nunique()))
-
     return dataframe
 
 def timeRange(dataframe):
@@ -65,49 +48,6 @@ def timeRange(dataframe):
     endDay = dataframe['Date'].max()
     timeRange = 1 + (endDay - startDay).days
     return timeRange
-
-def chunkedAggregator(dataframe, configDict, fileNamesList, lengthList, file):
-    groupByCol = configDict['groupByCol']
-    print('The length of the list at this stage is: ', (len(lengthList)))
-    print('########################################################################################')
-    if len(lengthList) == 1:
-        dfGrouped = dataframe.groupby(['HAT','Date','license_plate']).agg(
-                                count=(groupByCol,'count'),
-                                sum=(groupByCol,'sum'),
-                                max=(groupByCol,'max'),
-                                min=(groupByCol,'min')).reset_index()
-                
-        dfFinalGrouped = dfGrouped  
-        print(file)
-    elif (len(lengthList) > 1):
-        dfGrouped = dataframe.groupby(['HAT','Date','license_plate']).agg(
-                                count=(groupByCol,'count'),
-                                sum=(groupByCol,'sum'),
-                                max=(groupByCol,'max'),
-                                min=(groupByCol,'min')).reset_index()
-                
-        dfGrouped = pd.concat([dfGrouped, dfFinalGrouped],  ignore_index=True)
-        print(file)
-        print('dfGrouped')
-        print(dfGrouped)
-
-        dfGroupedCombined = dfGrouped.groupby(['HAT','Date','license_plate']).agg({
-                                                    'count': 'sum',
-                                                    'sum': 'sum',
-                                                    'max':'max',
-                                                    'min':'min'}).reset_index()
-        dfFinalGrouped = dfGroupedCombined
-    dfFinalGrouped['mean'] = np.round((dfFinalGrouped['sum']/dfFinalGrouped['count']), 2)
-    print('')
-    print('dfFinalGrouped before filtering')
-    print(dfFinalGrouped) 
-
-    print('########################################################################################')
-    print('The length of the grouped dataframe is: ', len(dfFinalGrouped))
-    print('No. of Unique HATs of the grouped dataframe is: ', dfFinalGrouped['HAT'].nunique())
-    print('The number of unique license plates in the grouped dataframe is: ', dfFinalGrouped['license_plate'].nunique())
-    print('########################################################################################')
-    return dfFinalGrouped
 
 def filtering(dataframe, configDict):
      #filtering average num of occurences per day per HAT
@@ -126,10 +66,11 @@ def filtering(dataframe, configDict):
     print('Number of unique HATs left after filtering is: ' + str(dfFinalGrouped['HAT'].nunique()))
     print('########################################################################################')
     print('dfFinalGrouped after filtering')
-    print(dfFinalGrouped)
+    # print(dfFinalGrouped)
     return dfFinalGrouped
 
 def sensitivityFrame(dataframe):
+    # only needed for secure enclave implementation
     dfSensitivity = dataframe.groupby(['HAT', 'license_plate', 'Date']).agg({'count': ['count']})
     dfSensitivity.columns = dfSensitivity.columns.droplevel(0)
     dfSensitivity.reset_index(inplace = True)
@@ -141,74 +82,6 @@ def sensitivityFrame(dataframe):
     print('dfCount', len(dfCount))
 
     return dfSensitivity, dfCount
-
-
-def aggregator(dataframe, configDict):
-    #initializing variables from config file
-    groupByCol = configDict['groupByCol']
-    localityFactor = configDict['localityFactor']
-    winsorizeLower = configDict['winsorizeLowerBound']
-    winsorizeUpper = configDict['winsorizeUpperBound']
-    dfThreshold = dataframe
-
-    #winsorizing the values of the chosen column
-    lowClip = dfThreshold[groupByCol].quantile(winsorizeLower) * (1 -   localityFactor)
-    highClip = dfThreshold[groupByCol].quantile(winsorizeUpper) * (1 + localityFactor)
-    dfThreshold[groupByCol].clip(lower=lowClip, upper=highClip, inplace = True)
-        
-    if (dfThreshold[groupByCol].dtype) == int or (dfThreshold[groupByCol].dtype) == float:
-        dfGrouped = dfThreshold.groupby(['HAT','Date','license_plate']).agg(
-                                count=(groupByCol,'count'),
-                                sum=(groupByCol,'sum'),
-                                max=(groupByCol,'max'),
-                                min=(groupByCol,'min')).reset_index()
-        
-        # //TODO check mean compute with secureEnclaveTesting
-        # dfGrouped['mean'] = np.round((dfGrouped['sum']/dfGrouped['count']), 2)
-
-        # //TODO moving to post filtering
-        # dfSensitivity = dfGrouped.groupby(['HAT', 'license_plate', 'Date']).agg({'count': ['count']})
-        # dfSensitivity.columns = dfSensitivity.columns.droplevel(0)
-        # dfSensitivity.reset_index(inplace = True)
-
-        # dfCount = dfSensitivity.groupby(['HAT']).agg(
-        #                         max_count=('count', 'max'),
-        #                         sum_count=('count', 'sum'))
-        # dfCount.reset_index(inplace = True)
-        # print('dfCount', len(dfCount))
-
-        #filtering average num of occurences per day per HAT
-        date = dfGrouped["Date"].unique()
-        minEventOccurencesPerDay = int(configDict["minEventOccurences"])
-        limit = len(date) * minEventOccurencesPerDay
-        dfFiltered = dfGrouped.groupby(['HAT', 'Date']).agg({'license_plate':'nunique'}).reset_index()
-        # //TODO license_plate to be replaced with generic input from the config file
-        dfFiltered = dfFiltered.groupby(['HAT']).agg({'license_plate':'sum'}).reset_index()
-        dfFiltered.rename(columns={"license_plate": "license_plate_count"}, inplace=True)
-        dfFiltered = dfFiltered[dfFiltered['license_plate_count'] >= limit]
-        dfFiltered = dfGrouped["HAT"].isin(dfFiltered["HAT"])
-        dfGrouped = dfGrouped[dfFiltered]
-        # dfFinalGrouped.to_csv('groupingTestMultiple.csv')
-        print('Number of unique HATs left after filtering is: ' + str(dfGrouped['HAT'].nunique()))
-        print('########################################################################################')
-        print('dfFinal Grouped after filtering', dfGrouped)
-
-        dfSensitivity = dfGrouped.groupby(['HAT', 'license_plate', 'Date']).agg({'count': ['count']})
-        dfSensitivity.columns = dfSensitivity.columns.droplevel(0)
-        dfSensitivity.reset_index(inplace = True)
-
-        dfCount = dfSensitivity.groupby(['HAT']).agg(
-                                max_count=('count', 'max'),
-                                sum_count=('count', 'sum'))
-        dfCount.reset_index(inplace = True)
-        print('dfCount', len(dfCount))
-
-    else:
-        dfGrouped = dfThreshold.groupby(['HAT']).agg(
-                                count=(groupByCol,'count'))
-        print('Warning: Only the count query is available for non-numeric choice of groupByCol')
-
-    return dfGrouped, dfSensitivity, dfCount
 
 def ITMSQuery1(dataframe):
     #average speed of buses passing through a HAT
@@ -224,25 +97,25 @@ def ITMSQuery1(dataframe):
 
 # def ITMSQuery1a(dataframe, K, configDict):
     # print("REACHED Q1a")
-    print("Running optimized Query1")
-    hats = np.unique(dataframe['HAT'])
-    eps_prime = configDict["privacyLossBudgetEpsQuery"][0] / K
-    dfITMSQuery1a, signalQuery1a, noiseQuery1a, bVarianceQuery1a = [], [], [], []
-    for h in hats:
-        df_hat = dataframe[dataframe['HAT'] == h]
-        q, s, n, b = give_me_private_mean(df_hat, eps_prime)
-        dfITMSQuery1a.append(q)
-        signalQuery1a.append(s)
-        noiseQuery1a.append(n)
-        bVarianceQuery1a.append(b)
-    # noisytvals, signals, noises = ...
-    dfITMSQuery1a = pd.DataFrame(dfITMSQuery1a)
-    dfITMSQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
-    signalQuery1a = pd.DataFrame(signalQuery1a)
-    noiseQuery1a = pd.DataFrame(noiseQuery1a)
-    signalQuery1a.rename(columns = {0:'queryOutput'}, inplace = True)
-    noiseQuery1a = dfITMSQuery1a
-    return signalQuery1a, noiseQuery1a,bVarianceQuery1a
+    # print("Running optimized Query1")
+    # hats = np.unique(dataframe['HAT'])
+    # eps_prime = configDict["privacyLossBudgetEpsQuery"][0] / K
+    # dfITMSQuery1a, signalQuery1a, noiseQuery1a, bVarianceQuery1a = [], [], [], []
+    # for h in hats:
+    #     df_hat = dataframe[dataframe['HAT'] == h]
+    #     q, s, n, b = give_me_private_mean(df_hat, eps_prime)
+    #     dfITMSQuery1a.append(q)
+    #     signalQuery1a.append(s)
+    #     noiseQuery1a.append(n)
+    #     bVarianceQuery1a.append(b)
+    # # noisytvals, signals, noises = ...
+    # dfITMSQuery1a = pd.DataFrame(dfITMSQuery1a)
+    # dfITMSQuery1a.rename(columns = {0:'queryNoisyOutput'}, inplace = True)
+    # signalQuery1a = pd.DataFrame(signalQuery1a)
+    # noiseQuery1a = pd.DataFrame(noiseQuery1a)
+    # signalQuery1a.rename(columns = {0:'queryOutput'}, inplace = True)
+    # noiseQuery1a = dfITMSQuery1a
+    # return signalQuery1a, noiseQuery1a,bVarianceQuery1a
 
 def ITMSQuery2(dataframe, configDict):
     #average number of speed violations per HAT over all days

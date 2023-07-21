@@ -4,24 +4,20 @@ import json
 import math
 import matplotlib.pyplot as plt
 
-def postProcessing(dfNoise, configDict, genType):
-    if genType == 'spatio-temporal':
-        #postprocessing ITMSQuery1
-        globalMaxValue = configDict['globalMaxValue']
-        globalMinValue = configDict['globalMinValue']
-
-        if dfNoise.name == 'dfFinalQuery1':
-            dfFinalITMSQuery1 = dfNoise
-            dfFinalITMSQuery1['queryNoisyOutput'].clip(globalMinValue, globalMaxValue, inplace = True)
-            if configDict['optimized'] == False:
-                dfFinalITMSQuery1.drop(['queryOutput'], axis = 1, inplace = True)
-            return dfFinalITMSQuery1
-        elif dfNoise.name == 'dfFinalQuery2':
-            dfFinalITMSQuery2 = dfNoise
-            dfFinalITMSQuery2['queryNoisyOutput'].clip(0, np.inf, inplace = True)
-            if configDict['optimized'] == False:
-                dfFinalITMSQuery2.drop(['queryOutput'], axis = 1, inplace = True)
-            return dfFinalITMSQuery2
+def postProcessing(dfNoise, configDict):
+    #postprocessing ITMSQuery1
+    globalMaxValue = configDict['globalMaxValue']
+    globalMinValue = configDict['globalMinValue']
+    if dfNoise.name == 'dfFinalQuery1':
+        dfFinalITMSQuery1 = dfNoise
+        dfFinalITMSQuery1['queryNoisyOutput'].clip(globalMinValue, globalMaxValue, inplace = True)
+        # dfFinalITMSQuery1.drop(['queryOutput'], axis = 1, inplace = True)
+        return dfFinalITMSQuery1
+    elif dfNoise.name == 'dfFinalQuery2':
+        dfFinalITMSQuery2 = dfNoise
+        dfFinalITMSQuery2['queryNoisyOutput'].clip(0, np.inf, inplace = True)
+        # dfFinalITMSQuery2.drop(['queryOutput'], axis = 1, inplace = True)
+        return dfFinalITMSQuery2
 
     elif genType == 'categorical':
         dfFinal = dfNoise
@@ -45,7 +41,7 @@ def signalToNoise(snrAverage,configDict):
     return snrAverage
 
 def cumulativeEpsilon(configDict):
-
+    #computing the cumulative epsilon
     privacyLossBudgetQuery1 = configDict['privacyLossBudgetEpsQuery'][0]
     privacyLossBudgetQuery2 = configDict['privacyLossBudgetEpsQuery'][1]
     cumulativeEpsilon = privacyLossBudgetQuery1 + privacyLossBudgetQuery2
@@ -67,15 +63,35 @@ def createNestedJSON(dataframe, parent_col):
                     current[-1][col] = row[col]
     return result
 
-def outputFileSpatioTemporal(dfFinalQuery1, dfFinalQuery2):
-    dfFinal = pd.DataFrame()
-    dfFinal['HAT'] = dfFinalQuery1['HAT']
-    dfFinal['query1NoisyOutput'] = dfFinalQuery1['queryNoisyOutput'].round(3)
-    dfFinal['query2NoisyOutput'] = dfFinalQuery2['queryNoisyOutput'].round(3)
-    dfFinal = createNestedJSON(dfFinal, 'HAT')
-    outputFile = '../pipelineOutput/noisyOutputSpatioTemporal.json'
-    with open(outputFile, 'w') as file:
-        json.dump(dfFinal, file, indent=4)
+def outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2 = None):
+    if dataTapChoice == 1:
+        dfFinal = dfFinalQuery1.to_dict(orient='records')
+        outputFile = '../pipelineOutput/cleanOutput.json'
+        # print(dfFinal)
+        with open(outputFile, 'w') as file:
+            json.dump(dfFinal, file, indent=4)
+    elif dataTapChoice == 2:
+        dfFinal = pd.DataFrame()
+        dfFinal['HAT'] = dfFinalQuery1['HAT']
+        dfFinal['query1CleanOutput'] = dfFinalQuery1['queryOutput']
+        dfFinal['query2CleanOutput'] = dfFinalQuery2['queryOutput']
+        dfFinal = createNestedJSON(dfFinal, 'HAT')
+        outputFile = '../pipelineOutput/cleanOutput.json'
+        with open(outputFile, 'w') as file:
+            json.dump(dfFinal, file, indent=4)
+        print('Clean query output generated. Please check the pipelineOutput folder.')
+        print('\n################################################################\n')
+    elif dataTapChoice == 3:
+        dfFinal = pd.DataFrame()
+        dfFinal['HAT'] = dfFinalQuery1['HAT']
+        dfFinal['query1NoisyOutput'] = dfFinalQuery1['queryNoisyOutput']
+        dfFinal['query2NoisyOutput'] = dfFinalQuery2['queryNoisyOutput']
+        dfFinal = createNestedJSON(dfFinal, 'HAT')
+        outputFile = '../pipelineOutput/noisyOutput.json'
+        with open(outputFile, 'w') as file:
+            json.dump(dfFinal, file, indent=4)
+        print('Differentially private query output generated. Please check the pipelineOutput folder.')
+        print('\n################################################################\n')
     return
 
 def outputFileGenAgg(dict):

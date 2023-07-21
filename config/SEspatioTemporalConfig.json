@@ -15,6 +15,8 @@
 		"location.type",
 		"trip_id"
 	],
+	"outputOptions": 0,
+	"pseudoCol": "license_plate",
 	"locationCol": "location.coordinates",
 	"datetimeCol": "observationDateTime",
 	"trueValue": "speed",
@@ -25,8 +27,8 @@
 	"globalMaxValue": 65,
 	"globalMinValue": 0, 
 	"privacyLossBudgetEpsQuery": [
-		5,
-		0.5
+		100,
+		100
 	],
 	"h3Resolution": 7,
 	"startTime": 9,

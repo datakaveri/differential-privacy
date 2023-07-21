@@ -2,6 +2,8 @@ import json
 import jsonschema
 import pandas as pd
 from pandas import json_normalize
+import random
+import string
 
 def schemaValidator(schemaFile, configFile):
     schemaFile = '../config/' + schemaFile
@@ -18,34 +20,6 @@ def schemaValidator(schemaFile, configFile):
 # Validate the document against the schema
     jsonschema.validate(instance=document, schema=schema)
     return
-
-def readFile(configFileName):
-    #reading config
-    configFile = '../config/' + configFileName
-    with open(configFile, "r") as cfile:
-        configDict = json.load(cfile)
-    dataFileName = '../data/' + configDict['dataFile']
-    
-    if configDict['genType']=='spatio-temporal':        
-        #reading datafile
-        
-        with open(dataFileName, "r") as dfile:
-            dataDict = json.load(dfile)        
-        #loading data
-        dataframe = pd.json_normalize(dataDict)
-        
-    elif configDict['genType']=='categorical':
-        dataframe = pd.read_json(dataFileName)
-    elif configDict['genType']=='genAgg':
-        dataframe = pd.read_json(dataFileName)
-        dataframe['comments']=dataframe['comments'].str[0]
-        
-    pd.set_option('mode.chained_assignment', None)
-    print('The loaded file is: ' + dataFileName + ' with shape ' + str(dataframe.shape))
-    
-    genType = configDict['genType']
-    configDict = configDict[genType]
-    return dataframe, configDict, genType
 
 def dropDuplicates(dataframe, configDict):
 
@@ -75,3 +49,24 @@ def suppress(dataframe, configDict):
     print("\nDropping columns from configuration file...")
     print(str(dataframe.shape) + ' is the shape of the dataframe after suppression.\n\nThe number of unique rows are:\n' + str(dataframe.shape[0]))
     return dataframe
+
+def pseudonymize(dataframe, configDict):
+    pseudoCol = configDict['pseudoCol']
+    uniquePlates = dataframe[pseudoCol].unique()
+    pseudonymizedCol = {}
+    for item in uniquePlates:
+        pseudonymizedItem = ''
+        for char in item:
+            if char.isalpha():
+                random_char = random.choice(string.ascii_uppercase)
+                pseudonymizedItem += random_char
+            elif char.isdigit():
+                random_char = random.choice(string.digits)
+                pseudonymizedItem += random_char
+            else:
+                pseudonymizedItem += char
+        pseudonymizedCol[item] = pseudonymizedItem
+    # dataframe.drop([pseudoCol], axis = 1, inplace = True)
+    dataframe[pseudoCol] = dataframe[pseudoCol].map(pseudonymizedCol)
+    return dataframe
+
