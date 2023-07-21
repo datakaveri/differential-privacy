@@ -4,7 +4,7 @@ import json
 import math
 import matplotlib.pyplot as plt
 
-def postProcessing(dfNoise, configDict):
+def postProcessingSpatioTemporal(dfNoise, configDict):
     #postprocessing ITMSQuery1
     globalMaxValue = configDict['globalMaxValue']
     globalMinValue = configDict['globalMinValue']
@@ -64,11 +64,17 @@ def createNestedJSON(dataframe, parent_col):
 
 def outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2 = None):
     if dataTapChoice == 1:
-        dfFinal = dfFinalQuery1.to_dict(orient='records')
-        outputFile = '../pipelineOutput/cleanOutput.json'
-        # print(dfFinal)
+        # dfFinal = dfFinalQuery1.to_dict(orient='records')
+        dfFinal = dfFinalQuery1
+        # dfFinal['Date'] = pd.to_datetime(dfFinal['Date']).astype(str)
+        dfFinal['Date'] = dfFinal['Date'].astype(str)
+        grouped_data = dfFinal.groupby(['Date', 'license_plate']).apply(lambda x: x.drop(['Date', 'license_plate'], axis=1).to_dict('records')).reset_index(name='data')
+        nested_json_data = grouped_data.groupby('Date').apply(lambda x: x.set_index('license_plate')['data'].to_dict()).to_dict()
+        outputFile = '../pipelineOutput/pseudonymizedAggOutput.json'
         with open(outputFile, 'w') as file:
-            json.dump(dfFinal, file, indent=4)
+            json.dump(nested_json_data, file, indent=4)
+        print('Pseudonymized and aggregated query output generated. Please check the pipelineOutput folder.')
+        print('\n################################################################\n')
     elif dataTapChoice == 2:
         dfFinal = pd.DataFrame()
         dfFinal['HAT'] = dfFinalQuery1['HAT']
@@ -183,5 +189,4 @@ def RMSEGraph(snr,epsilon,filename):
     plt.grid(True)
     # Save the plot to a file (e.g., PNG format)
     plt.savefig('../pipelineOutput/'+filename)
-
-
+    return

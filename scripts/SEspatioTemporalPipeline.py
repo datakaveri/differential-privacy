@@ -21,30 +21,6 @@ file_names_list = ['../data/split_file_0.json',
             '../data/split_file_8.json',
             '../data/split_file_9.json']
 
-configFileName = '../config/SEspatioTemporalConfig.json'
-with open(configFileName, "r") as cfile:
-    configDict = json.load(cfile)
-schemaFileName = 'SEspatioTemporalSchema.json'
-
-# handling the choice for data tapping, including validation of choice
-validChoice = 0
-while validChoice == 0: 
-    print("Select type of output file: ")
-    print('''1. Pseudonymized and Aggregated Output (Non-DP) \
-    2. Clean Query Output \
-    3. Noisy Query Output ''')
-    dataTapChoice = int(input("Enter a number to make your selection: "))
-    if dataTapChoice == 1:
-        configDict['outputOptions'] = 1
-        validChoice = 1
-    elif dataTapChoice == 2:
-        configDict['outputOptions'] = 2
-        validChoice = 1
-    elif dataTapChoice == 3:
-        configDict['outputOptions'] = 3
-        validChoice = 1
-    else:
-        print("Choice Invalid, please enter an integer between 1 and 3 to make your choice. \\ ")
 
 def chunkHandling(config, schema, fileList, dataTapChoice):
     with open(config, "r") as cfile:
@@ -185,7 +161,7 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
 
         return preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K
 
-def runSpatioTemporalPipeline(dataframe, configDict, K):
+def runSpatioTemporalPipeline(dataframe, configDict, K, timeRange, dfCount):
 
     dfGrouped = dataframe
 
@@ -214,7 +190,6 @@ def runSpatioTemporalPipeline(dataframe, configDict, K):
     dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2 = stmod.noiseComputeITMSQuery(dfQuery1, dfQuery2, sensitivityITMSQuery1, sensitivityITMSQuery2, configDict, K)
     return dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2
 
-
 def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, dataTapChoice):
     print('\n################################################################\n')
     print('POSTPROCESSING')
@@ -222,8 +197,8 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     #postprocessing
     dfNoiseQuery1.name = 'dfFinalQuery1'
     dfNoiseQuery2.name = 'dfFinalQuery2'
-    dfFinalQuery1 = postmod.postProcessing(dfNoiseQuery1, configDict)
-    dfFinalQuery2 = postmod.postProcessing(dfNoiseQuery2, configDict)
+    dfFinalQuery1 = postmod.postProcessingSpatioTemporal(dfNoiseQuery1, configDict)
+    dfFinalQuery2 = postmod.postProcessingSpatioTemporal(dfNoiseQuery2, configDict)
     
     #noise assignment
     noiseQuery1 = dfNoiseQuery1['queryNoisyOutput'].reset_index(drop = True)
@@ -249,9 +224,37 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     return
 
 #running predefined functions
-preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K = chunkHandling(configFileName, schemaFileName, file_names_list, dataTapChoice)
+configFileName = '../config/SEspatioTemporalConfig.json'
+with open(configFileName, "r") as cfile:
+    configDict = json.load(cfile)
+schemaFileName = 'SEspatioTemporalSchema.json'
 
-dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2 = runSpatioTemporalPipeline(preProcessedDataframe, configDict, K)
+def main(configDict):
+    # handling the choice for data tapping, including validation of choice
+    validChoice = 0
+    while validChoice == 0: 
+        print("Select type of output file: ")
+        print('''1. Pseudonymized and Aggregated Output (Non-DP) \
+        2. Clean Query Output \
+        3. Noisy Query Output ''')
+        dataTapChoice = int(input("Enter a number to make your selection: "))
+        if dataTapChoice == 1:
+            configDict['outputOptions'] = 1
+            validChoice = 1
+        elif dataTapChoice == 2:
+            configDict['outputOptions'] = 2
+            validChoice = 1
+        elif dataTapChoice == 3:
+            configDict['outputOptions'] = 3
+            validChoice = 1
+        else:
+            print("Choice Invalid, please enter an integer between 1 and 3 to make your choice. \\ ")
 
-postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, dataTapChoice)
+    preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K = chunkHandling(configFileName, schemaFileName, file_names_list, dataTapChoice)
 
+    dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2 = runSpatioTemporalPipeline(preProcessedDataframe, configDict, K, timeRange, dfCount)
+
+    postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, dataTapChoice)
+
+if __name__ == '__main__':
+    main(configDict)
