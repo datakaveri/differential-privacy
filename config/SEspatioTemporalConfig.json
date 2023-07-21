@@ -27,8 +27,8 @@
 	"globalMaxValue": 65,
 	"globalMinValue": 0, 
 	"privacyLossBudgetEpsQuery": [
-		100,
-		100
+		10,
+		10
 	],
 	"h3Resolution": 7,
 	"startTime": 9,

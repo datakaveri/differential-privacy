@@ -199,8 +199,7 @@ def snrCompute(signal, bVariance):
     else:
         for i in range (0, len(signal)):
             snr.append((signal[i]*signal[i])/(bVariance[i]))
-    snrAverage = np.mean(snr)
-    return snrAverage,snr
+    return snr
 
 def maeCompute(signal, estimate):
     mae = np.mean(np.abs(signal - estimate))

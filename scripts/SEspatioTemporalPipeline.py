@@ -202,9 +202,14 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     noiseQuery2 = dfNoiseQuery2['queryNoisyOutput'].reset_index(drop = True)
     
     #signal to noise computation
-    # snrAverageQuery1 = stmod.snrCompute(signalQuery1, bVarianceQuery1)
-    # snrAverageQuery2 = stmod.snrCompute(signalQuery2, bVarianceQuery2)
-    # print('\n\nFor Query 1: ')
+    if dataTapChoice==3:
+        snr1 = stmod.snrCompute(signalQuery1, bVarianceQuery1)
+        snr2 = stmod.snrCompute(signalQuery2, bVarianceQuery2)
+        postmod.RMSEGraph(snr1,configDict["privacyLossBudgetEpsQuery"][0],'spatioQuery1.png')
+        print("Relative RMSE Graph generated for query1 check the pipelineOuput Folder")
+        postmod.RMSEGraph(snr2,configDict["privacyLossBudgetEpsQuery"][1],'spatioQuery2.png')
+        print("Relative RMSE Graph generated for query2 check the pipelineOuput Folder")
+        # print('\n\nFor Query 1: ')
     # postmod.signalToNoise(snrAverageQuery1, configDict)
     # maeQuery1 = stmod.maeCompute(signalQuery1, noiseQuery1)
     # print("The MAE is: ", maeQuery1)

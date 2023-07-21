@@ -60,9 +60,13 @@ def categoricalDP(query1Dict, query2Dict, configDict):
     chunkedNoiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(query2Dict, configDict)
     
     #compute snr
-    #cmod.snrQuery(chunkedNoiseHistQuery1, bVarianceQuery1, configDict)
-    #cmod.snrQuery(chunkedNoiseHistQuery2, bVarianceQuery2, configDict)
-    
+    if configDict['outputOptions'] ==2:
+        snr1=cmod.snrQuery(chunkedNoiseHistQuery1, bVarianceQuery1, configDict)
+        postmod.RMSEGraph(snr1,configDict["PrivacyLossBudget"][0],'categoricalQuery1.png')
+        print("Relative RMSE Graph generated for query1 check the pipelineOuput Folder")
+        snr2=cmod.snrQuery(chunkedNoiseHistQuery2, bVarianceQuery2, configDict)
+        postmod.RMSEGraph(snr2,configDict["PrivacyLossBudget"][1],'categoricalQuery2.png')
+        print("Relative RMSE Graph generated for query2 check the pipelineOuput Folder")
     #post processing 
     roundedHistQuery1 = cmod.postProcessingQuery(chunkedNoiseHistQuery1, configDict)
     roundedHistQuery2 = cmod.postProcessingQuery(chunkedNoiseHistQuery2, configDict)

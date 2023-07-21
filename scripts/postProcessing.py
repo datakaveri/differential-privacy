@@ -102,6 +102,7 @@ def outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2 = None)
 def outputFileGenAgg(dict):
     outputFile = '../pipelineOutput/genAggOutput.json'
     nested_json = {}
+    
     for WAYM, df in dict.items():
         nested_json[WAYM] = {}
         for department, counts in df.iterrows():
@@ -115,9 +116,9 @@ def outputFileCategorical(dfs1, dfs2, configDict):
     outputDFs['Query1']=dfs1
     outputDFs['Query2']=dfs2
     if configDict['outputOptions'] == 1:
-        name = 'cleanOutput.json'
+        name = 'cleanOutputCategorical.json'
     elif configDict['outputOptions'] == 2:
-        name = 'noisyOutput.json'
+        name = 'noisyOutputCategorical.json'
     
     jsonDict = {}
     for query, df in outputDFs.items():
@@ -180,7 +181,7 @@ def RMSEGraph(snr,epsilon,filename):
     plt.plot(epsilons, error_25, color='blue', label='x=0.25')
     plt.plot(epsilons, error_50, color='green', label='x=0.5')
     # Add a vertical dotted line at the x position epsilon
-    plt.axvline(x=epsilon, linestyle='dotted', color='gray',label=f'ε={epsilon}')
+    plt.axvline(x=epsilon, linestyle='dotted', color='gray',label=f'chosen ε={epsilon}')
     # Set the plot title and labels
     plt.title('Relative RMSE graph')
     plt.xlabel('Epsilons')

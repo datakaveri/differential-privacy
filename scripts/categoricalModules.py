@@ -184,7 +184,7 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
     SNR=[]
     for name, noisyDfs in noiseHistQuery.items():
         listOfSNR = []
-        print('For '+name+ ': ', end='')
+        #print('For '+name+ ': ', end='')
         for pair, finalDF in noisyDfs.items():
             
             #signal assignment
@@ -202,9 +202,9 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
         
         snrAverage = np.mean(listOfSNR)
         snrVariance = np.var(listOfSNR)
-        print('\nSNR Average : ' +  str(np.round(snrAverage,3)), end=' ')
+        #print('\nSNR Average : ' +  str(np.round(snrAverage,3)), end=' ')
         #postmod.signalToNoise(snrAverage, configDict)
-        print('|| SNR Variance : ' + str(np.round(snrVariance, 3)))
+        #print('|| SNR Variance : ' + str(np.round(snrVariance, 3)))
         #postmod.signalToNoise(snrVariance, configDict)
         return SNR
 

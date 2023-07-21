@@ -6,7 +6,7 @@ import json
 validChoice = 0
 while validChoice == 0: 
     print("--------- IUDX DATA ANONYMIZATION PIPELINE ---------\n")
-    print('''1. Spatio-Temporal Dataset (Surat ITMS)\n2. Categorical Dataset (Telangana Soil)\n3. Comments Dataset (Vadodara Civic Complaints)\n''')
+    print('''1. Spatio-Temporal Dataset (Surat ITMS)\n2. Categorical Dataset (Telangana Soil)\n3. genAgg Dataset (Vadodara Civic Complaints)\n''')
     datasetChoice = int(input("Enter a number to make your selection: "))
     if datasetChoice == 1:       
         SES.main()
