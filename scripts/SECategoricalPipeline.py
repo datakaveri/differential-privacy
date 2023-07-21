@@ -4,16 +4,16 @@ import preProcessing as premod
 import postProcessing as postmod
 import categoricalModules as cmod
 
-file_names_list = ['../data/categorical/split_file_0.csv',
-              '../data/categorical/split_file_1.csv',
-              '../data/categorical/split_file_2.csv',
-              '../data/categorical/split_file_3.csv',
-              '../data/categorical/split_file_4.csv',
-              '../data/categorical/split_file_5.csv',
-              '../data/categorical/split_file_6.csv',
-              '../data/categorical/split_file_7.csv',
-              '../data/categorical/split_file_8.csv',
-              '../data/categorical/split_file_9.csv']
+file_names_list = ['../data/split_file_0.csv',
+              '../data/split_file_1.csv',
+              '../data/split_file_2.csv',
+              '../data/split_file_3.csv',
+              '../data/split_file_4.csv',
+              '../data/split_file_5.csv',
+              '../data/split_file_6.csv',
+              '../data/split_file_7.csv',
+              '../data/split_file_8.csv',
+              '../data/split_file_9.csv']
 
 configFileName = '../config/SECategoricalConfig.json'
 with open(configFileName, "r") as cfile:
@@ -55,9 +55,13 @@ def categoricalDP(query1Dict, query2Dict, configDict):
     chunkedNoiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(query2Dict, configDict)
     
     #compute snr
-    cmod.snrQuery(chunkedNoiseHistQuery1, bVarianceQuery1, configDict)
-    cmod.snrQuery(chunkedNoiseHistQuery2, bVarianceQuery2, configDict)
-    
+    if configDict['outputOptions'] ==2:
+        snr1=cmod.snrQuery(chunkedNoiseHistQuery1, bVarianceQuery1, configDict)
+        postmod.RMSEGraph(snr1,configDict["PrivacyLossBudget"][0],'categoricalQuery1.png')
+        print("Relative RMSE Graph generated for query1 check the pipelineOuput Folder")
+        snr2=cmod.snrQuery(chunkedNoiseHistQuery2, bVarianceQuery2, configDict)
+        postmod.RMSEGraph(snr2,configDict["PrivacyLossBudget"][1],'categoricalQuery2.png')
+        print("Relative RMSE Graph generated for query2 check the pipelineOuput Folder")
     #post processing 
     roundedHistQuery1 = cmod.postProcessingQuery(chunkedNoiseHistQuery1, configDict)
     roundedHistQuery2 = cmod.postProcessingQuery(chunkedNoiseHistQuery2, configDict)

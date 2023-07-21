@@ -180,7 +180,7 @@ def RMSEGraph(snr,epsilon,filename):
     plt.plot(epsilons, error_25, color='blue', label='x=0.25')
     plt.plot(epsilons, error_50, color='green', label='x=0.5')
     # Add a vertical dotted line at the x position epsilon
-    plt.axvline(x=epsilon, linestyle='dotted', color='gray',label=f'ε={epsilon}')
+    plt.axvline(x=epsilon, linestyle='dotted', color='gray',label=f'choosen ε={epsilon}')
     # Set the plot title and labels
     plt.title('Relative RMSE graph')
     plt.xlabel('Epsilons')
