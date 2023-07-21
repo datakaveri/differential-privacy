@@ -108,3 +108,65 @@ def outputFileCategorical(dfs1, dfs2, configDict):
     with open('../pipelineOutput/'+name, 'w') as fp:
         json.dump(jsonDict, fp, indent=4)
 
+def RMSEGraph(snr,epsilon,filename):
+    alphas=[]
+    epsilons=[]
+    for i in range(1, 101):
+        value = i / 10.0
+        alphas.append(value)
+        epsilons.append(value*epsilon)
+    snr_final=[]
+    for alpha in alphas:
+        snr_new = []  # Initialize an empty list
+        # Iterate over the elements of the original sequence
+        for snr_value in snr:
+            result = (alpha * alpha) * snr_value  # Perform the multiplication
+            snr_new.append(result)
+        snr_final.append(snr_new)
+    RMSE=[]
+    for snr in snr_final:
+        rmse=[]
+        for value in snr:
+            if value==0:
+                rmse.append(pow(10,10)*0.2)
+            else:
+                rmse.append(1.0/math.sqrt(value))
+            
+        RMSE.append(rmse)
+    error_10=[]
+    error_25=[]
+    error_50=[]
+    for rmse in RMSE:
+        cnt_10=0
+        cnt_25=0
+        cnt_50=0
+        for value in rmse:
+            if value < 0.1:
+                cnt_10=cnt_10+1
+            if value < 0.25:
+                cnt_25=cnt_25+1
+            if value < 0.5:
+                cnt_50=cnt_50+1
+        error_10.append(cnt_10)
+        error_25.append(cnt_25)
+        error_50.append(cnt_50)
+    error_10=np.multiply(np.divide(error_10,len(snr)),100)
+    error_25=np.multiply(np.divide(error_25,len(snr)),100)
+    error_50=np.multiply(np.divide(error_50,len(snr)),100)
+    # Clear the plot before each new plot
+    plt.clf()
+    plt.plot(epsilons, error_10, color='red', label='x=0.1')
+    plt.plot(epsilons, error_25, color='blue', label='x=0.25')
+    plt.plot(epsilons, error_50, color='green', label='x=0.5')
+    # Add a vertical dotted line at the x position epsilon
+    plt.axvline(x=epsilon, linestyle='dotted', color='gray',label=f'ε={epsilon}')
+    # Set the plot title and labels
+    plt.title('Relative RMSE graph')
+    plt.xlabel('Epsilons')
+    plt.ylabel('Percentage of samples whose Relative RMSE  is less than x ')
+    plt.legend()
+    plt.grid(True)
+    # Save the plot to a file (e.g., PNG format)
+    plt.savefig('../pipelineOutput/'+filename)
+
+

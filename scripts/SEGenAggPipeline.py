@@ -7,16 +7,8 @@ import postProcessing as postmod
 import GenAggModules as  gamod
 from pandas import json_normalize
 def chunkHandling():
-    file_names_list = ['../data/split_file_0.json',
-              '../data/split_file_1.json',
-              '../data/split_file_2.json',
-              '../data/split_file_3.json',
-              '../data/split_file_4.json',
-              '../data/split_file_5.json',
-              '../data/split_file_6.json',
-              '../data/split_file_7.json',
-              '../data/split_file_8.json',
-              '../data/split_file_9.json']
+    with open("../config/configFile.json", "r") as config_file:
+        file_names_list = json.load(config_file)
     configFileName = '../config/SEGenAggConfig.json'
     with open(configFileName, "r") as cfile:
         configDict = json.load(cfile)
