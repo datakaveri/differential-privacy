@@ -20,8 +20,10 @@ def merge(dict1,dict2):
     for WAYM, df in dict2.items():
         if WAYM in dict1:
             df1=dict1[WAYM]
-            combined_df = df1.combine_first(df)
-            dict1[WAYM] = combined_df
+            merged_df = pd.merge(df1, df, how='outer', left_index=True, right_index=True)
+            merged_df = df1.add(df, fill_value=0)
+            merged_df.fillna(0, inplace=True)
+            dict1[WAYM] = merged_df
         else:
             dict1[WAYM] = df
     return dict1

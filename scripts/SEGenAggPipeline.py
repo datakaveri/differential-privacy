@@ -52,7 +52,6 @@ def chunkHandling():
             dataframe = gamod.genAggGeneralization(dataframe,configDict)
             dfGrouped_dict=gamod.resolutionCount(dataframe)
             dfFinalGrouped_dict=gamod.merge(dfFinalGrouped_dict,dfGrouped_dict)        
-
         # print('########################################################################################')
         print('The length of the grouped dataframe is ',len(dfFinalGrouped_dict), 'for chunk ',len(lengthList))
        # print('No. of Unique HATs of the grouped dataframe is: ', dfFinalGrouped['HAT'].nunique())
