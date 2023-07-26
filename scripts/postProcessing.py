@@ -130,7 +130,7 @@ def outputFileCategorical(dfs1, dfs2, configDict):
     with open('../pipelineOutput/'+name, 'w') as fp:
         json.dump(jsonDict, fp, indent=4)
 
-def RMSEGraph(snr,epsilon,filename):
+def RMSEGraph(snr,epsilon,type,Query):
     alphas=[]
     epsilons=[]
     for i in range(1, 101):
@@ -183,11 +183,12 @@ def RMSEGraph(snr,epsilon,filename):
     # Add a vertical dotted line at the x position epsilon
     plt.axvline(x=epsilon, linestyle='dotted', color='gray',label=f'chosen ε={epsilon}')
     # Set the plot title and labels
-    plt.title('Relative RMSE graph')
+    plt.title('Relative RMSE graph For '+Query)
     plt.xlabel('Epsilons')
-    plt.ylabel('Percentage of samples whose Relative RMSE  is less than x ')
+    plt.ylabel('Percentage of samples whose Relative RMSE  is less than x')
     plt.legend()
     plt.grid(True)
     # Save the plot to a file (e.g., PNG format)
+    filename=type+Query+'.png'
     plt.savefig('../pipelineOutput/'+filename)
     return
