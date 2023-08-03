@@ -10,10 +10,11 @@ from pandas import json_normalize
 def chunkHandling():
     with open("../config/genAggFNList.json", "r") as config_file:
             file_names_list = json.load(config_file)
-    configFileName = '../config/SEGenAggConfig.json'
+    configFileName = '../config/anonymizationConfig.json'
     with open(configFileName, "r") as cfile:
         configDict = json.load(cfile)
-    schemaFileName = 'SEGenAggSchema.json'
+    configDict = configDict['genAgg']
+    schemaFileName = 'anonymizationSchema.json'
     print('\n####################################################################\n')
     print('PREPROCESSING')
     lengthList = []

@@ -19,11 +19,13 @@ import categoricalModules as cmod
 with open("../config/categoricalFNList.json", "r") as config_file:
             file_names_list = json.load(config_file)
 
-configFileName = '../config/SECategoricalConfig.json'
+configFileName = '../config/anonymizationConfig.json'
 
 with open(configFileName, "r") as cfile:
     configDict = json.load(cfile)
-schemaFileName = 'SECategoricalSchema.json'
+configDict = configDict['categorical']
+schemaFileName = 'anonymizationSchema.json'
+
 premod.schemaValidator(schemaFileName, configFileName)
 
 def chunkHandling(configDict):

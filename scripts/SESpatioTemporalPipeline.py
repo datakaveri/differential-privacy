@@ -10,6 +10,7 @@ import numpy as np
 # //TODO: Write a wrapper function to ensure that the correct pipeline file is run
 # //TODO: Include file names list handling within the wrapper file
 # //TODO: Handle data tapping within the individual pipeline files
+# //TODO: Read configDict and configSchema once
 '''file_names_list = ['../data/split_file_0.json',
             '../data/split_file_1.json',
             '../data/split_file_2.json',
@@ -22,8 +23,11 @@ import numpy as np
             '../data/split_file_9.json']'''
 
 def chunkHandling(config, schema, fileList, dataTapChoice):
-    with open(config, "r") as cfile:
+    configFileName = '../config/anonymizationConfig.json'
+    with open(configFileName, "r") as cfile:
         configDict = json.load(cfile)
+    configDict = configDict['spatio-temporal']
+    configDict['dataFile'] = ''
     schemaFileName = schema
 
     print('\n####################################################################\n')
@@ -230,10 +234,11 @@ def main():
         file_names_list = json.load(config_file)
 
     #running predefined functions
-    configFileName = '../config/SESpatioTemporalConfig.json'
+    configFileName = '../config/anonymizationConfig.json'
     with open(configFileName, "r") as cfile:
         configDict = json.load(cfile)
-    schemaFileName = 'SESpatioTemporalSchema.json'
+    configDict = configDict['spatio-temporal']
+    schemaFileName = 'anonymizationSchema.json'
     premod.schemaValidator(schemaFileName, configFileName)
 
 
