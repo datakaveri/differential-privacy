@@ -89,8 +89,8 @@ def outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2 = None)
     elif dataTapChoice == 3:
         dfFinal = pd.DataFrame()
         dfFinal['HAT'] = dfFinalQuery1['HAT']
-        dfFinal['query1NoisyOutput'] = dfFinalQuery1['queryNoisyOutput']
-        dfFinal['query2NoisyOutput'] = dfFinalQuery2['queryNoisyOutput']
+        dfFinal['query1NoisyOutput'] = np.round(dfFinalQuery1['queryNoisyOutput'], 3)
+        dfFinal['query2NoisyOutput'] = np.round(dfFinalQuery2['queryNoisyOutput'], 3)
         dfFinal = createNestedJSON(dfFinal, 'HAT')
         outputFile = '../pipelineOutput/noisyOutputSpatioTemporal.json'
         with open(outputFile, 'w') as file:
