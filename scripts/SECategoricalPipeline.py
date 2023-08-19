@@ -34,6 +34,23 @@ def chunkHandling(configDict):
     flag = 0
     cnt = 1
     
+    #asking variables
+    print('\nUsing numbers select which group by column( Type 0 for default )\n', configDict['groupLocations'], '\n')
+    
+    while True:
+        grouped = int(input())
+        if grouped <0 or grouped >len(configDict['groupLocations'])+1:
+            print('Invalid column chosen please chose from one of the follows\n', configDict['groupLocations'])
+            continue
+        break
+    
+    if grouped == 0:
+        groupBy = configDict['queryPer']
+    else : 
+        groupBy = configDict['groupLocations'][grouped-1]
+
+    
+    
     #iterate through the chunks and get counts as per query
     for file in file_names_list:
         print('------------------------ Processing chunk no. ', cnt)
@@ -44,13 +61,13 @@ def chunkHandling(configDict):
         dataframe = cmod.categoricGeneralization(dataframe, configDict)
     
         if flag == 0:
-            query1Dict = cmod.histogramQuery1(dataframe, configDict)
-            query2Dict = cmod.histogramQuery2(dataframe, configDict)
+            query1Dict = cmod.histogramQuery1(dataframe, configDict, groupBy)            
+            query2Dict = cmod.histogramQuery2(dataframe, configDict, groupBy)
             flag = 1
             
         elif flag == 1:
-            tempDict = cmod.histogramQuery1(dataframe, configDict)
-            tempDict2 = cmod.histogramQuery2(dataframe, configDict)
+            tempDict = cmod.histogramQuery1(dataframe, configDict, groupBy)
+            tempDict2 = cmod.histogramQuery2(dataframe, configDict, groupBy)
             query1Dict = cmod.merge_dicts(query1Dict, tempDict)
             query2Dict = cmod.merge_dicts(query2Dict, tempDict2)
     
@@ -59,22 +76,40 @@ def chunkHandling(configDict):
 def categoricalDP(query1Dict, query2Dict, configDict):
     #compute noise
     chunkedNoiseHistQuery1, bVarianceQuery1 = cmod.noiseComputeHistogramQuery1(query1Dict, configDict)
-    chunkedNoiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(query2Dict, configDict)
+    roundedHistQuery1 = cmod.postProcessingQuery(chunkedNoiseHistQuery1, configDict)
+    dfFinalQuery1 = cmod.histogramOutputQuery(roundedHistQuery1)
+    
+    while(True):
+        configDict['q2choice'] = int(input('\n\nNoise added successfuly for query1.\n\nPlease choose the method you would like for query2\n1. Noisy Counts\n2. Modal Values\n\n'))
+        if configDict['q2choice'] < 0 or configDict['q2choice'] >2:
+            continue
+        else:
+            break
+    if configDict['q2choice'] == 2:
+        while(True):
+            configDict['q2choice'] = int(input('\nPlease choose the method you would like for calculating mode:\n1. Exponential Mechanism\n2. Report Noisy Max\n\n'))+1
+            if configDict['q2choice'] < 0 or configDict['q2choice'] > 3:
+                continue 
+            else :
+                break
+    if configDict['q2choice'] == 1 or configDict['q2choice'] == 0: 
+        chunkedNoiseHistQuery2, bVarianceQuery2 = cmod.noiseComputeHistogramQuery2(query2Dict, configDict)
+        roundedHistQuery2 = cmod.postProcessingQuery(chunkedNoiseHistQuery2, configDict)
+        dfFinalQuery2 = cmod.histogramOutputQuery(roundedHistQuery2)
+    elif configDict['q2choice'] == 2:
+        dfFinalQuery2 = cmod.exponentialMechanismHistogramQuery2(query2Dict, configDict)
+    elif configDict['q2choice'] == 3:
+        dfFinalQuery2 = cmod.reportNoisyMax(query2Dict, configDict)
     
     #compute snr
     if configDict['outputOptions'] ==2:
         snr1=cmod.snrQuery(chunkedNoiseHistQuery1, bVarianceQuery1, configDict)
         postmod.RMSEGraph(snr1,configDict["PrivacyLossBudget"][0],'categorical','Query1')
         print("Relative RMSE Graph generated for query1 check the pipelineOuput Folder")
-        snr2=cmod.snrQuery(chunkedNoiseHistQuery2, bVarianceQuery2, configDict)
-        postmod.RMSEGraph(snr2,configDict["PrivacyLossBudget"][1],'categorical','Query2')
-        print("Relative RMSE Graph generated for query2 check the pipelineOuput Folder")
-    #post processing 
-    roundedHistQuery1 = cmod.postProcessingQuery(chunkedNoiseHistQuery1, configDict)
-    roundedHistQuery2 = cmod.postProcessingQuery(chunkedNoiseHistQuery2, configDict)
-
-    dfFinalQuery1 = cmod.histogramOutputQuery(roundedHistQuery1)
-    dfFinalQuery2 = cmod.histogramOutputQuery(roundedHistQuery2)
+        if configDict['q2choice'] == 1: 
+            snr2=cmod.snrQuery(chunkedNoiseHistQuery2, bVarianceQuery2, configDict)
+            postmod.RMSEGraph(snr2,configDict["PrivacyLossBudget"][1],'categorical','Query2')
+            print("Relative RMSE Graph generated for query2 check the pipelineOuput Folder")   
     
     return dfFinalQuery1, dfFinalQuery2
 

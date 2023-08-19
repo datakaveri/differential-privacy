@@ -15,7 +15,7 @@
 			"vehicle_label",
 			"id",
 			"location.type",
-			"trip_id"
+			"trip_id" 
 		],
 		"outputOptions": 0,
 		"pseudoCol": "license_plate",
@@ -43,7 +43,8 @@
 	"categorical": {
 		"duplicateDetection": [
 			"Sample No."
-		],
+		],	
+		"groupLocations" : ["village","subdistrict", "district"],
 		"queryPer":"subdistrict",
 		"splitCols":[
 			"pH",
@@ -72,6 +73,7 @@
 		],
 		"groupByPairs":[["N","P"], ["Zn","Fe"],["N","pH"],["OC","EC"]],
 		"ID":"Sample No.",
+		"q2choice" : 1,
 		"cycleToDrop":["2019-20-to-2020-2021"],
 		"cycleToKeep":["2017-18-to-2018-19"],
 		"PrivacyLossBudget":[5, 5],

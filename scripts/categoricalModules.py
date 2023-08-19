@@ -33,10 +33,9 @@ def merge_dicts(dict1, dict2):
 
     return dict1
 
-def histogramQuery1(dataframe, configFile):       
+def histogramQuery1(dataframe, configFile, grouped):           
     
-    grouped = dataframe.groupby(configFile['queryPer'])
-
+    grouped = dataframe.groupby(grouped)
     # create a dictionary of dataframes where each key corresponds to a unique value in the column
     dfs = {}
     for name, group in grouped:
@@ -45,7 +44,7 @@ def histogramQuery1(dataframe, configFile):
     histogramDfs = {}
     
     #print('size of data before hist' ,len(df))
-    listToGrouped = configFile['groupByCols']
+    listToGrouped = configFile['groupByCols']   
     
     for listToGrouped in configFile['groupByPairs']:
         for name, DF in dfs.items():
@@ -74,6 +73,8 @@ def histogramQuery1(dataframe, configFile):
 
             # reset the index and rename the columns
             result = result.reset_index()
+            if len(result)==0:
+                continue
             result[listToGrouped] = result['index'].apply(lambda x: pd.Series(x))    
             result = result.drop('index', axis=1)
             first_col = result.pop(result.columns[0])
@@ -113,10 +114,10 @@ def noiseComputeHistogramQuery1(dataframeDict, configFile):
     
     return noisyDataframeDict, bVarianceQuery1
     
-def histogramQuery2(dataframe, configFile):
+def histogramQuery2(dataframe, configFile, grouped):
     allCols = configFile['splitCols'].copy()
     computedCols = configFile['groupByPairs']
-    grouped = dataframe.groupby(configFile['queryPer'])
+    grouped = dataframe.groupby(grouped)
 
     # create a dictionary of dataframes where each key corresponds to a unique value in the column
     dfs = {}
@@ -209,16 +210,19 @@ def snrQuery(noiseHistQuery, bVariance, configDict):
         return SNR
 
 #dormant functions:
-"""
+
 
 def exponentialMechanismHistogramQuery2 (dfs, configFile):
+    allCols = configFile['splitCols'].copy()
     noisy_mode = {}
     sensitivity = 1
-    epsilon = configFile['PrivacyLossBudget'][1]/len(dfs['Adilabad'])
+    epsilon = configFile['PrivacyLossBudget'][1]/len(allCols)
     for district in dfs:
         scores = []
         for col in dfs[district]:
             scores = np.array(dfs[district][col]['Count'].values)
+            if len(scores) == 0:
+                continue
             max_score = np.max(scores)
             scores = scores - max_score
            
@@ -238,22 +242,26 @@ def exponentialMechanismHistogramQuery2 (dfs, configFile):
             noisy_mode[district][col] = selected_item
             #noisy_mode[district] = pd.DataFrame(noisy_mode[district])
             
-    finalDF2 = pd.DataFrame.from_dict(noisy_mode, orient='index')
+    finalDF2 = pd.DataFrame.from_dict(noisy_mode)
 
-    return noisy_mode,finalDF2  
+    return noisy_mode  
 
-def reportNoisyMax(dfs):
+def reportNoisyMax(dfs, configFile):
+    
+    allCols = configFile['splitCols'].copy()
     noisy_mode2 ={}
     sensitivity = 2
-    epsilon = 0.001
+    epsilon = configFile['PrivacyLossBudget'][1]/len(allCols)
     for district in dfs:
         scores = []
         for col in dfs[district]:
-            scores = np.array(dfs[district][col]['count'].values)
+            scores = np.array(dfs[district][col]['Count'].values)
             b = sensitivity/epsilon
             noise = np.random.laplace(0, b, len(scores))
             noisyScores = noise+scores
             #print(scores, noisyScores)
+            if len(noisyScores) == 0:
+                continue
             max_idx = np.argmax(noisyScores)
             # Return the element corresponding to that index
             selected_item = dfs[district][col].iloc[max_idx][0]
@@ -263,8 +271,8 @@ def reportNoisyMax(dfs):
             #noisy_mode[district] = pd.DataFrame(noisy_mode[district])
             
     finalDF3 = pd.DataFrame.from_dict(noisy_mode2, orient='index')
-    return noisy_mode2, finalDF3   
-
+    return noisy_mode2
+"""
 def printHistogram(df, name, pair, query):
     
     # create figure and axis objects

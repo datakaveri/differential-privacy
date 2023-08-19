@@ -115,6 +115,7 @@ def outputFileCategorical(dfs1, dfs2, configDict):
     outputDFs = {}
     outputDFs['Query1']=dfs1
     outputDFs['Query2']=dfs2
+
     if configDict['outputOptions'] == 1:
         name = 'cleanOutputCategorical.json'
     elif configDict['outputOptions'] == 2:
@@ -126,7 +127,10 @@ def outputFileCategorical(dfs1, dfs2, configDict):
         for subdistrict, df2 in df.items():
             jsonDict[query][subdistrict] = {}
             for pair, df3 in df2.items():
-                jsonDict[query][subdistrict][pair] = df3.to_dict(orient = 'records')
+                if query == 'Query1' or configDict['q2choice'] == 1:
+                    jsonDict[query][subdistrict][pair] = df3.to_dict(orient = 'records')
+                elif query == 'Query2' and configDict['q2choice'] != 1 :
+                    jsonDict[query][subdistrict][pair] = df3
     with open('../pipelineOutput/'+name, 'w') as fp:
         json.dump(jsonDict, fp, indent=4)
 
