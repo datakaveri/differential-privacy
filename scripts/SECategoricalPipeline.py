@@ -1,6 +1,6 @@
 import json
 import pandas as pd
-import preProcessing as premod
+import utilities as utils
 import postProcessing as postmod
 import categoricalModules as cmod
 
@@ -26,7 +26,7 @@ with open(configFileName, "r") as cfile:
 configDict = configDict['categorical']
 schemaFileName = 'anonymizationSchema.json'
 
-premod.schemaValidator(schemaFileName, configFileName)
+utils.schemaValidator(schemaFileName, configFileName)
 
 def chunkHandling(configDict):
 
@@ -56,8 +56,8 @@ def chunkHandling(configDict):
         print('------------------------ Processing chunk no. ', cnt)
         cnt +=1
         dataframe = pd.read_csv(file)    
-        dataframe = premod.dropDuplicates(dataframe, configDict)
-        dataframe = premod.suppress(dataframe, configDict)
+        dataframe = utils.dropDuplicates(dataframe, configDict)
+        dataframe = utils.suppress(dataframe, configDict)
         dataframe = cmod.categoricGeneralization(dataframe, configDict)
     
         if flag == 0:

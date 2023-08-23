@@ -62,8 +62,23 @@ def createNestedJSON(dataframe, parent_col):
                     current[-1][col] = row[col]
     return result
 
+# //TODO: Ensure that the JSON output is in proper line nested format
 def outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2 = None):
     if dataTapChoice == 1:
+        outputJSON = dfFinalQuery1.to_json(orient = 'records', index = 'false', lines=True)
+        outputFile = '../pipelineOutput/suppressedOutput.json'
+        with open(outputFile, 'w') as file:
+            json.dump(outputJSON, file, indent=4)
+        print('Suppressed data output generated. Please check the pipelineOutput folder.')
+        print('\n################################################################\n')
+    if dataTapChoice == 2:
+        outputJSON = dfFinalQuery1.to_json(orient = 'records', compression = 'infer', index = 'false', lines=True)
+        outputFile = '../pipelineOutput/pseudonymizedOutput.json'
+        with open(outputFile, 'w') as file:
+            json.dump(outputJSON, file, indent=4)
+        print('Pseudonymized data output generated. Please check the pipelineOutput folder.')
+        print('\n################################################################\n')
+    if dataTapChoice == 3:
         # dfFinal = dfFinalQuery1.to_dict(orient='records')
         dfFinal = dfFinalQuery1.copy()
         # dfFinal['Date'] = pd.to_datetime(dfFinal['Date']).astype(str)
@@ -75,7 +90,7 @@ def outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2 = None)
             json.dump(nested_json_data, file, indent=4)
         print('Pseudonymized and aggregated query output generated. Please check the pipelineOutput folder.')
         print('\n################################################################\n')
-    elif dataTapChoice == 2:
+    elif dataTapChoice == 4:
         dfFinal = pd.DataFrame()
         dfFinal['HAT'] = dfFinalQuery1['HAT']
         dfFinal['query1CleanOutput'] = dfFinalQuery1['queryOutput']
@@ -86,7 +101,7 @@ def outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2 = None)
             json.dump(dfFinal, file, indent=4)
         print('Clean query output generated. Please check the pipelineOutput folder.')
         print('\n################################################################\n')
-    elif dataTapChoice == 3:
+    elif dataTapChoice == 5:
         dfFinal = pd.DataFrame()
         dfFinal['HAT'] = dfFinalQuery1['HAT']
         dfFinal['query1NoisyOutput'] = np.round(dfFinalQuery1['queryNoisyOutput'], 3)

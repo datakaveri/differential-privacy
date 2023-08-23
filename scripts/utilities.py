@@ -53,21 +53,23 @@ def suppress(dataframe, configDict):
 def pseudonymize(df, configDict):
     dataframe = df.copy()
     pseudoCol = configDict['pseudoCol']
-    uniquePlates = dataframe[pseudoCol].unique()
-    pseudonymizedCol = {}
-    for item in uniquePlates:
-        pseudonymizedItem = ''
-        for char in item:
-            if char.isalpha():
-                random_char = random.choice(string.ascii_uppercase)
-                pseudonymizedItem += random_char
-            elif char.isdigit():
-                random_char = random.choice(string.digits)
-                pseudonymizedItem += random_char
-            else:
-                pseudonymizedItem += char
-        pseudonymizedCol[item] = pseudonymizedItem
-    # dataframe.drop([pseudoCol], axis = 1, inplace = True)
-    dataframe[pseudoCol] = dataframe[pseudoCol].map(pseudonymizedCol)
+    for col in pseudoCol:
+        uniquePlates = dataframe[col].unique()
+        pseudonymizedCol = {}
+        for item in uniquePlates:
+            item = str(item)
+            pseudonymizedItem = ''
+            for char in item:
+                if char.isalpha():
+                    random_char = random.choice(string.ascii_uppercase)
+                    pseudonymizedItem += random_char
+                elif char.isdigit():
+                    random_char = random.choice(string.digits)
+                    pseudonymizedItem += random_char
+                else:
+                    pseudonymizedItem += char
+            pseudonymizedCol[item] = pseudonymizedItem
+        # dataframe.drop([pseudoCol], axis = 1, inplace = True)
+        dataframe[col] = dataframe[col].map(pseudonymizedCol)
     return dataframe
 

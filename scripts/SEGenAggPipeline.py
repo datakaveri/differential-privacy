@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import json
 #import jsonschema
-import preProcessing as premod
+import utilities as utils
 import postProcessing as postmod
 import genAggModules as  gamod
 from pandas import json_normalize
@@ -31,16 +31,16 @@ def chunkHandling():
             print('The loaded file is: ' + file + ' with shape ' + str(dataframe.shape))
             configDict['dataFile'] = file
 
-        premod.schemaValidator(schemaFileName, configFileName)
+        utils.schemaValidator(schemaFileName, configFileName)
 
         #reading the file and dropping any duplicates
-        # dataframe, configDict = premod.readFile(configFileName)
+        # dataframe, configDict = utils.readFile(configFileName)
         #dropping duplicates
         dataframe['comments']=dataframe['comments'].astype(str)
-        dataframe = premod.dropDuplicates(dataframe, configDict)
+        dataframe = utils.dropDuplicates(dataframe, configDict)
 
         #supressing any columns that may not be required in the final output
-        dataframe = premod.suppress(dataframe, configDict)        
+        dataframe = utils.suppress(dataframe, configDict)        
         #aggregating dataframe
         # print('########################################################################################')
         print('The chunk number is: ', (len(lengthList)))

@@ -16,7 +16,7 @@
 		"trip_id"
 	],
 	"outputOptions": 0,
-	"pseudoCol": "license_plate",
+	"pseudoCol": ["license_plate"],
 	"locationCol": "location.coordinates",
 	"datetimeCol": "observationDateTime",
 	"trueValue": "speed",

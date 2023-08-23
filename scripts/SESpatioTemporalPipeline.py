@@ -1,16 +1,17 @@
 import spatioTemporalModules as stmod
 import categoricalModules as cmod
-import preProcessing as premod
+import utilities as utils
 import postProcessing as postmod
+import configurator as configurator
 import json
 import pandas as pd
 import numpy as np
 
+# //TODO: add input request for type of generalization for spatial generalization
+# //TODO: add input request for type of generalization for timeslots
+# //TODO: add input request for type of anonymization desired
+# //TODO: add input request for type of query desired
 
-# //TODO: Write a wrapper function to ensure that the correct pipeline file is run
-# //TODO: Include file names list handling within the wrapper file
-# //TODO: Handle data tapping within the individual pipeline files
-# //TODO: Read configDict and configSchema once
 '''file_names_list = ['../data/split_file_0.json',
             '../data/split_file_1.json',
             '../data/split_file_2.json',
@@ -45,15 +46,23 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
             configDict['dataFile'] == file
 
         #dropping duplicates
-        dataframe = premod.dropDuplicates(dataframe, configDict)
+        dataframe = utils.dropDuplicates(dataframe, configDict)
 
-        #supressing any columns that may not be required in the final output
-        dataframe = premod.suppress(dataframe, configDict)
+        #suppressing any columns that may not be required in the final output
+        if dataTapChoice == 1:
+            suppressedDataframe = configurator.suppressConfigurator(dataframe, configDict)
+            postmod.outputFileSpatioTemporal(dataTapChoice, suppressedDataframe)
+            exit(0)
 
+        if dataTapChoice == 2:
+            dataframe = configurator.suppressConfigurator(dataframe, configDict)
+            pseudonymizedDataframe = configurator.pseudonymizeConfigurator(dataframe, configDict)
+            postmod.outputFileSpatioTemporal(dataTapChoice, pseudonymizedDataframe)
+            exit(0)
         #generalization applied to categories like time, location, etc that may contain personal identifiable information
         dataframe = stmod.spatioTemporalGeneralization(dataframe, configDict)
         
-        if dataTapChoice == 1:
+        if dataTapChoice == 3:
             #aggregating dataframe for data tapping option 1
             print('The chunk number is: ', (len(lengthList)))
             if len(lengthList) == 1:
@@ -153,7 +162,7 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
 
     if dataTapChoice == 1:
         #pseudonymizing the true values for the license plates
-        preProcessedDataframe = premod.pseudonymize(dataframe, configDict)
+        preProcessedDataframe = utils.pseudonymize(dataframe, configDict)
         postmod.outputFileSpatioTemporal(dataTapChoice, preProcessedDataframe)
         exit(0)
     else:
@@ -239,14 +248,19 @@ def main():
         configDict = json.load(cfile)
     configDict = configDict['spatio-temporal']
     schemaFileName = 'anonymizationSchema.json'
-    premod.schemaValidator(schemaFileName, configFileName)
+    utils.schemaValidator(schemaFileName, configFileName)
 
 
     # handling the choice for data tapping, including validation of choice
     validChoice = 0
     while validChoice == 0: 
-        print("Select type of output file: ")
-        print('''1. Pseudonymized and Aggregated Output (Non-DP) \n2. Clean Query Output \n3. Noisy Query Output ''')
+        print("Select level of anonymization: \n ")
+        print("NOTE: Selecting a level automatically selects all the levels before it \n")
+        print('''1. Suppression \n
+2. Pseudonymization \n
+3. Generalization \n
+4. Aggregation \n
+5. Noise Addition \n''')
         dataTapChoice = int(input("Enter a number to make your selection: "))
         if dataTapChoice == 1:
             configDict['outputOptions'] = 1
@@ -257,8 +271,14 @@ def main():
         elif dataTapChoice == 3:
             configDict['outputOptions'] = 3
             validChoice = 1
+        elif dataTapChoice == 4:
+            configDict['outputOptions'] = 4
+            validChoice = 1
+        elif dataTapChoice == 5:
+            configDict['outputOptions'] = 5
+            validChoice = 1
         else:
-            print("Choice Invalid, please enter an integer between 1 and 3 to make your choice. \\ ")
+            print("Choice Invalid, please enter an integer between 1 and 5 to make your choice. \\ ")
 
     preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K = chunkHandling(configFileName, schemaFileName, file_names_list, dataTapChoice)
 
