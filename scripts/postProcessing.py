@@ -132,11 +132,13 @@ def outputFileCategorical(dfs1, dfs2, configDict):
 
 def RMSEGraph(snr,epsilon,type,Query):
     alphas=[]
-    epsilons=[]
-    for i in range(1, 101):
-        value = i / 10.0
-        alphas.append(value)
-        epsilons.append(value*epsilon)
+    epsilons_vec=[]
+    for i in range(1,101):
+        epsilons_vec.append(i/100.0)
+    for i in range(1,101):
+        epsilons_vec.append(i)
+    for i in epsilons_vec:
+        alphas.append(i/epsilon)
     snr_final=[]
     for alpha in alphas:
         snr_new = []  # Initialize an empty list
@@ -156,39 +158,31 @@ def RMSEGraph(snr,epsilon,type,Query):
             
         RMSE.append(rmse)
     error_10=[]
-    error_25=[]
-    error_50=[]
     for rmse in RMSE:
         cnt_10=0
-        cnt_25=0
-        cnt_50=0
         for value in rmse:
             if value < 0.1:
                 cnt_10=cnt_10+1
-            if value < 0.25:
-                cnt_25=cnt_25+1
-            if value < 0.5:
-                cnt_50=cnt_50+1
         error_10.append(cnt_10)
-        error_25.append(cnt_25)
-        error_50.append(cnt_50)
     error_10=np.multiply(np.divide(error_10,len(snr)),100)
-    error_25=np.multiply(np.divide(error_25,len(snr)),100)
-    error_50=np.multiply(np.divide(error_50,len(snr)),100)
     # Clear the plot before each new plot
     plt.clf()
-    plt.plot(epsilons, error_10, color='red', label='x=0.1')
-    plt.plot(epsilons, error_25, color='blue', label='x=0.25')
-    plt.plot(epsilons, error_50, color='green', label='x=0.5')
+    plt.plot(epsilons_vec, error_10, color='red')
+    marker_y=error_10[epsilons_vec.index(epsilon)]
+    plt.scatter(epsilon, marker_y, color='b', label='Marker')
     # Add a vertical dotted line at the x position epsilon
-    plt.axvline(x=epsilon, linestyle='dotted', color='gray',label=f'chosen ε={epsilon}')
     # Set the plot title and labels
     plt.title('Relative RMSE graph For '+Query)
     plt.xlabel('Epsilons')
-    plt.ylabel('Percentage of samples whose Relative RMSE  is less than x')
-    plt.legend()
+    plt.ylabel('Percentage of samples with Relative RMSE < 0.1')
     plt.grid(True)
     # Save the plot to a file (e.g., PNG format)
     filename=type+Query+'.png'
     plt.savefig('../pipelineOutput/'+filename)
+    data = {'epsilon': epsilons_vec, 'percentage of samples': error_10}
+    df = pd.DataFrame(data)
+    json_data = df.to_json(orient='records')
+     # Write JSON data to a file
+    with open('../pipelineOutput/'+type+Query+'epsilon_table.json', 'w') as json_file:
+        json_file.write(json_data)
     return
