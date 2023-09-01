@@ -83,3 +83,10 @@ def pseudonymizeConfigurator(dataframe, configDict):
     dataframe = utils.pseudonymize(dataframe, configDict)
     pseudonymizedDataframe = dataframe.copy()
     return pseudonymizedDataframe
+
+def generalizeConfigurator(dataframe, configdict):
+    # //TODO: choose type of generalization
+    # //TODO: add types of spatial generalization
+    # //TODO: how to infer spatial or temporal column?
+
+    return generalizedDataframe
