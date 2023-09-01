@@ -22,13 +22,9 @@ import numpy as np
             '../data/split_file_8.json',
             '../data/split_file_9.json']'''
 
-def chunkHandling(config, schema, fileList, dataTapChoice):
-    configFileName = '../config/anonymizationConfig.json'
-    with open(configFileName, "r") as cfile:
-        configDict = json.load(cfile)
-    configDict = configDict['spatio-temporal']
+def chunkHandling(configDict, fileList, dataTapChoice):
+   
     configDict['dataFile'] = ''
-    schemaFileName = schema
 
     print('\n####################################################################\n')
     print('PREPROCESSING')
@@ -229,38 +225,22 @@ def postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, 
     postmod.outputFileSpatioTemporal(dataTapChoice, dfFinalQuery1, dfFinalQuery2)
     return
 
-def main():
+def main(configDict):
     with open("../config/spatioTemporalFNList.json", "r") as config_file:
         file_names_list = json.load(config_file)
 
     #running predefined functions
-    configFileName = '../config/anonymizationConfig.json'
-    with open(configFileName, "r") as cfile:
-        configDict = json.load(cfile)
-    configDict = configDict['spatio-temporal']
-    schemaFileName = 'anonymizationSchema.json'
-    premod.schemaValidator(schemaFileName, configFileName)
+    configDict = configDict['spatio-temporal']   
 
 
     # handling the choice for data tapping, including validation of choice
-    validChoice = 0
-    while validChoice == 0: 
-        print("Select type of output file: ")
-        print('''1. Pseudonymized and Aggregated Output (Non-DP) \n2. Clean Query Output \n3. Noisy Query Output ''')
-        dataTapChoice = int(input("Enter a number to make your selection: "))
-        if dataTapChoice == 1:
-            configDict['outputOptions'] = 1
-            validChoice = 1
-        elif dataTapChoice == 2:
-            configDict['outputOptions'] = 2
-            validChoice = 1
-        elif dataTapChoice == 3:
-            configDict['outputOptions'] = 3
-            validChoice = 1
-        else:
-            print("Choice Invalid, please enter an integer between 1 and 3 to make your choice. \\ ")
+    dataTapChoice = configDict['outputOptions']
+    
+    if dataTapChoice <1 or dataTapChoice >3:
+        print('Invalid choice for data tapping. Please check the configFile and try again.')
+        exit(0)
 
-    preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K = chunkHandling(configFileName, schemaFileName, file_names_list, dataTapChoice)
+    preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K = chunkHandling(configDict, file_names_list, dataTapChoice)
 
     dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2 = runSpatioTemporalPipeline(preProcessedDataframe, configDict, K, timeRange, dfCount)
 

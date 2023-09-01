@@ -19,15 +19,6 @@ import categoricalModules as cmod
 with open("../config/categoricalFNList.json", "r") as config_file:
             file_names_list = json.load(config_file)
 
-configFileName = '../config/anonymizationConfig.json'
-
-with open(configFileName, "r") as cfile:
-    configDict = json.load(cfile)
-configDict = configDict['categorical']
-schemaFileName = 'anonymizationSchema.json'
-
-premod.schemaValidator(schemaFileName, configFileName)
-
 def chunkHandling(configDict):
 
     #initializing variables to manage flow of chunks 
@@ -83,22 +74,10 @@ def outputFileGeneration(dfFinalQuery1, dfFinalQuery2, configDict):
     postmod.outputFileCategorical(dfFinalQuery1, dfFinalQuery2, configDict)
     print('\nOutput generated. Please check the pipelineOutput folder.')
 
-def main():
+def main(configDict):
     # handling the choice for data tapping, including validation of choice
-    validChoice = 0
-    while validChoice == 0: 
-        print("Select type of output file: \n")
-        print('''1. Clean Query Output\n2. Noisy Query Output \n''')
-        dataTapChoice = int(input("Enter a number to make your selection: "))
-        if dataTapChoice == 1:
-            configDict['outputOptions'] = 1
-            validChoice = 1
-        elif dataTapChoice == 2:
-            configDict['outputOptions'] = 2
-            validChoice = 1
-        else:
-            print("Choice Invalid, please enter an integer between 1 and 2 to make your choice. \\ ")
-    
+    configDict = configDict['categorical']
+
     query1Dict, query2Dict = chunkHandling(configDict)
     
     if configDict['outputOptions'] == 1:
@@ -106,6 +85,8 @@ def main():
     elif configDict['outputOptions'] == 2:
         dfFinalQuery1, dfFinalQuery2 = categoricalDP(query1Dict, query2Dict, configDict)
         outputFileGeneration(dfFinalQuery1, dfFinalQuery2, configDict)
+    else:
+        print("Invalid output option chosen. Please check the configFile and try again.")
     
 if __name__ == "__main__":
     main()

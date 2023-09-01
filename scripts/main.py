@@ -1,21 +1,29 @@
 import SECategoricalPipeline as SEC
 import SESpatioTemporalPipeline as SES
 import SEGenAggPipeline  as SEG
+import preProcessing as premod
 import json 
+
+configFileName = '../config/anonymizationConfig.json'
+with open(configFileName, "r") as cfile:
+    configDict = json.load(cfile)
+
+schemaFileName = 'anonymizationSchema.json'
+premod.schemaValidator(schemaFileName, configFileName)
+
+datasetType = configDict['genType']
 
 validChoice = 0
 while validChoice == 0: 
-    print("--------- IUDX DATA ANONYMIZATION PIPELINE ---------\n")
-    print('''1. Spatio-Temporal Dataset (Surat ITMS)\n2. Categorical Dataset (Telangana Soil)\n3. genAgg Dataset (Vadodara Civic Complaints)\n''')
-    datasetChoice = int(input("Enter a number to make your selection: "))
-    if datasetChoice == 1:       
-        SES.main()
+    if datasetType == 'spatioTemporal':       
+        SES.main(configDict)
         validChoice = 1
-    elif datasetChoice == 2:
-        SEC.main()
+    elif datasetType == 'categorical':
+        SEC.main(configDict)
         validChoice = 1
-    elif datasetChoice == 3:        
-        SEG.main()
+    elif datasetType == 'genAgg':        
+        SEG.main(configDict)
         validChoice = 1
     else:
-        print("Choice Invalid, please enter an integer between 1 and 3 to make your choice. \\ ")
+        print("genType chosen in the configFile is invalid. Please check the configFile and try again.")
+        break

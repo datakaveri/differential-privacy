@@ -7,18 +7,15 @@ import postProcessing as postmod
 import genAggModules as  gamod
 from pandas import json_normalize
 
-def chunkHandling():
+def chunkHandling(configDict):
     with open("../config/genAggFNList.json", "r") as config_file:
             file_names_list = json.load(config_file)
-    configFileName = '../config/anonymizationConfig.json'
-    with open(configFileName, "r") as cfile:
-        configDict = json.load(cfile)
+   
     configDict = configDict['genAgg']
-    schemaFileName = 'anonymizationSchema.json'
+
     print('\n####################################################################\n')
     print('PREPROCESSING')
     lengthList = []
-    dfFinalGrouped = pd.DataFrame()
 
     #groupByCol = configDict['groupByCol']
 
@@ -29,9 +26,7 @@ def chunkHandling():
             dataDict = json.load(dfile)
             dataframe = pd.json_normalize(dataDict)
             print('The loaded file is: ' + file + ' with shape ' + str(dataframe.shape))
-            configDict['dataFile'] = file
-
-        premod.schemaValidator(schemaFileName, configFileName)
+            configDict['dataFile'] = file      
 
         #reading the file and dropping any duplicates
         # dataframe, configDict = premod.readFile(configFileName)
@@ -61,8 +56,8 @@ def chunkHandling():
         # dataframe, dfSensitivity, dfCount = stmod.chunkedAggregator(dataframe, configDict)
     return dfFinalGrouped_dict
 
-def main():
-    data_dict=chunkHandling()
+def main(configDict):
+    data_dict=chunkHandling(configDict)
     postmod.outputFileGenAgg(data_dict)
     
 if __name__ == "__main__":
