@@ -190,7 +190,21 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
     dfNoiseITMSQuery2['queryNoisyOutput'] = dfNoiseITMSQuery2['queryOutput'] + noiseITMSQuery2
  
     return dfNoiseITMSQuery1, dfNoiseITMSQuery2, bITMSQueryVariance1, bITMSQueryVariance2
-
+'''def private_quantile(data, quantile, epsilon, Lambda):
+    Z=data
+    k = len(Z)
+    Z.sort()
+    Z= [min(max(0, z), Lambda) for z in Z]
+    Z=[0]+Z+[Lambda]
+    y = [(Z[i+1] - Z[i]) * np.exp(-(epsilon/2) * abs(i  - quantile*k)) for i in range(k+1)]
+    sum_y = sum(y)
+    probabilities = [y_i / sum_y for y_i in y]
+    # Sampling an index i based on the probabilities
+    i = np.random.choice(range(k+1), p=probabilities)
+    # Sampling a uniform draw from Zi+1 - Zi
+    uniform_draw = random.uniform(Z[i], Z[i+1])
+    
+    print(quantile," quantile of the speed data is ",uniform_draw)'''
 def snrCompute(signal, bVariance):
     snr =[]
     if (len(bVariance) == 1):

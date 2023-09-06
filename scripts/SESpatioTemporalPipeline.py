@@ -103,7 +103,7 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
             print('########################################################################################')
             # dataframe, dfSensitivity, dfCount = stmod.chunkedAggregator(dataframe, configDict)
             #                 
-        elif dataTapChoice == 2 or 3:
+        elif (dataTapChoice == 2) or (dataTapChoice == 3):
 
             #aggregating dataframe for data tapping options 2 & 3
             # print('########################################################################################')
