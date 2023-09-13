@@ -130,7 +130,7 @@ def outputFileCategorical(dfs1, dfs2, configDict):
     with open('../pipelineOutput/'+name, 'w') as fp:
         json.dump(jsonDict, fp, indent=4)
 
-def RMSEGraph(snr,epsilon,type,Query):
+def RMSEGraph(snr,epsilon):
     alphas=[]
     epsilons_vec=[]
     for i in range(1,101):
@@ -155,7 +155,6 @@ def RMSEGraph(snr,epsilon,type,Query):
                 rmse.append(pow(10,10)*0.2)
             else:
                 rmse.append(1.0/math.sqrt(value))
-            
         RMSE.append(rmse)
     error_10=[]
     for rmse in RMSE:
@@ -165,24 +164,37 @@ def RMSEGraph(snr,epsilon,type,Query):
                 cnt_10=cnt_10+1
         error_10.append(cnt_10)
     error_10=np.multiply(np.divide(error_10,len(snr)),100)
-    # Clear the plot before each new plot
-    plt.clf()
-    plt.plot(epsilons_vec, error_10, color='red')
-    marker_y=error_10[epsilons_vec.index(epsilon)]
-    plt.scatter(epsilon, marker_y, color='b', label='Marker')
-    # Add a vertical dotted line at the x position epsilon
-    # Set the plot title and labels
-    plt.title('Relative RMSE graph For '+Query)
+    return epsilons_vec,error_10
+def generategraph(epsilons_vec,query1_count,epsilon_1,query2_count,epsilon_2):
+    filename="RRMSE_graph.png"
+    plt.figure(figsize=(8, 12))
+    # First subplot
+    plt.subplot(2, 1, 1)  # 1 row, 2 columns, first subplot
+    plt.plot(epsilons_vec, query1_count, color='red')
+    marker_y=query1_count[epsilons_vec.index(epsilon_1)]
+    plt.scatter(epsilon_1,marker_y, color='green', marker='o', label=f'Marker at ({epsilon_1}, {marker_y:.2f})')
+    plt.title('Query 1')
     plt.xlabel('Epsilons')
     plt.ylabel('Percentage of samples with Relative RMSE < 0.1')
     plt.grid(True)
-    # Save the plot to a file (e.g., PNG format)
-    filename=type+Query+'.png'
+    plt.legend()
+    plt.subplots_adjust(wspace=2)
+    # Second subplot
+    plt.subplot(2, 1, 2)  # 1 row, 2 columns, second subplot
+    plt.plot(epsilons_vec, query2_count, color='blue')
+    marker_y=query2_count[epsilons_vec.index(epsilon_2)]
+    plt.scatter(epsilon_2,marker_y, color='green', marker='o', label=f'Marker at ({epsilon_2}, {marker_y:.2f})')
+    plt.title('Query 2')
+    plt.xlabel('Epsilons')
+    plt.ylabel('Percentage of samples with Relative RMSE < 0.1')
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
     plt.savefig('../pipelineOutput/'+filename)
-    data = {'epsilon': epsilons_vec, 'percentage of samples': error_10}
+
+def epsilontable(epsilons_vec,query1_count,query2_count):
+    data = {'epsilon': epsilons_vec, 'percentage of samples for query 1':query1_count, 'percentage of samples for query 2':query2_count}
     df = pd.DataFrame(data)
     json_data = df.to_json(orient='records')
-     # Write JSON data to a file
-    with open('../pipelineOutput/'+type+Query+'epsilon_table.json', 'w') as json_file:
+    with open('../pipelineOutput/'+'epsilon_table.json', 'w') as json_file:
         json_file.write(json_data)
-    return
