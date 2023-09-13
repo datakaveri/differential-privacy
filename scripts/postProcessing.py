@@ -174,7 +174,7 @@ def generategraph(epsilons_vec,query1_count,epsilon_1,query2_count,epsilon_2):
     marker_y=query1_count[epsilons_vec.index(epsilon_1)]
     plt.scatter(epsilon_1,marker_y, color='green', marker='o', label=f'Marker at ({epsilon_1}, {marker_y:.2f})')
     plt.title('Query 1')
-    plt.xlabel('Epsilons')
+    plt.xlabel('Epsilon')
     plt.ylabel('Percentage of samples with Relative RMSE < 0.1')
     plt.grid(True)
     plt.legend()
@@ -185,7 +185,7 @@ def generategraph(epsilons_vec,query1_count,epsilon_1,query2_count,epsilon_2):
     marker_y=query2_count[epsilons_vec.index(epsilon_2)]
     plt.scatter(epsilon_2,marker_y, color='green', marker='o', label=f'Marker at ({epsilon_2}, {marker_y:.2f})')
     plt.title('Query 2')
-    plt.xlabel('Epsilons')
+    plt.xlabel('Epsilon')
     plt.ylabel('Percentage of samples with Relative RMSE < 0.1')
     plt.grid(True)
     plt.legend()
