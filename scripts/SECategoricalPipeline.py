@@ -55,9 +55,9 @@ def categoricalDP(query1Dict, query2Dict, configDict):
     #compute snr
     if configDict['outputOptions'] ==2:
         snr1=cmod.snrQuery(chunkedNoiseHistQuery1, bVarianceQuery1, configDict)
-        epsilons_vec,query1_count=postmod.RMSEGraph(snr1,configDict["PrivacyLossBudget"][0])
+        epsilons_vec,query1_count=postmod.RMSEGraph(snr1,configDict["privacyLossBudgetEpsQuery"][0])
         snr2=cmod.snrQuery(chunkedNoiseHistQuery2, bVarianceQuery2, configDict)
-        epsilons_vec,query2_count=postmod.RMSEGraph(snr2,configDict["PrivacyLossBudget"][1],'categorical','Query2')
+        epsilons_vec,query2_count=postmod.RMSEGraph(snr2,configDict["privacyLossBudgetEpsQuery"][1])
         postmod.generategraph(epsilons_vec,query1_count,configDict["privacyLossBudgetEpsQuery"][0],query2_count,configDict["privacyLossBudgetEpsQuery"][1])
         print("Relative RMSE Graph generated check the pipelineOuput Folder")
         postmod.epsilontable(epsilons_vec,query1_count,query2_count)

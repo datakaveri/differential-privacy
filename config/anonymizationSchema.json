@@ -271,7 +271,7 @@
 		  "ID",
 		  "cycleToDrop",
 		  "cycleToKeep",
-		  "PrivacyLossBudget",
+		  "privacyLossBudgetEpsQuery",
 		  "snrUpperLimit",
 		  "snrLowerLimit",
 		  "outputOptions"

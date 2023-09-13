@@ -94,7 +94,7 @@ def noiseComputeHistogramQuery1(dataframeDict, configFile):
     for name, df in dataframeDict.items():
         for pair, dataframe in df.items():
             bins = len(dataframe)
-            epsilon = configFile['PrivacyLossBudget'][0]/len(configFile['groupByPairs'])  
+            epsilon = configFile['privacyLossBudgetEpsQuery'][0]/len(configFile['groupByPairs'])  
             if bins == 1 :
                 sensitivity = 1
             else:
@@ -147,7 +147,7 @@ def noiseComputeHistogramQuery2(dfs, configFile):
     allCols = configFile['splitCols'].copy()
     sensitivity = 2
     for df in dfs:
-        epsilon = configFile['PrivacyLossBudget'][1]/len(allCols)
+        epsilon = configFile['privacyLossBudgetEpsQuery'][1]/len(allCols)
         b = sensitivity/epsilon
         bVarianceQuery2 = 2*b*b
         scores = []
