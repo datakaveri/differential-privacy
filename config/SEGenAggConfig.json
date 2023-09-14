@@ -1,6 +1,0 @@
-{
-	"dataFile": "",
-	"duplicateDetection": [],
-	"suppressCols": ["subCategory","comments"],
-	"datetimeCol": "observationDateTime"
-}

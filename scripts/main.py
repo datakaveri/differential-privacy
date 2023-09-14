@@ -15,7 +15,7 @@ datasetType = configDict['genType']
 
 validChoice = 0
 while validChoice == 0: 
-    if datasetType == 'spatioTemporal':       
+    if datasetType == 'spatio-temporal':       
         SES.main(configDict)
         validChoice = 1
     elif datasetType == 'categorical':

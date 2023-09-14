@@ -1,6 +1,6 @@
 {
 	"dataFile": "",
-	"genType": "",
+	"genType": "spatio-temporal",
 	"spatio-temporal": {
 		"duplicateDetection": [
 			"trip_id",
@@ -17,7 +17,7 @@
 			"location.type",
 			"trip_id"
 		],
-		"outputOptions": 0,
+		"outputOptions": 1,
 		"pseudoCol": "license_plate",
 		"locationCol": "location.coordinates",
 		"datetimeCol": "observationDateTime",
@@ -29,8 +29,8 @@
 		"globalMaxValue": 65,
 		"globalMinValue": 0, 
 		"privacyLossBudgetEpsQuery": [
-			10,
-			10
+			50,
+			30
 		],
 		"h3Resolution": 7,
 		"startTime": 9,
@@ -74,7 +74,7 @@
 		"ID":"Sample No.",
 		"cycleToDrop":["2019-20-to-2020-2021"],
 		"cycleToKeep":["2017-18-to-2018-19"],
-		"PrivacyLossBudget":[5, 5],
+		"privacyLossBudgetEpsQuery":[5, 5],
 		"snrUpperLimit" : 3,
 		"snrLowerLimit" : 0,
 		"outputOptions": 0	

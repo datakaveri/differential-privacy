@@ -238,7 +238,7 @@ def main(configDict):
     dataTapChoice = configDict['outputOptions']
     
     if dataTapChoice <1 or dataTapChoice >3:
-        print('Invalid choice for data tapping. Please check the configFile and try again.')
+        print('Invalid choice for outputOptions. Please check the config file and ensure the outputOptions parameter is set to a number between 1 & 3, and try again.')
         exit(0)
 
     preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K = chunkHandling(configDict, file_names_list, dataTapChoice)
