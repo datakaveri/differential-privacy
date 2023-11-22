@@ -35,6 +35,7 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
     print('PREPROCESSING')
     lengthList = []
     dfFinalGrouped = pd.DataFrame()
+    dfFinalGrouped_histo=pd.DataFrame()
     groupByCol = configDict['groupByCol']
 
     for file in fileList:
@@ -71,7 +72,8 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
                                         sum=(groupByCol,'sum'),
                                         max=(groupByCol,'max'),
                                         min=(groupByCol,'min')).reset_index()
-                        
+                dfGrouped_1=dataframe.groupby(['license_plate','HAT','Date']).agg({'speed':list}).reset_index()  
+                dfFinalGrouped_histo=dfGrouped_1    
                 dfFinalGrouped = dfGrouped  
                 # print(file)
             elif (len(lengthList) > 1):
@@ -80,15 +82,17 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
                                         sum=(groupByCol,'sum'),
                                         max=(groupByCol,'max'),
                                         min=(groupByCol,'min')).reset_index()
-                        
+                dfGrouped_1=dataframe.groupby(['license_plate','HAT','Date']).agg({'speed':list}).reset_index()        
                 dfGrouped = pd.concat([dfGrouped, dfFinalGrouped],  ignore_index=True)
-
+                dfGrouped_1=pd.concat([dfGrouped_1, dfFinalGrouped_histo],  ignore_index=True)
                 dfGroupedCombined = dfGrouped.groupby(['Date','license_plate','HAT']).agg({
                                                             'count': 'sum',
                                                             'sum': 'sum',
                                                             'max':'max',
                                                             'min':'min'}).reset_index()
+                dfGroupedCombined_histo=dfGrouped_1.groupby(['license_plate','HAT','Date']).agg({'speed':list}).reset_index()        
                 dfFinalGrouped = dfGroupedCombined
+                dfFinalGrouped_histo=dfGroupedCombined_histo
             dfFinalGrouped['mean'] = np.round((dfFinalGrouped['sum']/dfFinalGrouped['count']), 2)
 
 
@@ -102,7 +106,7 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
             print('The number of unique license plates in the grouped dataframe is: ', dfFinalGrouped['license_plate'].nunique())
             print('########################################################################################')
             # dataframe, dfSensitivity, dfCount = stmod.chunkedAggregator(dataframe, configDict)
-            #                 
+            #               
         elif (dataTapChoice == 2) or (dataTapChoice == 3):
 
             #aggregating dataframe for data tapping options 2 & 3
@@ -114,7 +118,8 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
                                         sum=(groupByCol,'sum'),
                                         max=(groupByCol,'max'),
                                         min=(groupByCol,'min')).reset_index()
-                        
+
+
                 dfFinalGrouped = dfGrouped  
                 # print(file)
             elif (len(lengthList) > 1):
@@ -134,6 +139,7 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
                                                             'sum': 'sum',
                                                             'max':'max',
                                                             'min':'min'}).reset_index()
+                
                 dfFinalGrouped = dfGroupedCombined
             dfFinalGrouped['mean'] = np.round((dfFinalGrouped['sum']/dfFinalGrouped['count']), 2)
             # print('')
@@ -156,7 +162,7 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
 
     #filtering the aggregated chunks
     dataframe = stmod.filtering(dfFinalGrouped, configDict)
-
+    dfGroupedCombined_histo=stmod.filtering(dfGroupedCombined_histo,configDict)
     #sensitivity computation
     dfSensitivity, dfCount = stmod.sensitivityFrame(dataframe) 
 
@@ -169,9 +175,9 @@ def chunkHandling(config, schema, fileList, dataTapChoice):
         preProcessedDataframe = dataframe
         # print(preProcessedDataframe)
 
-        return preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K
+        return preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K,dfGroupedCombined_histo
 
-def runSpatioTemporalPipeline(dataframe, configDict, K, timeRange, dfCount):
+def runSpatioTemporalPipeline(dataframe, configDict, K, timeRange, dfCount,df_histo):
 
     dfGrouped = dataframe
 
@@ -181,7 +187,8 @@ def runSpatioTemporalPipeline(dataframe, configDict, K, timeRange, dfCount):
     #query building
     dfQuery1 = stmod.ITMSQuery1(dfGrouped)
     dfQuery2 = stmod.ITMSQuery2(dfGrouped, configDict)
-    
+    stmod.Histo_query(df_histo,0,65,50)
+    exit(0)
     #signal assignment
     signalQuery1 = dfQuery1['queryOutput'].reset_index(drop = True)
     signalQuery2 = dfQuery2['queryOutput'].reset_index(drop = True)
@@ -280,9 +287,9 @@ def main():
         else:
             print("Choice Invalid, please enter an integer between 1 and 5 to make your choice. \\ ")
 
-    preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K = chunkHandling(configFileName, schemaFileName, file_names_list, dataTapChoice)
-
-    dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2 = runSpatioTemporalPipeline(preProcessedDataframe, configDict, K, timeRange, dfCount)
+    preProcessedDataframe, configDict, timeRange, dfSensitivity, dfCount, K ,df_histo= chunkHandling(configFileName, schemaFileName, file_names_list, dataTapChoice)
+    print(df_histo)
+    dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2 = runSpatioTemporalPipeline(preProcessedDataframe, configDict, K, timeRange, dfCount,df_histo)
 
     postProcessingSpatioTemporal(dfNoiseQuery1, dfNoiseQuery2, bVarianceQuery1, bVarianceQuery2, signalQuery1, signalQuery2, configDict, dataTapChoice)
 

@@ -85,7 +85,7 @@
 		  },
 		  "h3Resolution": {
 			"minimum": 6,
-			"maximum": 8,
+			"maximum": 12,
 			"type": "integer"
 		  },
 		  "startTime": {

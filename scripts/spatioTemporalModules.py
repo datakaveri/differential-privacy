@@ -6,9 +6,9 @@ import jsonschema
 from pandas import json_normalize
 import matplotlib.pyplot as plt
 import h3
-# import itertools 
-import matplotlib.pyplot as plt
+import math
 from math import exp
+from itertools import chain
 
 def spatioTemporalGeneralization(dataframe, configFile):
     # separating latitude and longitude from location
@@ -44,6 +44,7 @@ def spatioTemporalGeneralization(dataframe, configFile):
 
 def timeRange(dataframe):
     #calculating the number of days in the dataset
+    print(dataframe)
     startDay = dataframe['Date'].min()
     endDay = dataframe['Date'].max()
     timeRange = 1 + (endDay - startDay).days
@@ -149,6 +150,120 @@ def KCompute(dataframe):
     dfK = dataframe.groupby(['Date','license_plate']).agg({'HAT':'nunique'}).reset_index()
     K = dfK['HAT'].max()
     return K
+def license_plates_HAT(df,HAT,day):
+    filtered_df = df[(df['HAT'] == HAT) & (df['Date'] == day)]
+    license_plates_list = filtered_df['license_plate'].tolist()
+    return license_plates_list
+def assign_speed_to_idx(speed, my_dict):
+    for key in my_dict:
+        lower_bound, upper_bound = key
+        if lower_bound <= speed <= upper_bound:
+            return my_dict[key]
+def clip_values(lst, c):
+    sum=0
+    #print("c value:",c)
+    #c=float(c)
+    #print("c type:",type(c))
+    for i in lst:
+        sum=sum+i
+    for i in range(0,len(lst)):
+        lst[i]=(c*lst[i])/max(c,sum)
+    return lst
+def find_key(bins,value):
+    for key,val in bins.items():
+        if val==value:
+            return key
+
+def flatten_list(nested_list):
+    return [item for sublist in nested_list for item in (flatten_list(sublist) if isinstance(sublist, list) else [sublist])]
+def change_list(speed):
+    list=[]
+    for val in speed:
+        if val>0:
+            list.append(val)
+    return list
+
+def Histo_query(df,min_speed,max_speed,epsilon):
+    HAT_list=df['HAT'].unique().tolist()
+    epsilon_hat=epsilon/len(HAT_list)
+
+    # Define the bin edges including both min_speed and max_speed
+    bin_edges = np.arange(min_speed, max_speed + 5, 5)
+    bins={}
+    d=max_speed//5
+    j=0
+    #Assigning an index for each bin
+    for i in range(0,len(bin_edges)-1):
+            key=(bin_edges[i],bin_edges[i+1])
+            bins[key]=j
+            j=j+1
+    for hat in HAT_list:
+        m_h=[]
+        N_h=[0]*d
+        #print("start length of N_h:",len(N_h))
+        #exit(0)
+        filtered_df=df[df['HAT'] == hat]
+        DATE_list=filtered_df['Date']
+        N={}
+        for day in DATE_list:
+            N[day]={}
+            plate_list=license_plates_HAT(df,hat,day)
+            for plate in plate_list:
+                filtered_df = df[(df['license_plate'] == plate)]
+                # print(filtered_df)
+                speed=filtered_df['speed']
+                # print(speed)
+                speed = flatten_list(speed)
+                speed=change_list(speed)
+                m_h.append(len(speed))
+                print(speed)
+                for speed_val in speed:
+                    if plate in N:
+                        idx=assign_speed_to_idx(speed_val,bins)
+                        N[day][plate][idx]=N[day][plate][idx]+1
+                    else:
+                        N[day][plate]=[0]*d 
+                        idx=assign_speed_to_idx(speed_val,bins)
+                        N[day][plate][idx]=N[day][plate][idx]+1
+        n=0
+        for val in m_h:
+            n=n+val
+        max_value = max(m_h)
+        print("MAx value in m_h",max_value)
+        quantile=1-(1/n)*math.ceil((2*d)/epsilon_hat)
+        print("quantile", quantile)
+        c=private_quantile(m_h,quantile,epsilon_hat/2,max_value)
+        for key,value in N.items():
+            for subkey,list in value.items():
+                new_list=clip_values(list,c)
+                N_h = [n + l_element for n, l_element in zip(N_h, new_list)]
+                #N_h=N_h+clip_values(list,c)
+                print("N_h is:",N_h)
+                print("length of N_h is:",len(N_h))
+        print("hat_list:",len(HAT_list))
+        print("c",c)
+        print("laplace:",(4*c)/epsilon_hat)
+        print("epsilon_hat",epsilon_hat)
+        random_list=np.random.laplace(0,(4*c)/epsilon_hat,d)
+        N_h=N_h+random_list
+        #N_h = [n + l_element for n, l_element in zip(N_h,random_list)]
+        print("final list after adding random value:",N_h)
+        #N_h=N_h+[np.random.laplace(0,(4*c)/epsilon_hat)]*d
+        x_values=[]
+        print("length bins dictionary:",len(bins))
+        for i in range (0,d):
+            key=find_key(bins,i)
+            x_values.append(str(key[0])+' - '+str(key[1]))
+        # Plot the bar graph
+        plt.bar(x_values, N_h, width=0.8, align='center', alpha=0.7)
+        plt.xlabel('X-axis Values')
+        plt.ylabel('Counts')
+        plt.title('Histogram Plot for HAT value'+hat)
+        plt.grid(True)
+        # Set x-axis labels
+        plt.xticks(x_values, rotation=45)
+        plt.savefig("../pipelineOutput/"+hat+"_histogram.png")
+        exit(0)
 
 def sensitivityComputeITMSQuery(configDict, timeRange, dfCount):
     maxValue = configDict['globalMaxValue']
@@ -190,21 +305,29 @@ def noiseComputeITMSQuery(dfITMSQuery1, dfITMSQuery2, sensitivityITMSQuery1, sen
     dfNoiseITMSQuery2['queryNoisyOutput'] = dfNoiseITMSQuery2['queryOutput'] + noiseITMSQuery2
  
     return dfNoiseITMSQuery1, dfNoiseITMSQuery2, bITMSQueryVariance1, bITMSQueryVariance2
-'''def private_quantile(data, quantile, epsilon, Lambda):
+def private_quantile(data, quantile, epsilon, Lambda):
     Z=data
     k = len(Z)
     Z.sort()
+    print("Lamda:-",Lambda)
     Z= [min(max(0, z), Lambda) for z in Z]
     Z=[0]+Z+[Lambda]
     y = [(Z[i+1] - Z[i]) * np.exp(-(epsilon/2) * abs(i  - quantile*k)) for i in range(k+1)]
     sum_y = sum(y)
+    # print("sum_y", sum_y)
+    # print("y", y)
+    print("k", k)
+    list_absfunc = []
+    for i in range(k+1):
+        list_absfunc.append(Z[i+1]-Z[i])
+    print("Z[i+1]-Z[i]", list_absfunc)
     probabilities = [y_i / sum_y for y_i in y]
     # Sampling an index i based on the probabilities
     i = np.random.choice(range(k+1), p=probabilities)
     # Sampling a uniform draw from Zi+1 - Zi
-    uniform_draw = random.uniform(Z[i], Z[i+1])
-    
-    print(quantile," quantile of the speed data is ",uniform_draw)'''
+    uniform_draw = np.random.uniform(Z[i], Z[i+1])
+    print(quantile," quantile of the speed data is ",uniform_draw)
+    return uniform_draw
 def snrCompute(signal, bVariance):
     snr =[]
     if (len(bVariance) == 1):
