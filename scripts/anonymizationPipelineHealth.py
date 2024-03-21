@@ -15,9 +15,9 @@ if "suppress" in operations:
 if "pseudonymize" in operations:
     print("Performing Attribute Pseudonymization: Pseudonymized Attribute stored in Hashed Value Column")
     data = mods.pseudonymize(data, config)
-# if "k_anonymize" in operations:
-#     print("K-Anonymizing Data")
-#     data = mods.k_anonymize(data, config)
+if "k_anonymize" in operations:
+    print("K-Anonymizing Data")
+    data = mods.k_anonymize(data, config)
 if "dp" in operations:
     print("Enacting Differential Privacy")
     data = mods.differential_privacy(data, config)
