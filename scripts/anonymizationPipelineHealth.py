@@ -2,7 +2,7 @@
 import anonymizationPipelineHealthModules as mods
 
 # necessary file reads
-config = mods.read_config("pipelineConfig.json")
+config = mods.read_config("../config/pipelineConfig.json")
 data = mods.read_data(config["data_file"])
 
 # checking the order of operations required

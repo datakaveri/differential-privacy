@@ -1,5 +1,5 @@
 {
-	"data_file": "sampleHealthData.json",
+	"data_file": "../data/sampleHealthData.json",
 	"output_option": 1,
 	"suppress": [
 		"Patient ID",
