@@ -1,21 +1,18 @@
 {
-	"data_file": "../data/sampleHealthData.json",
-	"output_option": 1,
-	"suppress": [
-		"Patient ID",
-        "Date of Birth",
-		"Gender",
-		"Address",
-		"ZIP Code",
-        "Medication",
-        "Lab Results"
-	],
-	"pseudonymize": "Name",
-	"generalize": "Age",
-	"k": 1000,
-    "min_bin_value": 0,
-    "max_bin_value": 101,
-    "dp_aggregation": "Hashed Value",
-    "dp_query": "Diagnosis",
-	"dp_epsilon": 0.1
+  "data_file": "../data/sampleHealthData_positivity.json",
+  "suppress": [
+    "Patient ID",
+    "Date of Birth",
+    "Gender",
+    "Address",
+    "Lab Results"
+  ],
+  "pseudonymize": "Name",
+  "generalize": "Age",
+  "k": 1000,
+  "min_bin_value": 0,
+  "max_bin_value": 101,
+  "dp_aggregation": "PIN Code",
+  "dp_query": "Test Result",
+  "dp_epsilon": 0.1
 }

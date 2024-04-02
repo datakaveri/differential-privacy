@@ -80,20 +80,26 @@ def k_anonymize(dataframe, config):
 def query_building(dataframe, config):
     query_column = config["dp_query"]
     aggregation_column = config["dp_aggregation"]
-    dataframe = dataframe.groupby(query_column).agg({aggregation_column:"count"})
-    dataframe.rename(columns={aggregation_column:"Count"}, inplace = True)
-    return dataframe
+    T = len(dataframe)
+    positive_count = dataframe.groupby('PIN Code')[['Test Result']].agg(lambda x: (x == 'Positive').sum())    # dataframe = dataframe.groupby(aggregation_column)
+    dataframe = positive_count
+    dataframe["Positivity Ratio"] = dataframe['Test Result']/T
+    # dataframe.rename(columns={"Test Result":"Positive Count"}, inplace = True)
+    dataframe.drop("Test Result", axis = 1, inplace = True)
+    print(dataframe)
+    return dataframe, T
 
 def differential_privacy(dataframe, config):
-    dataframe = query_building(dataframe, config)
+    dataframe, T = query_building(dataframe, config)
     epsilon = config["dp_epsilon"]
-    sensitivity = 1
+    sensitivity = 1/T
     b = sensitivity/epsilon
     noise = np.random.laplace(0, b, len(dataframe))
-    dataframe["Noisy Count"] = dataframe["Count"] + noise
-    dataframe["Noisy Count"].clip(0, np.inf, inplace = True)
-    dataframe["Noisy Count"] = dataframe["Noisy Count"].round().astype(int)
-    dataframe.drop(columns = "Count", inplace = True)
+    print(noise)
+    dataframe["Noisy Ratio"] = dataframe["Positivity Ratio"] + noise
+    dataframe["Noisy Ratio"].clip(0, np.inf, inplace = True)
+    dataframe["Noisy Ratio"] = dataframe["Noisy Ratio"].round(4)
+    # dataframe.drop(columns = "Positive Count", inplace = True)
     return dataframe
 
 ###########################
