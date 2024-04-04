@@ -96,10 +96,10 @@ def differential_privacy(dataframe, config):
     b = sensitivity/epsilon
     noise = np.random.laplace(0, b, len(dataframe))
     print(noise)
-    dataframe["Noisy Ratio"] = dataframe["Positivity Ratio"] + noise
-    dataframe["Noisy Ratio"].clip(0, np.inf, inplace = True)
-    dataframe["Noisy Ratio"] = dataframe["Noisy Ratio"].round(4)
-    # dataframe.drop(columns = "Positive Count", inplace = True)
+    dataframe["Noisy Positivity Ratio"] = dataframe["Positivity Ratio"] + noise
+    dataframe["Noisy Positivity Ratio"].clip(0, np.inf, inplace = True)
+    dataframe["Noisy Positivity Ratio"] = dataframe["Noisy Positivity Ratio"].round(4)
+    dataframe.drop(columns = "Positivity Ratio", inplace = True)
     return dataframe
 
 ###########################
