@@ -17,15 +17,13 @@ if "pseudonymize" in operations:
     data = mods.pseudonymize(data, config)
 if "k_anonymize" in operations:
     print("K-Anonymizing Data")
-    data = mods.k_anonymize(data, config)
+    data, users_per_bin = mods.k_anonymize(data, config)
 # if "dp" in operations:
 #     print("Enacting Differential Privacy")
 #     data = mods.differential_privacy_histogram(data, config)
 
 
-print(data)
+# print(data)
 # print(type(data))
 # mods.output_handler(data)
-
-
 

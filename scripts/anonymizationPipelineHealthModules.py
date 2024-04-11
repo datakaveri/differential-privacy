@@ -67,10 +67,10 @@ def k_anonymize(dataframe, config):
         while violation_checker(k, dataframe) == True:
             dataframe = generalize(dataframe, config, np.arange(min_bin_value,max_bin_value,i))
             age_value_counts = dataframe['Age Bin'].value_counts()
-            print(age_value_counts) 
             i+=1
     dataframe.drop(columns = attribute_to_generalize, inplace = True)
-    return dataframe
+    age_value_counts = age_value_counts[age_value_counts != 0]
+    return dataframe, age_value_counts
 
 ###########################
 # function to implement DP
