@@ -84,23 +84,50 @@ def query_building(dataframe, config):
     positive_count = dataframe.groupby('PIN Code')[['Test Result']].agg(lambda x: (x == 'Positive').sum())    # dataframe = dataframe.groupby(aggregation_column)
     dataframe = positive_count
     dataframe["Positivity Ratio"] = dataframe['Test Result']/T
-    # dataframe.rename(columns={"Test Result":"Positive Count"}, inplace = True)
     dataframe.drop("Test Result", axis = 1, inplace = True)
-    print(dataframe)
+    # print(dataframe)
     return dataframe, T
 
-def differential_privacy(dataframe, config):
+def differential_privacy_histogram(dataframe, config):
     dataframe, T = query_building(dataframe, config)
-    epsilon = config["dp_epsilon"]
+    eps_step = config["dp_epsilon_step"]
+    eps_array = np.arange(0.1,10,eps_step)     
     sensitivity = 1/T
-    b = sensitivity/epsilon
-    noise = np.random.laplace(0, b, len(dataframe))
-    print(noise)
-    dataframe["Noisy Positivity Ratio"] = dataframe["Positivity Ratio"] + noise
-    dataframe["Noisy Positivity Ratio"].clip(0, np.inf, inplace = True)
-    dataframe["Noisy Positivity Ratio"] = dataframe["Noisy Positivity Ratio"].round(4)
-    dataframe.drop(columns = "Positivity Ratio", inplace = True)
-    return dataframe
+    array_of_df = []
+    for epsilon in eps_array:
+        df_array = dataframe.copy()
+        # print(dataframe)
+        # print(epsilon)
+        b = sensitivity/epsilon
+        noise = np.random.laplace(0, b, len(df_array))
+        # print(noise)
+        df_array["epsilon"] = epsilon
+        df_array["Noisy Positivity Ratio"] = df_array["Positivity Ratio"] + noise
+        df_array["Noisy Positivity Ratio"].clip(0, np.inf, inplace = True)
+        df_array["Noisy Positivity Ratio"] = df_array["Noisy Positivity Ratio"].round(4)
+        # df_array.drop(columns = "Positivity Ratio", inplace = True)
+        array_of_df.append(df_array)
+    return array_of_df
+
+def query_building_mean(dataframe, config):
+
+    return
+
+def differential_privacy_mean(dataframe, config, eps_array):
+
+    return
+
+###########################
+# function to format output
+def output_handler(dataframe_list):
+    combined_df = pd.concat(dataframe_list, axis = 0)
+    combined_df =  combined_df.groupby(["epsilon","PIN Code"]).agg({"Noisy Positivity Ratio": list, "Positivity Ratio": list}).reset_index()
+    data_dict = combined_df.to_dict(orient="records")
+    json_data = json.dumps(data_dict, indent = 3)
+    with open('testOutput.json', 'w') as f:
+        f.write(json_data)
+    print("Output File Generated")
+    return
 
 ###########################
 # function to handle order of operations

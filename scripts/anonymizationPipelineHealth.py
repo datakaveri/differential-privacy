@@ -20,13 +20,11 @@ if "pseudonymize" in operations:
 #     data = mods.k_anonymize(data, config)
 if "dp" in operations:
     print("Enacting Differential Privacy")
-    data = mods.differential_privacy(data, config)
+    data = mods.differential_privacy_histogram(data, config)
 
 
+# print(data)
+# print(type(data))
+mods.output_handler(data)
 
-print(data)
-data.to_csv("dp.csv")
-
-# data["Age Bin"] = data["Age Bin"].astype(str)
-# data.to_json("testOutput.json", orient = "records")
 
