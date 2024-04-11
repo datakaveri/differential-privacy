@@ -1,18 +1,12 @@
 {
   "data_file": "../data/sampleHealthData_positivity.json",
-  "suppress": [
-    "Patient ID",
-    "Date of Birth",
-    "Gender",
-    "Address",
-    "Lab Results"
-  ],
-  "pseudonymize": "Name",
+  "suppress": ["Date of Birth", "Gender", "Address", "Lab Results"],
+  "pseudonymize": ["Name", "Patient ID"],
   "generalize": "Age",
   "k": 1000,
   "min_bin_value": 0,
   "max_bin_value": 101,
   "dp_aggregation": "PIN Code",
   "dp_query": "Test Result",
-  "dp_epsilon": 0.1
+  "dp_epsilon_step": 0.1
 }

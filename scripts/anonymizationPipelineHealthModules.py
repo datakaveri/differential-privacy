@@ -30,8 +30,9 @@ def suppress(dataframe, config):
 # pseudonymize
 def pseudonymize(dataframe, config):
     attribute_to_pseudonymize = config['pseudonymize']
-    dataframe['Hashed Value'] = dataframe[attribute_to_pseudonymize].apply(lambda x:hashlib.sha256(x.encode()).hexdigest())
-    dataframe.drop(columns = attribute_to_pseudonymize, inplace = True)
+    dataframe['UID'] = dataframe[attribute_to_pseudonymize[0]] + dataframe[attribute_to_pseudonymize[1]]
+    dataframe['Hashed Value'] = dataframe['UID'].apply(lambda x:hashlib.sha256(x.encode()).hexdigest())
+    dataframe.drop(columns=['UID'] + attribute_to_pseudonymize, inplace=True)
     return dataframe
 
 ###########################
