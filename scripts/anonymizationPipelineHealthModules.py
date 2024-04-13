@@ -82,14 +82,19 @@ def query_building(dataframe, config):
     query_column = config["dp_query"]
     aggregation_column = config["dp_aggregation"]
     T = len(dataframe)
-    positive_count = dataframe.groupby('PIN Code')[['Test Result']].agg(lambda x: (x == 'Positive').sum())    # dataframe = dataframe.groupby(aggregation_column)
+    # if query_column == 'Test Result' and aggregation_column == 'PIN Code':
+    positive_count = dataframe.groupby('PIN Code')[['Test Result']].agg(lambda x: (x == 'Positive').sum())
+    # query_output = dataframe.groupby(aggregation_column)[[query_column]].agg()
     dataframe = positive_count
     dataframe["Positivity Ratio"] = dataframe['Test Result']/T
     dataframe.drop("Test Result", axis = 1, inplace = True)
-    # print(dataframe)
     return dataframe, T
+    # if query_column == 'Time to Negative' and aggregation_column == 'Gender':
+    #     dataframe = dataframe.groupby("Gender")[["Time to Negative"]].agg('mean')
+    #     print(dataframe)
+    #     return dataframe, T
 
-def differential_privacy_histogram(dataframe, config):
+def differential_privacy_histogram_query(dataframe, config):
     dataframe, T = query_building(dataframe, config)
     eps_step = config["dp_epsilon_step"]
     eps_array = np.arange(0.1,10,eps_step)     
@@ -110,11 +115,13 @@ def differential_privacy_histogram(dataframe, config):
         array_of_df.append(df_array)
     return array_of_df
 
-def query_building_mean(dataframe, config):
 
-    return
-
-def differential_privacy_mean(dataframe, config, eps_array):
+# def differential_privacy_mean_query(dataframe, config, eps_array):
+    # Query: mean of Time to Negative per gender
+    dataframe, T = query_building(dataframe, config)
+    eps_step = config["dp_epsilon_step"]
+    eps_array = np.arange(0.1,10,eps_step)     
+    sensitivity = 1/T
 
     return
 
@@ -124,10 +131,32 @@ def output_handler(dataframe_list):
     combined_df = pd.concat(dataframe_list, axis = 0)
     combined_df =  combined_df.groupby(["epsilon","PIN Code"]).agg({"Noisy Positivity Ratio": list, "Positivity Ratio": list}).reset_index()
     data_dict = combined_df.to_dict(orient="records")
-    json_data = json.dumps(data_dict, indent = 3)
-    with open('testOutput.json', 'w') as f:
-        f.write(json_data)
-    print("Output File Generated")
+
+    # Group the data by 'epsilon' and create dictionaries with the desired structure
+    grouped_data = {}
+    for entry in data_dict:
+        epsilon_value = entry['epsilon']
+        if epsilon_value not in grouped_data:
+            grouped_data[epsilon_value] = []
+        grouped_data[epsilon_value].append({
+            'PIN Code': entry['PIN Code'],
+            'Noisy Positivity Ratio': entry['Noisy Positivity Ratio'],
+            'Positivity Ratio': entry['Positivity Ratio']
+        })
+
+    # Convert grouped data to a list of dictionaries
+    result_list = [{'epsilon': key, 'data': value} for key, value in grouped_data.items()]
+
+    # Convert list of dictionaries to JSON format
+    json_data = json.dumps(result_list, indent=4)
+
+    # Writing JSON data to a file
+    with open('nestedEpsTestOutput.json', 'w') as json_file:
+        json_file.write(json_data)
+        print("Output File Generated")
+    # json_data = json.dumps(data_dict, indent = 3)
+    # with open('testOutput.json', 'w') as f:
+    #     f.write(json_data)
     return
 
 ###########################
