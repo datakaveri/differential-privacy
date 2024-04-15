@@ -74,64 +74,77 @@ def k_anonymize(dataframe, config):
 
 ###########################
 # function to implement DP
-    # query: number of users for a diagnosis
+    # query: count of users testing positive per PIN Code
     # neighbouring dataset: add or remove a user from original dataset
-    # sensitivity: 1
+    # sensitivity: 1/T
 
+# def query_building_histogram(dataframe, config):
+#     output_attribute = config["dp_output_attribute"]
+#     aggregation_attribute = config["dp_aggregate_attribute"]
+#     T = len(dataframe)
+#     # if output_attribute == 'Test Result' and aggregation_attribute == 'PIN Code':
+#     positive_count = dataframe.groupby(aggregation_attribute)[[output_attribute]].agg(lambda x: (x == 'Positive').sum())
+#     # query_output = dataframe.groupby(aggregation_attribute)[[output_attribute]].agg()
+#     dataframe = positive_count
+#     dataframe["Positivity Ratio"] = dataframe['Test Result']/T
+#     dataframe.drop("Test Result", axis = 1, inplace = True)
+#     return dataframe, T
+#     # if output_attribute == 'Time to Negative' and aggregation_attribute == 'Gender':
+#     #     dataframe = dataframe.groupby("Gender")[["Time to Negative"]].agg('mean')
+#     #     print(dataframe)
+#     #     return dataframe, T
+    
 def query_building(dataframe, config):
-    query_column = config["dp_query"]
-    aggregation_column = config["dp_aggregation"]
+    output_attribute = config["dp_output_attribute"]
+    aggregation_attribute = config["dp_aggregate_attribute"]
+    dp_query = config["dp_query"]
     T = len(dataframe)
-    # if query_column == 'Test Result' and aggregation_column == 'PIN Code':
-    positive_count = dataframe.groupby('PIN Code')[['Test Result']].agg(lambda x: (x == 'Positive').sum())
-    # query_output = dataframe.groupby(aggregation_column)[[query_column]].agg()
-    dataframe = positive_count
-    dataframe["Positivity Ratio"] = dataframe['Test Result']/T
-    dataframe.drop("Test Result", axis = 1, inplace = True)
-    return dataframe, T
-    # if query_column == 'Time to Negative' and aggregation_column == 'Gender':
-    #     dataframe = dataframe.groupby("Gender")[["Time to Negative"]].agg('mean')
-    #     print(dataframe)
-    #     return dataframe, T
+    # conditional for config options
+    if dp_query == 'histogram':
+        # building custom query for "positivity ratio per PIN code" for count query
+        dataframe = dataframe.groupby(aggregation_attribute)[[output_attribute]].agg(lambda x: (x == 'Positive').sum())
+        dataframe[output_attribute] = dataframe['Test Result']/T
+        dataframe.drop(output_attribute, axis = 1, inplace = True)
+        return dataframe, T
+    elif dp_query == 'mean':
+        # building custom query for "time to negative per gender" for mean query
+        dataframe = dataframe.groupby(aggregation_attribute)[[output_attribute]].agg('mean')
+        return dataframe, T
 
-def differential_privacy_histogram_query(dataframe, config):
-    dataframe, T = query_building(dataframe, config)
+def differential_privacy(data, config):
+    output_attribute = config["dp_output_attribute"]
+    aggregation_attribute = config["dp_aggregate_attribute"]
+    dp_query = config["dp_query"]
+    dataframe, T = query_building(data, config)
     eps_step = config["dp_epsilon_step"]
-    eps_array = np.arange(0.1,10,eps_step)     
-    sensitivity = 1/T
+    eps_array = np.arange(0.1,10,eps_step)  
+    
+    # computing sensitivity for each query
+    if dp_query == 'histogram':   
+        sensitivity = 1/T
+    elif dp_query == 'mean':
+        sensitivity = 1
+
     array_of_df = []
     for epsilon in eps_array:
         df_array = dataframe.copy()
-        # print(dataframe)
-        # print(epsilon)
         b = sensitivity/epsilon
         noise = np.random.laplace(0, b, len(df_array))
-        # print(noise)
         df_array["epsilon"] = epsilon
-        df_array["Noisy Positivity Ratio"] = df_array["Positivity Ratio"] + noise
-        df_array["Noisy Positivity Ratio"].clip(0, np.inf, inplace = True)
-        df_array["Noisy Positivity Ratio"] = df_array["Noisy Positivity Ratio"].round(4)
-        # df_array.drop(columns = "Positivity Ratio", inplace = True)
+        #replace with query attribute + noisy
+        df_array[f"Noisy {output_attribute}"] = df_array[output_attribute] + noise
+        df_array[f"Noisy {output_attribute}"].clip(0, np.inf, inplace = True)
+        df_array[f"Noisy {output_attribute}"] = df_array[f"Noisy {output_attribute}"].round(4)
+        # df_array.drop(columns = output_attribute, inplace = True)
         array_of_df.append(df_array)
     return array_of_df
 
-
-# def differential_privacy_mean_query(dataframe, config, eps_array):
-    # Query: mean of Time to Negative per gender
-    dataframe, T = query_building(dataframe, config)
-    eps_step = config["dp_epsilon_step"]
-    eps_array = np.arange(0.1,10,eps_step)     
-    sensitivity = 1/T
-
-    return
-
-###########################
-# function to format output
-def output_handler(dataframe_list):
+def output_handler(dataframe_list, config):
+    output_attribute = config["dp_output_attribute"]
+    aggregation_attribute = config["dp_aggregate_attribute"]
     combined_df = pd.concat(dataframe_list, axis = 0)
-    combined_df =  combined_df.groupby(["epsilon","PIN Code"]).agg({"Noisy Positivity Ratio": list, "Positivity Ratio": list}).reset_index()
+    combined_df =  combined_df.groupby(["epsilon",aggregation_attribute]).agg({f"Noisy {output_attribute}": list, output_attribute: list}).reset_index()
     data_dict = combined_df.to_dict(orient="records")
-
     # Group the data by 'epsilon' and create dictionaries with the desired structure
     grouped_data = {}
     for entry in data_dict:
@@ -139,9 +152,9 @@ def output_handler(dataframe_list):
         if epsilon_value not in grouped_data:
             grouped_data[epsilon_value] = []
         grouped_data[epsilon_value].append({
-            'PIN Code': entry['PIN Code'],
-            'Noisy Positivity Ratio': entry['Noisy Positivity Ratio'],
-            'Positivity Ratio': entry['Positivity Ratio']
+            aggregation_attribute: entry[aggregation_attribute],
+            f"Noisy {output_attribute}": entry[f"Noisy {output_attribute}"],
+            output_attribute: entry[output_attribute]
         })
 
     # Convert grouped data to a list of dictionaries
@@ -150,14 +163,11 @@ def output_handler(dataframe_list):
     # Convert list of dictionaries to JSON format
     json_data = json.dumps(result_list, indent=4)
 
-    # Writing JSON data to a file
-    with open('nestedEpsTestOutput.json', 'w') as json_file:
-        json_file.write(json_data)
-        print("Output File Generated")
-    # json_data = json.dumps(data_dict, indent = 3)
-    # with open('testOutput.json', 'w') as f:
-    #     f.write(json_data)
-    return
+    # # Writing JSON data to a file
+    # with open('nestedEpsTestOutputCount.json', 'w') as json_file:
+    #     json_file.write(json_data)
+    #     print("Output File Generated")
+    return json_data
 
 ###########################
 # function to handle order of operations
@@ -169,6 +179,6 @@ def oop_handler(config):
         operations.append("pseudonymize")
     if "generalize" in config:
         operations.append("k_anonymize")
-    if "dp_aggregation" in config:
+    if "dp_query" in config:
         operations.append("dp")
     return operations
