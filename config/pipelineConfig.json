@@ -6,8 +6,8 @@
   "k": 1000,
   "min_bin_value": 0,
   "max_bin_value": 101,
-  "dp_query": "mean",
-  "dp_output_attribute": "Time to Negative",
-  "dp_aggregate_attribute": "Gender",
+  "dp_query": "histogram",
+  "dp_output_attribute": "Test Result",
+  "dp_aggregate_attribute": "PIN Code",
   "dp_epsilon_step": 0.1
 }
