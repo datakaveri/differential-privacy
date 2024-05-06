@@ -120,6 +120,7 @@ def differential_privacy(data, config):
             # len(df_array)
             b = sensitivity/epsilon
             noise = np.random.laplace(0, b, len(df_array))
+            # print(noise)
             df_array["epsilon"] = epsilon
             #replace with query attribute + noisy
             df_array[f"Noisy {output_attribute}"] = df_array[output_attribute] + noise
@@ -141,16 +142,16 @@ def differential_privacy(data, config):
             noise_array = []
             for sens in sensitivity:
                 b = sens/epsilon
-                noise = (np.random.laplace(0,b,1))
+                noise = np.random.laplace(0,b,1)
                 noise_array.append(noise)
             noise_array = np.array(noise_array)
+            noise_array = noise_array.flatten()
             df_array["epsilon"] = epsilon
             # replace with query attribute + noisy
-            df_array[f"Noisy {output_attribute}"] = df_array[output_attribute] + noise
-            df_array[f"Noisy {output_attribute}"].clip(0, np.inf, inplace = True)
+            # print(df_array[output_attribute])
+            df_array[f"Noisy {output_attribute}"] = df_array[output_attribute] + noise_array
+            # df_array[f"Noisy {output_attribute}"].clip(0, np.inf, inplace = True)
             df_array[f"Noisy {output_attribute}"] = df_array[f"Noisy {output_attribute}"].round(4)
-            # print(df_array)
-            # df_array.drop(columns = output_attribute, inplace = True)
             array_of_df.append(df_array)
         return array_of_df
 
