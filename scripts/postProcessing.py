@@ -130,42 +130,83 @@ def outputFileCategorical(dfs1, dfs2, configDict):
     with open('../pipelineOutput/'+name, 'w') as fp:
         json.dump(jsonDict, fp, indent=4)
 
+# def My_RMSEGraph(snr,epsilon):
+#     alphas=[]
+#     epsilons_vec=[]
+#     for i in range(1,101):
+#         epsilons_vec.append(i/100.0)
+#     for i in range(1,101):
+#         epsilons_vec.append(i)
+#     for i in epsilons_vec:
+#         alphas.append(i/epsilon)
+#     snr_final=[]
+#     for alpha in alphas:
+#         snr_new = []  # Initialize an empty list
+#         # Iterate over the elements of the original sequence
+#         for snr_value in snr:
+#             result = (alpha * alpha) * snr_value  # Perform the multiplication
+#             snr_new.append(result)
+#         snr_final.append(snr_new)
+#     RMSE=[]
+#     for snr in snr_final:
+#         rmse=[]
+#         for value in snr:
+#             if value==0:
+#                 rmse.append(pow(10,10)*0.2)
+#             else:
+#                 rmse.append(1.0/math.sqrt(value))
+#         RMSE.append(rmse)
+#     error_10=[]
+#     for rmse in RMSE:
+#         cnt_10=0
+#         for value in rmse:
+#             if value < 0.1:
+#                 cnt_10=cnt_10+1
+#         error_10.append(cnt_10)
+#     error_10=np.multiply(np.divide(error_10,len(snr)),100)
+#     return epsilons_vec,error_10
+
+##################################################################
 def RMSEGraph(snr,epsilon):
     alphas=[]
-    epsilons_vec=[]
-    for i in range(1,101):
-        epsilons_vec.append(i/100.0)
-    for i in range(1,101):
-        epsilons_vec.append(i)
-    for i in epsilons_vec:
-        alphas.append(i/epsilon)
+
+    # Create a vector epsilon_vec = [0.1, 0.2, 0.3, ....100]
+    epsilons_vec=np.arange(1, 1001)/10
+    
+    # Create a vector alphas = [0.1, 0.2, 0.3, ....100]/epssilon
+    alphas = epsilons_vec/epsilon;
     snr_final=[]
     for alpha in alphas:
-        snr_new = []  # Initialize an empty list
-        # Iterate over the elements of the original sequence
-        for snr_value in snr:
-            result = (alpha * alpha) * snr_value  # Perform the multiplication
-            snr_new.append(result)
-        snr_final.append(snr_new)
-    RMSE=[]
-    for snr in snr_final:
-        rmse=[]
-        for value in snr:
-            if value==0:
-                rmse.append(pow(10,10)*0.2)
-            else:
-                rmse.append(1.0/math.sqrt(value))
-        RMSE.append(rmse)
+        temp = alpha * alpha
+        #print(" Type od snr variable : ", type(snr))
+        snr_final.append(temp * np.array(snr))
+    RMSE = np.array(snr_final)
+    RMSE[RMSE == 0] = 1/10000000
+    RMSE = 1/np.sqrt(RMSE)
+    # for s in snr_final:
+    #     rmse=[]
+    #     for value in s:
+    #         if value==0:
+    #             rmse.append(pow(10,10)*0.2)
+    #         else:
+    #             rmse.append(1.0/math.sqrt(value))
+    #     RMSE.append(rmse)
     error_10=[]
+    
     for rmse in RMSE:
-        cnt_10=0
-        for value in rmse:
-            if value < 0.1:
-                cnt_10=cnt_10+1
+        cnt_10 = sum(rmse > 0.1)
+
+        # for value in rmse:
+        #     if value < 0.1:
+        #         cnt_10=cnt_10+1
         error_10.append(cnt_10)
-    error_10=np.multiply(np.divide(error_10,len(snr)),100)
-    return epsilons_vec,error_10
+    error_10 = np.multiply(np.divide(error_10,len(snr)),100)
+    epsilon_list = epsilons_vec.tolist()
+    return epsilon_list, error_10
+
+##################################################################
 def generategraph(epsilons_vec,query1_count,epsilon_1,query2_count,epsilon_2):
+    #print("Entered generategraph ")
     filename="RRMSE_graph.png"
     plt.figure(figsize=(8, 12))
     # First subplot
