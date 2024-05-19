@@ -1,12 +1,13 @@
 # script for function call handling 
-import anonymizationPipelineHealthModules as mods
+import scripts.medicalModules as mods
+import scripts.utilities as utils
 
 # necessary file reads
 config = mods.read_config("../config/pipelineConfig.json")
 data = mods.read_data(config["data_file"])
 
 # checking the order of operations required
-operations = mods.oop_handler(config)
+operations = utils.oop_handler(config)
 print(operations)
 
 if "suppress" in operations:

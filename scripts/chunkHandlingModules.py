@@ -3,17 +3,15 @@ import json
 import pandas as pd
 import utilities as utils
 
+# for testing
 fileList = ['../data/syntheticMedicalChunks/medical_data_split_file_0.json',
             '../data/syntheticMedicalChunks/medical_data_split_file_1.json',
             '../data/syntheticMedicalChunks/medical_data_split_file_2.json',
             '../data/syntheticMedicalChunks/medical_data_split_file_3.json',
             '../data/syntheticMedicalChunks/medical_data_split_file_4.json']
-
-# for testing
 operations = ["suppress", "pseudonymize"]
 configDict = utils.read_config("../config/pipelineConfig.json")
 medicalConfigDict = configDict[configDict["data_type"]]
-print(medicalConfigDict)
 
 # function to handle chunked dataframe for pseudonymization and suppression
 def chunkHandlingCommon(configDict, operations, fileList):
@@ -25,7 +23,6 @@ def chunkHandlingCommon(configDict, operations, fileList):
             dataDict = json.load(dfile)
             dataframeChunk = pd.json_normalize(dataDict)
             print('The loaded file is: ' + file + ' with shape ' + str(dataframeChunk.shape))
-            # configDict['dataFile'] == file
 
         #dropping duplicates
         dataframeChunk = utils.deduplicate(dataframeChunk)
@@ -38,7 +35,7 @@ def chunkHandlingCommon(configDict, operations, fileList):
         if "pseudonymize" in operations:
             dataframeChunk = utils.pseudonymize(dataframeChunk, configDict)
         
-    dataframeAccumulate = pd.concat([dataframeAccumulate, dataframeChunk], ignore_index=True)
+        dataframeAccumulate = pd.concat([dataframeAccumulate, dataframeChunk], ignore_index=True)
     print(dataframeAccumulate.info())
     return dataframeAccumulate
 

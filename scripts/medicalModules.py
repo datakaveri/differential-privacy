@@ -4,6 +4,7 @@ import numpy as np
 import json
 import hashlib
 
+# //TODO: Remove functions found in utilities
 ###########################
 # function definitions
 
@@ -104,7 +105,7 @@ def differential_privacy(data, config):
     output_attribute = config["dp_output_attribute"]
     aggregation_attribute = config["dp_aggregate_attribute"]
     dp_query = config["dp_query"]
-    dataframe, T, bin_nums = query_building(data, config)
+    dataframe, T, bin_nums = query_building(data, config) # type: ignore
     # print(bin_nums)
     eps_step = config["dp_epsilon_step"]
     # eps_array = np.arange(0.1,10,eps_step)  
@@ -131,9 +132,9 @@ def differential_privacy(data, config):
             array_of_df.append(df_array)
         return array_of_df
     elif dp_query == 'mean':
-        sensitivity_female = 28/bin_nums[0]
-        sensitivity_male = 28/bin_nums[1]
-        sensitivity_other = 28/bin_nums[2]
+        sensitivity_female = 28/bin_nums[0] # type: ignore
+        sensitivity_male = 28/bin_nums[1] # type: ignore
+        sensitivity_other = 28/bin_nums[2] # type: ignore
         sensitivity = [sensitivity_female, sensitivity_male, sensitivity_other]
         # print(sensitivity)
         array_of_df = []
@@ -185,16 +186,3 @@ def output_handler(dataframe_list, config):
         print("Output File Generated")
     return json_data
 
-###########################
-# function to handle order of operations
-def oop_handler(config):
-    operations = []
-    if "suppress" in config:
-        operations.append("suppress")
-    if "pseudonymize" in config:
-        operations.append("pseudonymize")
-    if "generalize" in config:
-        operations.append("k_anonymize")
-    if "dp_query" in config:
-        operations.append("dp")
-    return operations
