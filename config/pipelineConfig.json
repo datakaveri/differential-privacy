@@ -1,13 +1,45 @@
 {
   "data_file": "../data/sampleHealthData_positivity.json",
-  "suppress": ["Date of Birth", "Address", "Lab Results"],
-  "pseudonymize": ["Name", "Patient ID"],
-  "generalize": "Age",
-  "k": 1000,
-  "min_bin_value": 0,
-  "max_bin_value": 101,
-  "dp_query": "mean",
-  "dp_output_attribute": "Time to Negative",
-  "dp_aggregate_attribute": "Gender",
-  "dp_epsilon_step": 0.1
+  "data_type": "medical",
+  "medical": {
+    "suppress": ["Date of Birth", "Address", "Lab Results"],
+    "pseudonymize": ["Name", "Patient ID"],
+    "generalize": "Age",
+    "k": 1000,
+    "min_bin_value": 0,
+    "max_bin_value": 101,
+    "dp_query": "mean",
+    "dp_output_attribute": "Time to Negative",
+    "dp_aggregate_attribute": "Gender",
+    "dp_epsilon_step": 0.1
+  },
+  "spatioTemporal": {
+    "suppress": [
+      "trip_direction",
+      "last_stop_arrival_time",
+      "route_id",
+      "actual_trip_start_time",
+      "trip_delay",
+      "vehicle_label",
+      "id",
+      "location.type"
+    ],
+    "pseudonymize": ["license_plate", "trip_id"],
+    "spatial_generalize": {
+      "spatial_attribute": "location.coordinates",
+      "h3_resolution": 7,
+      "filter_attribute": "license_plate",
+      "filter_event_occurences": 30,
+      "filter_attribute_by": ["HAT", "Date"]
+    },
+    "temporal_generalize": {
+      "temporal_attribute": "observationDateTime",
+      "start_time": 9,
+      "end_time": 20,
+      "dp_query": "mean",
+      "dp_output_attribute": "speed",
+      "dp_aggregate_attribute": "HAT",
+      "dp_epsilon_step": 0.1
+    }
+  }
 }

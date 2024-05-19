@@ -20,6 +20,18 @@ def read_data(dataFile):
         dataframe = pd.json_normalize(data)
     return dataframe
 
+# drop duplicates
+def deduplicate(dataframe):
+    # df.drop_duplicates does not work on dataframes containing lists
+    # identifying attributes with lists 
+    list_attributes = [col for col in dataframe.columns if dataframe[col].apply(lambda x: isinstance(x, list)).any()]
+    attributes_without_lists = [col for col in dataframe.columns if col not in list_attributes]
+    # dropping all attributes in subset of columns without lists
+    dataframe = dataframe.drop_duplicates(
+        subset = attributes_without_lists, 
+        inplace = False, ignore_index = True)
+    return dataframe
+
 # suppress
 def suppress(dataframe, config):
     attributes_to_suppress = config['suppress']
@@ -34,3 +46,17 @@ def pseudonymize(dataframe, config):
     dataframe['Hashed Value'] = dataframe['UID'].apply(lambda x:hashlib.sha256(x.encode()).hexdigest())
     dataframe.drop(columns=['UID'] + attribute_to_pseudonymize, inplace=True)
     return dataframe
+
+###########################
+# function to handle order of operations and select config
+def oop_handler(config):
+    operations = []
+    if "suppress" in config:
+        operations.append("suppress")
+    if "pseudonymize" in config:
+        operations.append("pseudonymize")
+    if "generalize" in config:
+        operations.append("k_anonymize")
+    if "dp_query" in config:
+        operations.append("dp")
+    return operations
