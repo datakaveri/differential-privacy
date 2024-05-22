@@ -38,7 +38,7 @@
       "end_time": 20
     },
     "differential_privacy": {
-      "dp_query": "mean",
+      "dp_query": "count",
       "dp_output_attribute": "speed",
       "dp_aggregate_attribute": ["HAT", "Date", "license_plate"],
       "dp_epsilon_step": 0.1

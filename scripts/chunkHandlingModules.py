@@ -28,13 +28,22 @@ configDict = utils.read_config("../config/pipelineConfig.json")
 medicalConfigDict = configDict["medical"]
 spatioTemporalConfigDict = configDict["spatioTemporal"]
 
+def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
+    dpConfig = spatioTemporalConfigDict
+    dataframeAccumulator = dataframeChunk.groupby([dpConfig['dp_aggregate_attribute'][0],\
+                                                 dpConfig['dp_aggregate_attribute'][1],\
+                                                 dpConfig['dp_aggregate_attribute'][2]])\
+                                                .agg(query_output = (dpConfig['dp_output_attribute'], 
+                                                             dpConfig['dp_query'])).reset_index()
+    return dataframeAccumulator
+
 
 # function to handle chunked dataframe for pseudonymization and suppression
 def chunkHandlingCommon(configDict, operations, fileList):
-    # lengthList = []
+    lengthList = []
     dataframeAccumulate = pd.DataFrame()
     for file in fileList:
-        # lengthList.append(file)
+        lengthList.append(file)
         with open(file,"r") as dfile:
             dataDict = json.load(dfile)
             dataframeChunk = pd.json_normalize(dataDict)
@@ -85,18 +94,14 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, operations, fileList):
         # filtering HATS by average number of events per day
         dataframeChunk = stmod. spatioTemporalEventFiltering(dataframeChunk, spatioTemporalConfigDict)
 
-        print(dataframeChunk)
+        print('The chunk number is: ', (len(lengthList)))
         
-        # if "mean" in spatioTemporalConfigDict["dp_query"]:
-        # accumulating chunks for count and mean query
-        dataframeAccumulate = dataframeChunk.groupby([dpConfig['dp_aggregate_attribute'][0],\
-                                                 dpConfig['dp_aggregate_attribute'][1],\
-                                                 dpConfig['dp_aggregate_attribute'][2]])\
-                                                .agg(mean = (dpConfig['dp_output_attribute'], 
-                                                             dpConfig['dp_query']))
+        # accumulating chunks for dp query building
+        dataframeAccumulator = chunkAccumulatorSpatioTemporal(dataframeChunk, dpConfig)
         
-        dataframeAccumulateNew = pd.concat([dataframeAccumulate, dataframeAccumulateNew], ignore_index=True)
-    print(dataframeAccumulateNew)
+        # creating accumulated dataframe
+        dataframeAccumulate = pd.concat([dataframeAccumulate, dataframeAccumulator], ignore_index=True)
+    print(dataframeAccumulate)
     # //TODO: Add DP implementation
     return dataframeAccumulate
 
