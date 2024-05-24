@@ -28,16 +28,6 @@ configDict = utils.read_config("../config/pipelineConfig.json")
 medicalConfigDict = configDict["medical"]
 spatioTemporalConfigDict = configDict["spatioTemporal"]
 
-def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
-    dpConfig = spatioTemporalConfigDict
-    dataframeAccumulator = dataframeChunk.groupby([dpConfig['dp_aggregate_attribute'][0],\
-                                                 dpConfig['dp_aggregate_attribute'][1],\
-                                                 dpConfig['dp_aggregate_attribute'][2]])\
-                                                .agg(query_output = (dpConfig['dp_output_attribute'], 
-                                                             dpConfig['dp_query'])).reset_index()
-    return dataframeAccumulator
-
-
 # function to handle chunked dataframe for pseudonymization and suppression
 def chunkHandlingCommon(configDict, operations, fileList):
     lengthList = []
@@ -61,13 +51,23 @@ def chunkHandlingCommon(configDict, operations, fileList):
             dataframeChunk = utils.pseudonymize(dataframeChunk, configDict)
         
         dataframeAccumulate = pd.concat([dataframeAccumulate, dataframeChunk], ignore_index=True)
-    print(dataframeAccumulate.info())
+    # print(dataframeAccumulate.info())
     return dataframeAccumulate
 
-# chunkHandlingCommon(medicalConfigDict, operations, medicalFileList)
+chunkHandlingCommon(spatioTemporalConfigDict, operations, spatioTemporalFileList)
+
+# function to accumulate chunks with appropriate query building for DP
+def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
+    dpConfig = spatioTemporalConfigDict
+    dataframeAccumulator = dataframeChunk.groupby([dpConfig['dp_aggregate_attribute'][0],\
+                                                 dpConfig['dp_aggregate_attribute'][1],\
+                                                 dpConfig['dp_aggregate_attribute'][2]])\
+                                                .agg(query_output = (dpConfig['dp_output_attribute'], 
+                                                             dpConfig['dp_query'])).reset_index()
+    return dataframeAccumulator
 
 def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, operations, fileList):
-# assume that the appropriate config has been selected already based UI input
+# assume that the appropriate config has been selected already based on UI input
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
     dataframeAccumulateNew = pd.DataFrame()
@@ -92,7 +92,7 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, operations, fileList):
         dataframeChunk = stmod.temporalEventFiltering(dataframeChunk, spatioTemporalConfigDict)
 
         # filtering HATS by average number of events per day
-        dataframeChunk = stmod. spatioTemporalEventFiltering(dataframeChunk, spatioTemporalConfigDict)
+        dataframeChunk = stmod.spatioTemporalEventFiltering(dataframeChunk, spatioTemporalConfigDict)
 
         print('The chunk number is: ', (len(lengthList)))
         
@@ -102,13 +102,14 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, operations, fileList):
         # creating accumulated dataframe
         dataframeAccumulate = pd.concat([dataframeAccumulate, dataframeAccumulator], ignore_index=True)
     print(dataframeAccumulate)
+
+        
+    # //TODO: Add Sensitivity Computation for query 1 and 2 (no weightage)
+    # //TODO: Add noise addition for both queries
     # //TODO: Add DP implementation
     return dataframeAccumulate
 
 chunkHandlingSpatioTemporal(spatioTemporalConfigDict, operations, spatioTemporalFileList)
-
-
-
 
 def chunkHandlingMedical():
 # //TODO: Add in k-anonymity implementation for chunked data

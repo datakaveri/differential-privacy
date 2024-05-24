@@ -36,7 +36,7 @@ def deduplicate(dataframe):
 def suppress(dataframe, config):
     attributes_to_suppress = config['suppress']
     dataframe.drop(columns = attributes_to_suppress, inplace = True)
-    print(dataframe.info())
+    # print(dataframe.info())
     return dataframe
 
 # pseudonymize

@@ -76,3 +76,13 @@ def timeRange(dataframe):
     endDay = dataframe['Date'].max()
     timeRange = 1 + (endDay - startDay).days
     return timeRange
+
+def spatioTemporalDifferentialPrivacy(dataframe, configFile, timeRange):
+    # //TODO: Add sensitivity computation for each query
+    dpConfig = configFile['differential_privacy']
+    count = dataframe['count']
+    if dpConfig['dp_query'] == 'mean':
+        sensitivity = (dpConfig['global_max_value'] - dpConfig['global_min_value'])/len(count)
+    else if dpConfig['dp_query'] == 'count':
+        sensitivity = ()
+    return dataframe
