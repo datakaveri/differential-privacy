@@ -77,12 +77,24 @@ def timeRange(dataframe):
     timeRange = 1 + (endDay - startDay).days
     return timeRange
 
-def spatioTemporalDifferentialPrivacy(dataframe, configFile, timeRange):
-    # //TODO: Add sensitivity computation for each query
+def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange):
     dpConfig = configFile['differential_privacy']
-    count = dataframe['count']
+    count = dataframeAccumulate['query_output'].sum()
+
+    # appropriate sensitivity computation
     if dpConfig['dp_query'] == 'mean':
-        sensitivity = (dpConfig['global_max_value'] - dpConfig['global_min_value'])/len(count)
-    else if dpConfig['dp_query'] == 'count':
-        sensitivity = ()
-    return dataframe
+        sensitivity = (dpConfig['global_max_value'] - dpConfig['global_min_value'])/(count)
+    elif dpConfig['dp_query'] == 'count':
+        sensitivity = (1/timeRange)
+    
+    # noise generation
+    # TODO:// Epsilon prime consideration
+    b = sensitivity/dpConfig['dp_epsilon_step']
+    bVariance = 2 * (b * b)
+    noise = np.random.laplace(0, b, len(dataframeAccumulate))
+    print(len(noise))
+    # noise addition
+    privateAggregateDataframe = dataframeAccumulate.copy()
+    privateAggregateDataframe['noisy_output'] = privateAggregateDataframe['query_output'] + noise
+    print(privateAggregateDataframe)
+    return privateAggregateDataframe

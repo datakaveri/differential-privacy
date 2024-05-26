@@ -38,10 +38,12 @@
       "end_time": 20
     },
     "differential_privacy": {
-      "dp_query": "count",
+      "dp_query": "mean",
       "dp_output_attribute": "speed",
       "dp_aggregate_attribute": ["HAT", "Date", "license_plate"],
-      "dp_epsilon_step": 0.1
+      "dp_epsilon_step": 0.1,
+      "global_max_value": 65,
+      "global_min_value": 0
     }
   }
 }
