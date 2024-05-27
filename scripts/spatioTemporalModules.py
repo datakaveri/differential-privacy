@@ -70,6 +70,7 @@ def spatioTemporalEventFiltering(dataframe, configFile):
     print('########################################################################################')
     return dataframe
 
+# computing the number of days in the dataset
 def timeRange(dataframe):
     #calculating the number of days in the dataset
     startDay = dataframe['Date'].min()
@@ -77,6 +78,7 @@ def timeRange(dataframe):
     timeRange = 1 + (endDay - startDay).days
     return timeRange
 
+# performing differential privacy
 def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange):
     dpConfig = configFile['differential_privacy']
     count = dataframeAccumulate['query_output'].sum()

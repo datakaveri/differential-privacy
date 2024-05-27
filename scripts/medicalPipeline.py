@@ -1,29 +1,27 @@
-# script for function call handling 
-import scripts.medicalModules as mods
-import scripts.utilities as utils
+import medicalModules as medmod
+import chunkHandlingModules as chmod
+import utilities as utils
 
-# necessary file reads
-config = mods.read_config("../config/pipelineConfig.json")
-data = mods.read_data(config["data_file"])
+# for testing
+medicalFileList = ['../data/syntheticMedicalChunks/medical_data_split_file_0.json',
+            '../data/syntheticMedicalChunks/medical_data_split_file_1.json',
+            '../data/syntheticMedicalChunks/medical_data_split_file_2.json',
+            '../data/syntheticMedicalChunks/medical_data_split_file_3.json',
+            '../data/syntheticMedicalChunks/medical_data_split_file_4.json']
 
-# checking the order of operations required
-operations = utils.oop_handler(config)
-print(operations)
+operations = ["suppress", "pseudonymize"]
+configDict = utils.read_config("../config/pipelineConfig.json")
+medicalConfigDict = configDict["medical"]
 
-if "suppress" in operations:
-    print("Performing Attribute Suppression")
-    data = mods.suppress(data, config)
-if "pseudonymize" in operations:
-    print("Performing Attribute Pseudonymization: Pseudonymized Attribute stored in Hashed Value Column")
-    data = mods.pseudonymize(data, config)
-if "k_anonymize" in operations:
-    print("K-Anonymizing Data")
-    data, users_per_bin = mods.k_anonymize(data, config)
-if "dp" in operations:
-    print("Enacting Differential Privacy")
-    data = mods.differential_privacy(data, config)
+print("Performing common chunk accumulation functions")
+dataframeAccumulate = chmod.chunkHandlingCommon(medicalConfigDict,
+                                                operations,
+                                                medicalFileList)
 
-# print(data)
-mods.output_handler(data, config)
+print("Performing Chunk Accumulation for k-anon")
+dataframeAccumulateMed = chmod.chunkHandlingMedical(medicalConfigDict,
+                                                    operations,
+                                                    medicalFileList)
 
-
+print(dataframeAccumulateMed.to_string())
+print(dataframeAccumulateMed['Count'].sum())

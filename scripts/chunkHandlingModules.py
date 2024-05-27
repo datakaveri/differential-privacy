@@ -1,8 +1,10 @@
 # import statements
 import json
 import pandas as pd
+import numpy as np
 import utilities as utils
 import spatioTemporalModules as stmod
+import medicalModules as medmod
 
 # function to handle chunked dataframe for pseudonymization and suppression
 def chunkHandlingCommon(configDict, operations, fileList):
@@ -85,7 +87,9 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, operations, fileList):
     print("End of Accumulation")
     return dataframeAccumulate
 
-def chunkAccumulatorMedical(dataframeChunk, medicalConfigDict):
+# function to accumulate chunks with appropriate query building for DP
+def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
+    dpConfig = medicalConfigDict["differential_privacy"]
     print("Accumulating chunks for building DP Query")
     dataframeAccumulator = dataframeChunk.groupby([dpConfig['dp_aggregate_attribute'][0],\
                                                  dpConfig['dp_aggregate_attribute'][1],\
@@ -94,8 +98,44 @@ def chunkAccumulatorMedical(dataframeChunk, medicalConfigDict):
                                                              dpConfig['dp_query'])).reset_index()
     return dataframeAccumulator
 
-def chunkHandlingMedical(dataframeChunk, medicalConfigDict):
-    
+# preprocessing to accumulate chunks for k-anon
+def chunkHandlingMedicalKAnon(dataframeChunk, medicalConfigDict):
+    chunkHistogram = pd.Series()
+    kConfig = medicalConfigDict["k_anonymize"]
+    bins = np.arange(kConfig["min_bin_value"], kConfig["max_bin_value"], 1)
+
+    # filling each bin with appropriate count of ages using pd.cut()
+    dataframeChunk = medmod.generalize(dataframeChunk, medicalConfigDict, bins)
+
+    # counting no. of users in each bin
+    chunkHistogram = dataframeChunk[medicalConfigDict["generalize"]].value_counts().reindex(bins[:-1], fill_value=0)
+    return chunkHistogram
+
+# accumulating chunks with appropriate processing
+def chunkHandlingMedical(medicalConfigDict, operations, fileList):
+    lengthList = []
+    dataframeAccumulate = pd.DataFrame()
+    dataframeAccumulateNew = pd.DataFrame()
+    globalHistogramAccumulate = pd.Series()
+    dpConfig = medicalConfigDict["differential_privacy"]
+    kConfig = medicalConfigDict["k_anonymize"]
+    for file in fileList:
+        lengthList.append(file)
+        print('The chunk number is: ', (len(lengthList)))
+        with open(file,"r") as dfile:
+            dataDict = json.load(dfile)
+            dataframeChunk = pd.json_normalize(dataDict)
+            print('The loaded file is: ' + file + ' with shape ' + str(dataframeChunk.shape))
+
+
+        globalHistogramChunk = chunkHandlingMedicalKAnon(dataframeChunk, medicalConfigDict)
+
+        # accumulating no. of users per bin for every chunk
+        globalHistogramAccumulate = globalHistogramAccumulate.add(globalHistogramChunk, fill_value=0)
+
+    # reassigning column names
+    globalHistogramAccumulate = pd.DataFrame({medicalConfigDict["generalize"]:globalHistogramAccumulate.index, 'Count':globalHistogramAccumulate.values})
+
 # //TODO: Add in k-anonymity implementation for chunked data
 # //TODO: Add in DP implementation for medical queries
-    return
+    return globalHistogramAccumulate

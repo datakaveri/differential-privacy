@@ -5,13 +5,17 @@
     "suppress": ["Date of Birth", "Address", "Lab Results"],
     "pseudonymize": ["Name", "Patient ID"],
     "generalize": "Age",
-    "k": 1000,
-    "min_bin_value": 0,
-    "max_bin_value": 101,
-    "dp_query": "mean",
-    "dp_output_attribute": "Time to Negative",
-    "dp_aggregate_attribute": "Gender",
-    "dp_epsilon_step": 0.1
+    "k_anonymize": {
+      "k": 1000,
+      "min_bin_value": 0,
+      "max_bin_value": 101
+    },
+    "differential_privacy": {
+      "dp_query": "mean",
+      "dp_output_attribute": "Time to Negative",
+      "dp_aggregate_attribute": "Gender",
+      "dp_epsilon_step": 0.1
+    }
   },
   "spatioTemporal": {
     "suppress": [
