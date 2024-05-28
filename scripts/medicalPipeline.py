@@ -23,5 +23,9 @@ dataframeAccumulateMed = chmod.chunkHandlingMedical(medicalConfigDict,
                                                     operations,
                                                     medicalFileList)
 
-print(dataframeAccumulateMed.to_string())
-print(dataframeAccumulateMed['Count'].sum())
+# testing for spatio-temporal
+
+
+# testing k-anonymity 
+# print(dataframeAccumulateMed.to_string())
+# print(dataframeAccumulateMed['Count'].sum())

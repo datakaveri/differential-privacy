@@ -91,9 +91,7 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, operations, fileList):
 def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
     dpConfig = medicalConfigDict["differential_privacy"]
     print("Accumulating chunks for building DP Query")
-    dataframeAccumulator = dataframeChunk.groupby([dpConfig['dp_aggregate_attribute'][0],\
-                                                 dpConfig['dp_aggregate_attribute'][1],\
-                                                 dpConfig['dp_aggregate_attribute'][2]])\
+    dataframeAccumulator = dataframeChunk.groupby([dpConfig['dp_aggregate_attribute']])\
                                                 .agg(query_output = (dpConfig['dp_output_attribute'], 
                                                              dpConfig['dp_query'])).reset_index()
     return dataframeAccumulator
@@ -116,7 +114,8 @@ def chunkHandlingMedical(medicalConfigDict, operations, fileList):
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
     dataframeAccumulateNew = pd.DataFrame()
-    globalHistogramAccumulate = pd.Series()
+    kAnonAccumulate = pd.Series()
+    print(medicalConfigDict)
     dpConfig = medicalConfigDict["differential_privacy"]
     kConfig = medicalConfigDict["k_anonymize"]
     for file in fileList:
@@ -127,15 +126,36 @@ def chunkHandlingMedical(medicalConfigDict, operations, fileList):
             dataframeChunk = pd.json_normalize(dataDict)
             print('The loaded file is: ' + file + ' with shape ' + str(dataframeChunk.shape))
 
-
-        globalHistogramChunk = chunkHandlingMedicalKAnon(dataframeChunk, medicalConfigDict)
+        # generalizing each chunk
+        kAnonChunk = chunkHandlingMedicalKAnon(dataframeChunk, medicalConfigDict)
 
         # accumulating no. of users per bin for every chunk
-        globalHistogramAccumulate = globalHistogramAccumulate.add(globalHistogramChunk, fill_value=0)
+        kAnonAccumulate = kAnonAccumulate.add(kAnonChunk, fill_value=0)
+
+        # accumulating chunks for dp query building
+        dataframeAccumulator = chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict)
+
+
+        dataframeAccumulate = pd.concat([dataframeAccumulate, dataframeAccumulator], ignore_index=True)
+        # print(dataframeAccumulate)
+        print("The length of the accumulate dataframe is: ", len(dataframeAccumulate)) 
+    
+    # concat just adds on rows, so grouping again using the same parameters and computing the query again
+    # //TODO: This will only work for mean queries and not count as sum of counts is required
+    if dpConfig["dp_query"] == "mean":
+        dataframeAccumulate = dataframeAccumulate.groupby([dpConfig['dp_aggregate_attribute']])\
+                                                .agg(query_output = ('query_output', \
+                                                             dpConfig['dp_query'])).reset_index()
+    elif dpConfig["dp_query"] == "count":
+        dpAccumulate = dataframeAccumulate.groupby([dpConfig['dp_aggregate_attribute']])\
+                                                .agg(query_output = ('query_output', \
+                                                             "sum")).reset_index()
+    print(dpAccumulate) 
+    print(dpAccumulate.info())
 
     # reassigning column names
-    globalHistogramAccumulate = pd.DataFrame({medicalConfigDict["generalize"]:globalHistogramAccumulate.index, 'Count':globalHistogramAccumulate.values})
+    kAnonAccumulate = pd.DataFrame({medicalConfigDict["generalize"]:kAnonAccumulate.index, 'Count':kAnonAccumulate.values})
 
 # //TODO: Add in k-anonymity implementation for chunked data
 # //TODO: Add in DP implementation for medical queries
-    return globalHistogramAccumulate
+    return kAnonAccumulate
