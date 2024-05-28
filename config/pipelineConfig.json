@@ -6,7 +6,7 @@
     "pseudonymize": ["Name", "Patient ID"],
     "generalize": "Age",
     "k_anonymize": {
-      "k": 1000,
+      "k": 100,
       "min_bin_value": 0,
       "max_bin_value": 101
     },
