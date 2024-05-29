@@ -191,7 +191,7 @@ def chunkHandlingMedical(medicalConfigDict, operations, fileList):
     # concat just adds on rows, so grouping again using the same parameters and computing the query again
     # //TODO: This will only work for mean queries and not count as sum of counts is required
     if dpConfig["dp_query"] == "mean":
-        dataframeAccumulate = (
+        dpAccumulate = (
             dataframeAccumulate.groupby([dpConfig["dp_aggregate_attribute"]])
             .agg(query_output=("query_output", dpConfig["dp_query"]))
             .reset_index()
@@ -202,8 +202,8 @@ def chunkHandlingMedical(medicalConfigDict, operations, fileList):
             .agg(query_output=("query_output", "sum"))
             .reset_index()
         )
-    # print(dpAccumulate)
-    # print(dpAccumulate.info())
+    print(dpAccumulate)
+    print(dpAccumulate.info())
 
     # reassigning column names
     kAnonAccumulate = pd.DataFrame(
@@ -215,4 +215,4 @@ def chunkHandlingMedical(medicalConfigDict, operations, fileList):
 
     # //TODO: Add in k-anonymity implementation for chunked data
     # //TODO: Add in DP implementation for medical queries
-    return kAnonAccumulate
+    return kAnonAccumulate, dpAccumulate

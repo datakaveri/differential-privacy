@@ -6,15 +6,15 @@
     "pseudonymize": ["Name", "Patient ID"],
     "generalize": "Age",
     "k_anonymize": {
-      "k": 100,
+      "k": 500,
       "min_bin_value": 0,
       "max_bin_value": 101
     },
     "differential_privacy": {
-      "dp_query": "count",
-      "dp_output_attribute": "Test Result",
-      "dp_aggregate_attribute": "PIN Code",
-      "dp_epsilon_step": 0.1
+      "dp_query": "mean",
+      "dp_output_attribute": "Time to Negative",
+      "dp_aggregate_attribute": "Gender",
+      "dp_epsilon": 0.1
     }
   },
   "spatioTemporal": {

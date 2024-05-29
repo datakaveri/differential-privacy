@@ -8,28 +8,31 @@ medicalFileList = [
     "../data/syntheticMedicalChunks/medical_data_split_file_1.json",
     "../data/syntheticMedicalChunks/medical_data_split_file_2.json",
     "../data/syntheticMedicalChunks/medical_data_split_file_3.json",
-    "../data/syntheticMedicalChunks/medical_data_split_file_4.json",
+    "../data/syntheticMedicalChunks/medical_data_split_file_4.json"
 ]
 
 operations = ["suppress", "pseudonymize"]
 configDict = utils.read_config("../config/pipelineConfig.json")
 medicalConfigDict = configDict["medical"]
 
+# //TODO: Run all operations within a function
 print("Performing common chunk accumulation functions")
 dataframeAccumulate = chmod.chunkHandlingCommon(
     medicalConfigDict, operations, medicalFileList
 )
 
-print("Performing Chunk Accumulation for k-anon")
-dataframeAccumulateMed = chmod.chunkHandlingMedical(
+print("Performing Chunk Accumulation for k-anon and DP")
+dataframeAccumulateKAnon, dataframeAccumulateDP = chmod.chunkHandlingMedical(
     medicalConfigDict, operations, medicalFileList
 )
 
-# testing for spatio-temporal
-
+# testing for differential privacy
+print(dataframeAccumulateKAnon.to_string())
+print(dataframeAccumulateDP)
 
 # testing k-anonymity
-# print(dataframeAccumulateMed.to_string())
-# print(dataframeAccumulateMed["Count"].sum())
-opt_bin_width = medmod.k_anonymize(dataframeAccumulateMed, medicalConfigDict)
-print("optimal bin width : ", opt_bin_width)
+# optimalBinWidth = medmod.k_anonymize(dataframeAccumulateMed, medicalConfigDict)
+# print("optimal bin width : ", optimalBinWidth)
+
+privateAggregateDataframe = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, medicalConfigDict)
+print(privateAggregateDataframe)

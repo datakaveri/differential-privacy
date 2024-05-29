@@ -58,21 +58,6 @@ def generalize(dataframe, config, bins):
     )
     return dataframe
 
-
-# function to check if a bin violates k-anonymity
-def violation_checker(k, data):
-    age_value_counts = data["Age Bin"].value_counts()
-    violating_bins = age_value_counts[
-        (age_value_counts < k) & (age_value_counts > 0)
-    ].index
-    # print(violating_bins)
-    if len(violating_bins) > 0:
-        return True
-    else:
-        return False
-
-
-# ******************************************************************************
 ###############################################################################
 # Input : The dataframe with frequency counts for each possible age and k
 # output : width of the each bin, r_count
@@ -110,14 +95,14 @@ def k_anonymize(dataframe, config):
             # For each bin we are computing the count (in temp)
             for i in range(1, eff_rows + 1):
                 temp += dataframe["Count"][b * r_count + i]
-            # if i-th bin is not satisfied the k-anonility incraes the bin size
+            # if i-th bin does not satisfy k-anonymity, increase the bin size
             # and start afresh with new bin size
             temp = int(temp)
             if (temp < k) and (temp != 0):
                 # print("temp : ", temp)
                 r_count += 1
                 break
-        # control reached here means all bins satisfoed k-anonimity and we aresetting
+        # control reached here means all bins satisfied k-anonymity and we aresetting
         # flag to false and exiting
 
         if b * r_count + i >= mx_age:
@@ -132,33 +117,10 @@ def k_anonymize(dataframe, config):
             flag = 0
     return r_count
 
-
-# ******************************************************************************
-
-# function to k-anonymize
-# def k_anonymize(dataframe, config):
-#     attribute_to_generalize = config["generalize"]
-#     k = config["k"]
-#     min_bin_value = config["min_bin_value"]
-#     max_bin_value = config["max_bin_value"]
-#     age_bins = np.arange(min_bin_value, max_bin_value, 1)
-#     dataframe = generalize(dataframe, config, np.arange(min_bin_value,max_bin_value,1))
-#     # If ANY bin violates k-anonymity, increment the size of ALL bins
-#     for i in range(1, (len(age_bins) - 1)):
-#         while violation_checker(k, dataframe) == True:
-#             dataframe = generalize(dataframe, config, np.arange(min_bin_value,max_bin_value,i))
-#             age_value_counts = dataframe['Age Bin'].value_counts()
-#             i+=1
-#     dataframe.drop(columns = attribute_to_generalize, inplace = True)
-#     age_value_counts = age_value_counts[age_value_counts != 0]
-#     return dataframe, age_value_counts
-
-###########################
 # function to implement DP
 # query: count of users testing positive per PIN Code
 # neighbouring dataset: add or remove a user from original dataset
 # sensitivity: 1/T
-
 
 def query_building(dataframe, config):
     output_attribute = config["dp_output_attribute"]
@@ -186,7 +148,25 @@ def query_building(dataframe, config):
         )
         return dataframe, T, bin_nums
 
-
+def medicalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange = 1):
+    dpConfig = configFile['differential_privacy']
+    count = dataframeAccumulate['query_output'].sum()
+    epsilon = dpConfig["dp_epsilon"]
+    if dpConfig["dp_query"] == "count":
+        sensitivity = 1
+        # no epsilon vector is generated
+        b = sensitivity/epsilon
+        noise = np.random.laplace(0,b,len(dataframeAccumulate))
+        privateAggregateDataframe = dataframeAccumulate.copy()
+        privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
+        return privateAggregateDataframe
+    # elif dpConfig["dp_query"] == "mean":
+    #     aggregation_attribute = dpConfig["dp_aggregate_attribute"]
+    #     # for category in dataframeAccumulate[aggregation_attribute]:
+    #         # 
+    #     privateAggregateDataframe = dataframeAccumulate.copy()
+    #     privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
+    #     return privateAggregateDataframe
 def differential_privacy(data, config):
     output_attribute = config["dp_output_attribute"]
     aggregation_attribute = config["dp_aggregate_attribute"]
