@@ -80,23 +80,23 @@ def timeRange(dataframe):
 
 # performing differential privacy
 def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange):
-    dpConfig = configFile['differential_privacy']
-    count = dataframeAccumulate['query_output'].sum()
+    dpConfig = configFile["differential_privacy"]
+    count = dataframeAccumulate["query_output"].sum()
 
     # appropriate sensitivity computation
-    if dpConfig['dp_query'] == 'mean':
-        sensitivity = (dpConfig['global_max_value'] - dpConfig['global_min_value'])/(count)
-    elif dpConfig['dp_query'] == 'count':
+    if dpConfig["dp_query"] == "mean":
+        sensitivity = (dpConfig["global_max_value"] - dpConfig["global_min_value"])/(count)
+    elif dpConfig["dp_query"] == "count":
         sensitivity = (1/timeRange)
     
     # noise generation
     # TODO:// Epsilon prime consideration
-    b = sensitivity/dpConfig['dp_epsilon_step']
+    b = sensitivity/dpConfig["dp_epsilon_step"]
     bVariance = 2 * (b * b)
     noise = np.random.laplace(0, b, len(dataframeAccumulate))
     print(len(noise))
     # noise addition
     privateAggregateDataframe = dataframeAccumulate.copy()
-    privateAggregateDataframe['noisy_output'] = privateAggregateDataframe['query_output'] + noise
+    privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
     print(privateAggregateDataframe)
     return privateAggregateDataframe

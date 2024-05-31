@@ -125,7 +125,8 @@ def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
     print("Accumulating chunks for building DP Query")
     dataframeAccumulator = (
         dataframeChunk.groupby([dpConfig["dp_aggregate_attribute"]])
-        .agg(query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"]))
+        .agg(query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"]),
+             count=(dpConfig["dp_output_attribute"], "count"))
         .reset_index()
     )
     return dataframeAccumulator
@@ -191,9 +192,11 @@ def chunkHandlingMedical(medicalConfigDict, operations, fileList):
     # concat just adds on rows, so grouping again using the same parameters and computing the query again
     # //TODO: This will only work for mean queries and not count as sum of counts is required
     if dpConfig["dp_query"] == "mean":
+        # print("test", dataframeAccumulate)
         dpAccumulate = (
             dataframeAccumulate.groupby([dpConfig["dp_aggregate_attribute"]])
-            .agg(query_output=("query_output", dpConfig["dp_query"]))
+            .agg(query_output=("query_output", dpConfig["dp_query"]),
+                 count=("count", "sum"))
             .reset_index()
         )
     elif dpConfig["dp_query"] == "count":

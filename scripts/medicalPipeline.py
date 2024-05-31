@@ -15,7 +15,7 @@ operations = ["suppress", "pseudonymize"]
 configDict = utils.read_config("../config/pipelineConfig.json")
 medicalConfigDict = configDict["medical"]
 
-# //TODO: Run all operations within a function
+# //TODO: Run all operation[category]s within a function
 print("Performing common chunk accumulation functions")
 dataframeAccumulate = chmod.chunkHandlingCommon(
     medicalConfigDict, operations, medicalFileList
@@ -27,12 +27,12 @@ dataframeAccumulateKAnon, dataframeAccumulateDP = chmod.chunkHandlingMedical(
 )
 
 # testing for differential privacy
-print(dataframeAccumulateKAnon.to_string())
+# print(dataframeAccumulateKAnon.to_string())
 print(dataframeAccumulateDP)
 
 # testing k-anonymity
-# optimalBinWidth = medmod.k_anonymize(dataframeAccumulateMed, medicalConfigDict)
-# print("optimal bin width : ", optimalBinWidth)
+optimalBinWidth = medmod.k_anonymize(dataframeAccumulateKAnon, medicalConfigDict)
+print("optimal bin width : ", optimalBinWidth)
 
 privateAggregateDataframe = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, medicalConfigDict)
 print(privateAggregateDataframe)
