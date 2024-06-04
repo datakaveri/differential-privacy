@@ -114,7 +114,6 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, operations, fileList):
         print("The length of the accumulate dataframe is: ", len(dataframeAccumulate))
     print(dataframeAccumulate)
     print(dataframeAccumulate.info())
-    # //TODO: Check correct size of accumulate
     print("End of Accumulation")
     return dataframeAccumulate
 
@@ -190,7 +189,6 @@ def chunkHandlingMedical(medicalConfigDict, operations, fileList):
         print("The length of the accumulate dataframe is: ", len(dataframeAccumulate))
 
     # concat just adds on rows, so grouping again using the same parameters and computing the query again
-    # //TODO: This will only work for mean queries and not count as sum of counts is required
     if dpConfig["dp_query"] == "mean":
         # print("test", dataframeAccumulate)
         dpAccumulate = (
@@ -215,7 +213,4 @@ def chunkHandlingMedical(medicalConfigDict, operations, fileList):
             "Count": kAnonAccumulate.values,
         }
     )
-
-    # //TODO: Add in k-anonymity implementation for chunked data
-    # //TODO: Add in DP implementation for medical queries
     return kAnonAccumulate, dpAccumulate

@@ -27,12 +27,12 @@ dataframeAccumulateKAnon, dataframeAccumulateDP = chmod.chunkHandlingMedical(
 )
 
 # testing for differential privacy
-# print(dataframeAccumulateKAnon.to_string())
 print(dataframeAccumulateDP)
 
 # testing k-anonymity
-optimalBinWidth = medmod.k_anonymize(dataframeAccumulateKAnon, medicalConfigDict)
-print("optimal bin width : ", optimalBinWidth)
+# print(dataframeAccumulateKAnon.to_string())
+# optimalBinWidth = medmod.k_anonymize(dataframeAccumulateKAnon, medicalConfigDict)
+# print("optimal bin width : ", optimalBinWidth)
 
 privateAggregateDataframe = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, medicalConfigDict)
 print(privateAggregateDataframe)

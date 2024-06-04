@@ -22,12 +22,13 @@ dataframeAccumulate = chmod.chunkHandlingCommon(spatioTemporalConfigDict,
                                                 operations, 
                                                 spatioTemporalFileList)
 
-dataframeAccumulateST = chmod.chunkHandlingSpatioTemporal(spatioTemporalConfigDict, 
+dataframeAccumulateDP = chmod.chunkHandlingSpatioTemporal(spatioTemporalConfigDict, 
                                                           operations, 
                                                           spatioTemporalFileList)
+print(dataframeAccumulateDP)
+timeRange = stmod.timeRange(dataframeAccumulateDP)
 
-timeRange = stmod.timeRange(dataframeAccumulateST)
-
-privateAggregateDataframe = stmod.spatioTemporalDifferentialPrivacy(dataframeAccumulateST, 
+privateAggregateDataframe = stmod.spatioTemporalDifferentialPrivacy(dataframeAccumulateDP, 
                                                                     spatioTemporalConfigDict, 
                                                                     timeRange)
+print(privateAggregateDataframe)

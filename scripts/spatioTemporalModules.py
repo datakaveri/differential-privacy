@@ -98,5 +98,5 @@ def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange
     # noise addition
     privateAggregateDataframe = dataframeAccumulate.copy()
     privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
-    print(privateAggregateDataframe)
+    # print(privateAggregateDataframe)
     return privateAggregateDataframe

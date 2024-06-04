@@ -47,7 +47,6 @@ def pseudonymize(dataframe, config):
 
 
 ###########################
-# functions for k-anonymity
 # function to bin the ages
 def generalize(dataframe, config, bins):
     attribute_to_generalize = config["generalize"]
@@ -56,12 +55,7 @@ def generalize(dataframe, config, bins):
     )
     return dataframe
 
-###############################################################################
-# Input : The dataframe with frequency counts for each possible age and k
-# output : width of the each bin, r_count
-# If the number of bins is not an integer the last bins are being merged
-# Please see the effec_rows variable
-###############################################################################
+# function to k-anonymize
 def k_anonymize(dataframe, config):
     # start with each bin size 1
     kConfig = config["k_anonymize"]
@@ -100,7 +94,7 @@ def k_anonymize(dataframe, config):
                 # print("temp : ", temp)
                 r_count += 1
                 break
-        # control reached here means all bins satisfied k-anonymity and we aresetting
+        # control reached here means all bins satisfied k-anonymity and we are setting
         # flag to false and exiting
 
         if b * r_count + i >= mx_age:
@@ -115,37 +109,6 @@ def k_anonymize(dataframe, config):
             flag = 0
     return r_count
 
-# function to implement DP
-# query: count of users testing positive per PIN Code
-# neighbouring dataset: add or remove a user from original dataset
-# sensitivity: 1/T
-
-def query_building(dataframe, config):
-    output_attribute = config["dp_output_attribute"]
-    aggregation_attribute = config["dp_aggregate_attribute"]
-    dp_query = config["dp_query"]
-    T = len(dataframe)
-    # conditional for config options
-    if dp_query == "histogram":
-        # building custom query for "positivity ratio per PIN code" for count query
-        dataframe = dataframe.groupby(aggregation_attribute)[[output_attribute]].agg(
-            lambda x: (x == "Positive").sum()
-        )
-        # dataframe[output_attribute] = dataframe['Test Result']/T
-        dataframe[output_attribute] = dataframe["Test Result"]
-        # dataframe.drop(output_attribute, axis = 1, inplace = True)
-        return dataframe, T, None
-    elif dp_query == "mean":
-        # building custom query for "time to negative per gender" for mean query
-        female_num = dataframe["Gender"].tolist().count("Female")
-        male_num = dataframe["Gender"].tolist().count("Male")
-        other_num = dataframe["Gender"].tolist().count("Other")
-        bin_nums = [female_num, male_num, other_num]
-        dataframe = dataframe.groupby(aggregation_attribute)[[output_attribute]].agg(
-            "mean"
-        )
-        return dataframe, T, bin_nums
-
 def medicalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange = 1):
     dpConfig = configFile['differential_privacy']
     # count = dataframeAccumulate['query_output'].sum()
@@ -158,7 +121,7 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange = 1):
         noise = np.random.laplace(0,b,len(dataframeAccumulate))
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe[f"Noisy {output_attribute}"] = privateAggregateDataframe["query_output"] + noise
-        # privateAggregateDataframe.drop(columns = ["query_output"], inplace = True)
+        privateAggregateDataframe.drop(columns = ["query_output"], inplace = True)
         return privateAggregateDataframe
     elif dpConfig["dp_query"] == "mean":
         # count = dataframeAccumulate["count"]
@@ -173,71 +136,8 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange = 1):
         noise = np.array(noise).flatten()
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe[f"Noisy {output_attribute}"] = privateAggregateDataframe["query_output"] + noise
-        # privateAggregateDataframe.drop(columns = ["count", "query_output"], inplace = True)
+        privateAggregateDataframe.drop(columns = ["count", "query_output"], inplace = True)
         return privateAggregateDataframe
-    
-
-# def differential_privacy(data, config):
-#     output_attribute = config["dp_output_attribute"]
-#     aggregation_attribute = config["dp_aggregate_attribute"]
-#     dp_query = config["dp_query"]
-#     dataframe, T, bin_nums = query_building(data, config)  # type: ignore
-#     # print(bin_nums)
-#     eps_step = config["dp_epsilon_step"]
-#     # eps_array = np.arange(0.1,10,eps_step)
-#     eps_array = np.logspace(-3, 2, 50)
-#     # print(len(dataframe))
-#     # computing sensitivity for each query
-#     if dp_query == "histogram":
-#         sensitivity = 1
-#         array_of_df = []
-#         for epsilon in eps_array:
-#             df_array = dataframe.copy()
-#             # print('Length of df_array')
-#             # len(df_array)
-#             b = sensitivity / epsilon
-#             noise = np.random.laplace(0, b, len(df_array))
-#             # print(noise)
-#             df_array["epsilon"] = epsilon
-#             # replace with query attribute + noisy
-#             df_array[f"Noisy {output_attribute}"] = df_array[output_attribute] + noise
-#             df_array[f"Noisy {output_attribute}"].clip(0, np.inf, inplace=True)
-#             df_array[f"Noisy {output_attribute}"] = df_array[
-#                 f"Noisy {output_attribute}"
-#             ].round(4)
-#             # df_array.drop(columns = output_attribute, inplace = True)
-#             # print(df_array)
-#             array_of_df.append(df_array)
-#         return array_of_df
-#     elif dp_query == "mean":
-#         sensitivity_female = 28 / bin_nums[0]  # type: ignore
-#         sensitivity_male = 28 / bin_nums[1]  # type: ignore
-#         sensitivity_other = 28 / bin_nums[2]  # type: ignore
-#         sensitivity = [sensitivity_female, sensitivity_male, sensitivity_other]
-#         # print(sensitivity)
-#         array_of_df = []
-#         for epsilon in eps_array:
-#             df_array = dataframe.copy()
-#             noise_array = []
-#             for sens in sensitivity:
-#                 b = sens / epsilon
-#                 noise = np.random.laplace(0, b, 1)
-#                 noise_array.append(noise)
-#             noise_array = np.array(noise_array)
-#             noise_array = noise_array.flatten()
-#             df_array["epsilon"] = epsilon
-#             # replace with query attribute + noisy
-#             # print(df_array[output_attribute])
-#             df_array[f"Noisy {output_attribute}"] = (
-#                 df_array[output_attribute] + noise_array
-#             )
-#             # df_array[f"Noisy {output_attribute}"].clip(0, np.inf, inplace = True)
-#             df_array[f"Noisy {output_attribute}"] = df_array[
-#                 f"Noisy {output_attribute}"
-#             ].round(4)
-#             array_of_df.append(df_array)
-#         return array_of_df
-
 
 def output_handler(dataframe_list, config):
     output_attribute = config["dp_output_attribute"]
