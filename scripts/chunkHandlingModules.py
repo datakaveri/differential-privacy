@@ -48,17 +48,10 @@ def chunkHandlingCommon(configDict, operations, fileList):
 def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
     print("Accumulating chunks for building DP Query")
     dpConfig = spatioTemporalConfigDict
-    dataframeAccumulator = (
-        dataframeChunk.groupby(
-            [
-                dpConfig["dp_aggregate_attribute"][0],
-                dpConfig["dp_aggregate_attribute"][1],
-                dpConfig["dp_aggregate_attribute"][2],
-            ]
-        )
-        .agg(query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"]))
-        .reset_index()
-    )
+    groupby_attributes = dpConfig["dp_aggregate_attribute"]
+    dataframeAccumulator = dataframeChunk.groupby(groupby_attributes).agg(
+        query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"])
+    ).reset_index()
     return dataframeAccumulator
 
 
@@ -67,6 +60,7 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
     # assume that the appropriate config has been selected already based on UI input
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
+    startDay, endDay = [], []
     dpConfig = spatioTemporalConfigDict["differential_privacy"]
     print("Performing spatio-temporal generalization and filtering")
     for file in fileList:
@@ -99,7 +93,17 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
         dataframeChunk = stmod.temporalEventFiltering(
             dataframeChunk, spatioTemporalConfigDict
         )
-
+        
+        # update the max and min dates
+        # if len(dataframeAccumulate) == 0:
+        #     dataframeAccumulate = dataframeChunk
+        #     startDay = dataframeChunk['Date'].min()
+        #     endDay = dataframeChunk['Date'].max()
+        # else:
+        #     startDay = min(startDay, dataframeChunk['Date'].min())
+        #     endDay = max(endDay, dataframeChunk['Date'].max())
+        startDay.append(dataframeChunk['Date'].min())
+        endDay.append(dataframeChunk['Date'].max())
         # filtering HATS by average number of events per day
         dataframeChunk = stmod.spatioTemporalEventFiltering(
             dataframeChunk, spatioTemporalConfigDict
@@ -113,10 +117,13 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
             [dataframeAccumulate, dataframeAccumulator], ignore_index=True
         )
         print("The length of the accumulate dataframe is: ", len(dataframeAccumulate))
+    
+    timeRange = 1 + (max(endDay) - min(startDay)).days    
+
     print(dataframeAccumulate)
     print(dataframeAccumulate.info())
     print("End of Accumulation")
-    return dataframeAccumulate
+    return dataframeAccumulate, timeRange
 
 
 # function to accumulate chunks with appropriate query building for DP

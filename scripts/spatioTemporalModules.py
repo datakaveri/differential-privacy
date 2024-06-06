@@ -23,6 +23,14 @@ def spatialGeneralization(dataframe, configFile):
     dataframe["h3index"] = h3index
     return dataframe
 
+# computing the number of days in the dataset
+def timeRangeCompute(dataframe):
+    #calculating the number of days in the dataset
+    startDay = dataframe['Date'].min()
+    endDay = dataframe['Date'].max()
+    timeRange = 1 + (endDay - startDay).days
+    return timeRange
+
 # assigning date and time to separate dataframe and creating a timeslot column
 def temporalGeneralization(dataframe, configFile):
     configFile = configFile["temporal_generalize"]
@@ -71,14 +79,6 @@ def spatioTemporalEventFiltering(dataframe, configFile):
     print('Number of unique HATs left after spatio-temporal event filtering is: ' + str(dataframe['HAT'].nunique()))
     print('########################################################################################')
     return dataframe
-
-# computing the number of days in the dataset
-def timeRange(dataframe):
-    #calculating the number of days in the dataset
-    startDay = dataframe['Date'].min()
-    endDay = dataframe['Date'].max()
-    timeRange = 1 + (endDay - startDay).days
-    return timeRange
 
 # performing differential privacy
 def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange):

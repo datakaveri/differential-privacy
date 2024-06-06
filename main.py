@@ -45,7 +45,6 @@ def dataset_handler(config):
 
 # checking the dataset order of operations selected
 operations = utils.oop_handler(config)
-print(operations)
 dataset, config, fileList = dataset_handler(config)
 print(dataset, operations)
 
