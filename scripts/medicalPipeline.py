@@ -1,38 +1,32 @@
-import medicalModules as medmod
-import chunkHandlingModules as chmod
-import utilities as utils
+import scripts.medicalModules as medmod
+import scripts.chunkHandlingModules as chmod
 
-# for testing
-medicalFileList = [
-    "../data/syntheticMedicalChunks/medical_data_split_file_0.json",
-    "../data/syntheticMedicalChunks/medical_data_split_file_1.json",
-    "../data/syntheticMedicalChunks/medical_data_split_file_2.json",
-    "../data/syntheticMedicalChunks/medical_data_split_file_3.json",
-    "../data/syntheticMedicalChunks/medical_data_split_file_4.json"
-]
 
-operations = ["suppress", "pseudonymize"]
-configDict = utils.read_config("../config/pipelineConfig.json")
-medicalConfigDict = configDict["medical"]
+def medicalPipeline(config, operations, fileList):
+    if ("suppress" or "pseudonymize") in operations:
+        print("Performing common chunk accumulation functions")
+        dataframeAccumulate = chmod.chunkHandlingCommon(
+            config, operations, fileList
+        )
 
-# //TODO: Run all operation[category]s within a function
-print("Performing common chunk accumulation functions")
-dataframeAccumulate = chmod.chunkHandlingCommon(
-    medicalConfigDict, operations, medicalFileList
-)
+    if ("dp" or "k_anonymize") in operations:
+        print("Performing Chunk Accumulation for k-anon and DP")
+        dataframeAccumulateKAnon, dataframeAccumulateDP = chmod.chunkHandlingMedical(
+            config, fileList
+        )
+        
 
-print("Performing Chunk Accumulation for k-anon and DP")
-dataframeAccumulateKAnon, dataframeAccumulateDP = chmod.chunkHandlingMedical(
-    medicalConfigDict, operations, medicalFileList
-)
+    if "k_anonymize" in operations and "dp" not in operations:
+        print("Performing k-anonymization")
+        optimalBinWidth = medmod.k_anonymize(dataframeAccumulateKAnon, config)
 
-# testing for differential privacy
-print(dataframeAccumulateDP)
+    if "dp" in operations:
+        print("Performing Differential Privacy")
+        privateAggregateDataframe = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, config)
 
-# testing k-anonymity
-# print(dataframeAccumulateKAnon.to_string())
-# optimalBinWidth = medmod.k_anonymize(dataframeAccumulateKAnon, medicalConfigDict)
-# print("optimal bin width : ", optimalBinWidth)
-
-privateAggregateDataframe = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, medicalConfigDict)
-print(privateAggregateDataframe)
+    if "dp" in operations:
+        return privateAggregateDataframe
+    if ("suppress" or "pseudonymize") in operations and ("dp" or "k_anonymize") not in operations:
+        return dataframeAccumulate
+    if "k_anonymize" in operations:
+        return optimalBinWidth

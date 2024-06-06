@@ -51,12 +51,17 @@ def pseudonymize(dataframe, config):
 # function to handle order of operations and select config
 def oop_handler(config):
     operations = []
+    dataType = config["data_type"]
+    if dataType == "medical":
+        config = config["medical"]
+    elif dataType == "spatioTemporal":
+        config = config["spatioTemporal"]
     if "suppress" in config:
         operations.append("suppress")
     if "pseudonymize" in config:
         operations.append("pseudonymize")
     if "generalize" in config:
         operations.append("k_anonymize")
-    if "dp_query" in config:
+    if "differential_privacy" in config:
         operations.append("dp")
     return operations

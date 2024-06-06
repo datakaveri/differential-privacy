@@ -26,10 +26,12 @@ def spatialGeneralization(dataframe, configFile):
 # assigning date and time to separate dataframe and creating a timeslot column
 def temporalGeneralization(dataframe, configFile):
     configFile = configFile["temporal_generalize"]
-    dataframe["Date"] = pd.to_datetime(dataframe[configFile["temporal_attribute"]]).dt.date
-    dataframe["Time"] = pd.to_datetime(dataframe[configFile["temporal_attribute"]]).dt.time
+    temporalAttribute = configFile["temporal_attribute"]
+    dataframe["Date"] = pd.to_datetime(dataframe[temporalAttribute]).dt.date
+    dataframe["Time"] = pd.to_datetime(dataframe[temporalAttribute]).dt.time
     time = dataframe["Time"]
     dataframe["Timeslot"] = time.apply(lambda x: x.hour)
+    dataframe.drop(columns = temporalAttribute, inplace = True)
     return dataframe
 
 # assigning HATs from H3index and timeslot

@@ -1,30 +1,63 @@
 # import statements
-import scripts.medicalPipeline as medmod
-import scripts.spatioTemporalModules as stmod
-import scripts.chunkHandlingModules as chmod
+import scripts.medicalPipeline as medpipe
+import scripts.spatioTemporalPipeline as stpipe
+# import scripts.medicalModules as medmod
+# import scripts.spatioTemporalModules as stmod
+# import scripts.chunkHandlingModules as chmod
 import scripts.utilities as utils
 
-# //TODO: Add logic for pipeline selection from config
-# necessary file reads
-config = utils.read_config("../config/pipelineConfig.json")
-data = utils.read_data(config["data_file"])
+# for testing
+medicalFileList = ["../data/syntheticMedicalChunks/medical_data_split_file_0.json",
+                    "../data/syntheticMedicalChunks/medical_data_split_file_1.json",
+                    "../data/syntheticMedicalChunks/medical_data_split_file_2.json",
+                    "../data/syntheticMedicalChunks/medical_data_split_file_3.json",
+                    "../data/syntheticMedicalChunks/medical_data_split_file_4.json"
+                    ]
 
-# checking the order of operations required
+# for testing
+spatioTemporalFileList = ['../data/spatioTemporalChunks/split_file_0.json',
+            '../data/spatioTemporalChunks/split_file_1.json',
+            '../data/spatioTemporalChunks/split_file_2.json',
+            '../data/spatioTemporalChunks/split_file_3.json',
+            '../data/spatioTemporalChunks/split_file_4.json',
+            '../data/spatioTemporalChunks/split_file_5.json',
+            '../data/spatioTemporalChunks/split_file_6.json',
+            '../data/spatioTemporalChunks/split_file_7.json',
+            '../data/spatioTemporalChunks/split_file_8.json',
+            '../data/spatioTemporalChunks/split_file_9.json'
+            ]
+
+# necessary file reads
+config = utils.read_config("../config/medicalKAnon.json")
+# data = utils.read_data(config["data_file"])
+
+# function to handle dataset choice
+def dataset_handler(config):
+    if config["data_type"] == "medical":
+        config = config["medical"] # for testing only
+        dataset = "medical"
+        fileList = medicalFileList
+    elif config["data_type"] == "spatioTemporal":
+        config = config["spatioTemporal"] # for testing only
+        dataset = "spatioTemporal"
+        fileList = spatioTemporalFileList
+    return dataset, config, fileList
+
+# checking the dataset order of operations selected
 operations = utils.oop_handler(config)
 print(operations)
+dataset, config, fileList = dataset_handler(config)
+print(dataset, operations)
 
-if "suppress" in operations:
-    print("Performing Attribute Suppression")
-    data = chmod.suppress(data, config)
-if "pseudonymize" in operations:
-    print("Performing Attribute Pseudonymization: Pseudonymized Attribute stored in Hashed Value Column")
-    data = chmod.pseudonymize(data, config)
-if "k_anonymize" in operations:
-    print("K-Anonymizing Data")
-    data, users_per_bin = mods.k_anonymize(data, config)
-if "dp" in operations:
-    print("Enacting Differential Privacy")
-    data = mods.differential_privacy(data, config)
+# selecting appropriate pipeline
+if dataset == "medical":
+    data = medpipe.medicalPipeline(config, operations, fileList)
+if dataset == "spatioTemporal":
+    data = stpipe.spatioTemporalPipeline(config, operations, fileList)
 
-# print(data)
-mods.output_handler(data, config)
+print(data)
+
+# TODO: Add output format handling
+# TODO: Add RRMSE vs Epsilon computation and output
+# mods.output_handler(data, config)
+

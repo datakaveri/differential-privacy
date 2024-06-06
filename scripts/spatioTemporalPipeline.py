@@ -1,34 +1,27 @@
-import spatioTemporalModules as stmod
-import chunkHandlingModules as chmod
-import utilities as utils
-# for testing
-spatioTemporalFileList = ['../data/spatioTemporalChunks/split_file_0.json',
-            '../data/spatioTemporalChunks/split_file_1.json',
-            '../data/spatioTemporalChunks/split_file_2.json',
-            '../data/spatioTemporalChunks/split_file_3.json',
-            '../data/spatioTemporalChunks/split_file_4.json',
-            '../data/spatioTemporalChunks/split_file_5.json',
-            '../data/spatioTemporalChunks/split_file_6.json',
-            '../data/spatioTemporalChunks/split_file_7.json',
-            '../data/spatioTemporalChunks/split_file_8.json',
-            '../data/spatioTemporalChunks/split_file_9.json']
+import scripts.spatioTemporalModules as stmod
+import scripts.chunkHandlingModules as chmod
 
-operations = ["suppress", "pseudonymize"]
-configDict = utils.read_config("../config/pipelineConfig.json")
-spatioTemporalConfigDict = configDict["spatioTemporal"]
+def spatioTemporalPipeline(config, operations, fileList):
 
+    if "suppress" or "pseudonymize" in operations:
+        print("Performing common chunk accumulation functions")
+        dataframeAccumulate = chmod.chunkHandlingCommon(config, 
+                                                        operations, 
+                                                    fileList)
 
-dataframeAccumulate = chmod.chunkHandlingCommon(spatioTemporalConfigDict, 
-                                                operations, 
-                                                spatioTemporalFileList)
+    if "dp" in operations:
+        print("Performing Chunk Accumulation for DP")
+        dataframeAccumulateDP = chmod.chunkHandlingSpatioTemporal(config, 
+                                                                fileList)
+        timeRange = stmod.timeRange(dataframeAccumulateDP)
 
-dataframeAccumulateDP = chmod.chunkHandlingSpatioTemporal(spatioTemporalConfigDict, 
-                                                          operations, 
-                                                          spatioTemporalFileList)
-print(dataframeAccumulateDP)
-timeRange = stmod.timeRange(dataframeAccumulateDP)
-
-privateAggregateDataframe = stmod.spatioTemporalDifferentialPrivacy(dataframeAccumulateDP, 
-                                                                    spatioTemporalConfigDict, 
-                                                                    timeRange)
-print(privateAggregateDataframe)
+        print("Performing Differential Privacy")
+        privateAggregateDataframe = stmod.spatioTemporalDifferentialPrivacy(dataframeAccumulateDP, 
+                                                                        config, 
+                                                                        timeRange)
+    if "dp" in operations:
+        print_output = print("Returning privateAggregateDataframe")
+        return privateAggregateDataframe, print_output
+    if ("suppress" or "pseudonymize") in operations and ("dp") not in operations:
+        print_output = print("Returning dataframeAccumulate")
+        return dataframeAccumulate, print_output

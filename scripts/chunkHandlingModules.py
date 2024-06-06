@@ -2,9 +2,9 @@
 import json
 import pandas as pd
 import numpy as np
-import utilities as utils
-import spatioTemporalModules as stmod
-import medicalModules as medmod
+import scripts.utilities as utils
+import scripts.spatioTemporalModules as stmod
+import scripts.medicalModules as medmod
 
 
 # function to handle chunked dataframe for pseudonymization and suppression
@@ -30,10 +30,12 @@ def chunkHandlingCommon(configDict, operations, fileList):
         # supressing columns
         if "suppress" in operations:
             dataframeChunk = utils.suppress(dataframeChunk, configDict)
-
+            print("Performing Attribute Suppression for chunk ", len(lengthList))
+        
         # pseudonymizing columns
         if "pseudonymize" in operations:
             dataframeChunk = utils.pseudonymize(dataframeChunk, configDict)
+            print("Performing Attribute Pseudonymization for chunk ", len(lengthList))
 
         dataframeAccumulate = pd.concat(
             [dataframeAccumulate, dataframeChunk], ignore_index=True
@@ -61,11 +63,10 @@ def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
 
 
 # function to perform s/t generalization, filtering, query building for chunks
-def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, operations, fileList):
+def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
     # assume that the appropriate config has been selected already based on UI input
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
-    dataframeAccumulateNew = pd.DataFrame()
     dpConfig = spatioTemporalConfigDict["differential_privacy"]
     print("Performing spatio-temporal generalization and filtering")
     for file in fileList:
@@ -132,7 +133,7 @@ def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
 
 
 # preprocessing to accumulate chunks for k-anon
-def chunkHandlingMedicalKAnon(dataframeChunk, medicalConfigDict):
+def chunkAccumulatorMedicalKAnon(dataframeChunk, medicalConfigDict):
     chunkHistogram = pd.Series()
     kConfig = medicalConfigDict["k_anonymize"]
     bins = np.arange(kConfig["min_bin_value"], kConfig["max_bin_value"], 1)
@@ -150,7 +151,7 @@ def chunkHandlingMedicalKAnon(dataframeChunk, medicalConfigDict):
 
 
 # accumulating chunks with appropriate processing
-def chunkHandlingMedical(medicalConfigDict, operations, fileList):
+def chunkHandlingMedical(medicalConfigDict, fileList):
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
     dataframeAccumulateNew = pd.DataFrame()
@@ -172,7 +173,7 @@ def chunkHandlingMedical(medicalConfigDict, operations, fileList):
             )
 
         # generalizing each chunk
-        kAnonChunk = chunkHandlingMedicalKAnon(dataframeChunk, medicalConfigDict)
+        kAnonChunk = chunkAccumulatorMedicalKAnon(dataframeChunk, medicalConfigDict)
 
         # accumulating no. of users per bin for every chunk
         kAnonAccumulate = kAnonAccumulate.add(kAnonChunk, fill_value=0)
