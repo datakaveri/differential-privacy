@@ -9,18 +9,20 @@ def medicalPipeline(config, operations, fileList):
             config, operations, fileList
         )
 
-    if ("dp" or "k_anonymize") in operations:
-        print("Performing Chunk Accumulation for k-anon and DP")
-        dataframeAccumulateKAnon, dataframeAccumulateDP = chmod.chunkHandlingMedical(
+    if "k_anonymize" in operations:
+        print("Performing Chunk Accumulation for k-anon")
+        dataframeAccumulateKAnon = chmod.chunkHandlingMedicalKAnon(
             config, fileList
         )
-        
-
-    if "k_anonymize" in operations and "dp" not in operations:
         print("Performing k-anonymization")
         optimalBinWidth = medmod.k_anonymize(dataframeAccumulateKAnon, config)
 
+
     if "dp" in operations:
+        print("Performing Chunk Accumulation forDP")
+        dataframeAccumulateDP = chmod.chunkHandlingMedicalDP(
+            config, fileList
+        )
         print("Performing Differential Privacy")
         privateAggregateDataframe = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, config)
 

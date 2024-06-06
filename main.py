@@ -28,7 +28,7 @@ spatioTemporalFileList = ['../data/spatioTemporalChunks/split_file_0.json',
             ]
 
 # necessary file reads
-config = utils.read_config("../config/medicalKAnon.json")
+config = utils.read_config("../config/spatioDP.json")
 # data = utils.read_data(config["data_file"])
 
 # function to handle dataset choice
@@ -57,7 +57,7 @@ if dataset == "spatioTemporal":
 
 print(data)
 
-# TODO: Add output format handling
+# TODO: Add output format handling (json dumps)
 # TODO: Add RRMSE vs Epsilon computation and output
 # mods.output_handler(data, config)
 

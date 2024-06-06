@@ -150,15 +150,15 @@ def chunkAccumulatorMedicalKAnon(dataframeChunk, medicalConfigDict):
     return chunkHistogram
 
 
-# accumulating chunks with appropriate processing
-def chunkHandlingMedical(medicalConfigDict, fileList):
+# accumulating chunks with appropriate processing for KAnon
+def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
     lengthList = []
-    dataframeAccumulate = pd.DataFrame()
-    dataframeAccumulateNew = pd.DataFrame()
+    # dataframeAccumulate = pd.DataFrame()
+    # dataframeAccumulateNew = pd.DataFrame()
     kAnonAccumulate = pd.Series()
     print(medicalConfigDict)
-    dpConfig = medicalConfigDict["differential_privacy"]
-    kConfig = medicalConfigDict["k_anonymize"]
+    # dpConfig = medicalConfigDict["differential_privacy"]
+    # kConfig = medicalConfigDict["k_anonymize"]
     for file in fileList:
         lengthList.append(file)
         print("The chunk number is: ", (len(lengthList)))
@@ -177,6 +177,34 @@ def chunkHandlingMedical(medicalConfigDict, fileList):
 
         # accumulating no. of users per bin for every chunk
         kAnonAccumulate = kAnonAccumulate.add(kAnonChunk, fill_value=0)
+
+    # reassigning column names
+    kAnonAccumulate = pd.DataFrame(
+        {
+            medicalConfigDict["generalize"]: kAnonAccumulate.index,
+            "Count": kAnonAccumulate.values,
+        }
+    )
+    return kAnonAccumulate
+
+def chunkHandlingMedicalDP(medicalConfigDict, fileList):
+    lengthList = []
+    dataframeAccumulate = pd.DataFrame()
+    kAnonAccumulate = pd.Series()
+    print(medicalConfigDict)
+    dpConfig = medicalConfigDict["differential_privacy"]
+    for file in fileList:
+        lengthList.append(file)
+        print("The chunk number is: ", (len(lengthList)))
+        with open(file, "r") as dfile:
+            dataDict = json.load(dfile)
+            dataframeChunk = pd.json_normalize(dataDict)
+            print(
+                "The loaded file is: "
+                + file
+                + " with shape "
+                + str(dataframeChunk.shape)
+            )
 
         # accumulating chunks for dp query building
         dataframeAccumulator = chunkAccumulatorMedicalDP(
@@ -206,12 +234,4 @@ def chunkHandlingMedical(medicalConfigDict, fileList):
         )
     print(dpAccumulate)
     print(dpAccumulate.info())
-
-    # reassigning column names
-    kAnonAccumulate = pd.DataFrame(
-        {
-            medicalConfigDict["generalize"]: kAnonAccumulate.index,
-            "Count": kAnonAccumulate.values,
-        }
-    )
-    return kAnonAccumulate, dpAccumulate
+    return dpAccumulate

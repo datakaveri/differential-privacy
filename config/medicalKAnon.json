@@ -1,0 +1,11 @@
+{
+  "data_type": "medical",
+  "medical": {
+    "generalize": "Age",
+    "k_anonymize": {
+      "k": 500,
+      "min_bin_value": 0,
+      "max_bin_value": 101
+    }
+  }
+}

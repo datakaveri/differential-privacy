@@ -1,0 +1,12 @@
+{
+  "data_type": "medical",
+  "medical": {
+    "differential_privacy": {
+      "dp_query": "count",
+      "dp_output_attribute": "Test Result",
+      "dp_aggregate_attribute": "PIN Code",
+      "dp_max_value_sensitivity": 50,
+      "dp_epsilon": 0.1
+    }
+  }
+}

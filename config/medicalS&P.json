@@ -1,0 +1,7 @@
+{
+  "data_type": "medical",
+  "medical": {
+    "suppress": ["Date of Birth", "Address", "Lab Results"],
+    "pseudonymize": ["Name", "Patient ID"]
+  }
+}

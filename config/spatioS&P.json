@@ -1,0 +1,17 @@
+{
+  "data_type": "spatioTemporal",
+  "spatioTemporal": {
+    "suppress": [
+      "trip_direction",
+      "last_stop_arrival_time",
+      "route_id",
+      "actual_trip_start_time",
+      "trip_delay",
+      "vehicle_label",
+      "last_stop_id",
+      "id",
+      "location.type"
+    ],
+    "pseudonymize": ["license_plate", "trip_id"]
+  }
+}
