@@ -23,14 +23,6 @@ def spatialGeneralization(dataframe, configFile):
     dataframe["h3index"] = h3index
     return dataframe
 
-# computing the number of days in the dataset
-def timeRangeCompute(dataframe):
-    #calculating the number of days in the dataset
-    startDay = dataframe['Date'].min()
-    endDay = dataframe['Date'].max()
-    timeRange = 1 + (endDay - startDay).days
-    return timeRange
-
 # assigning date and time to separate dataframe and creating a timeslot column
 def temporalGeneralization(dataframe, configFile):
     configFile = configFile["temporal_generalize"]

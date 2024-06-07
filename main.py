@@ -7,28 +7,28 @@ import scripts.spatioTemporalPipeline as stpipe
 import scripts.utilities as utils
 
 # for testing
-medicalFileList = ["../data/syntheticMedicalChunks/medical_data_split_file_0.json",
-                    "../data/syntheticMedicalChunks/medical_data_split_file_1.json",
-                    "../data/syntheticMedicalChunks/medical_data_split_file_2.json",
-                    "../data/syntheticMedicalChunks/medical_data_split_file_3.json",
-                    "../data/syntheticMedicalChunks/medical_data_split_file_4.json"
+medicalFileList = ["data/syntheticMedicalChunks/medical_data_split_file_0.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_1.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_2.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_3.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_4.json"
                     ]
 
 # for testing
-spatioTemporalFileList = ['../data/spatioTemporalChunks/split_file_0.json',
-            '../data/spatioTemporalChunks/split_file_1.json',
-            '../data/spatioTemporalChunks/split_file_2.json',
-            '../data/spatioTemporalChunks/split_file_3.json',
-            '../data/spatioTemporalChunks/split_file_4.json',
-            '../data/spatioTemporalChunks/split_file_5.json',
-            '../data/spatioTemporalChunks/split_file_6.json',
-            '../data/spatioTemporalChunks/split_file_7.json',
-            '../data/spatioTemporalChunks/split_file_8.json',
-            '../data/spatioTemporalChunks/split_file_9.json'
+spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
+            'data/spatioTemporalChunks/split_file_1.json',
+            'data/spatioTemporalChunks/split_file_2.json',
+            'data/spatioTemporalChunks/split_file_3.json',
+            'data/spatioTemporalChunks/split_file_4.json',
+            'data/spatioTemporalChunks/split_file_5.json',
+            'data/spatioTemporalChunks/split_file_6.json',
+            'data/spatioTemporalChunks/split_file_7.json',
+            'data/spatioTemporalChunks/split_file_8.json',
+            'data/spatioTemporalChunks/split_file_9.json'
             ]
 
 # necessary file reads
-config = utils.read_config("../config/spatioDP.json")
+config = utils.read_config("testCases/spatioDP.json") 
 # data = utils.read_data(config["data_file"])
 
 # function to handle dataset choice
