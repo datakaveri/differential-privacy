@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import json
 import hashlib
-
+import matplotlib.pyplot as plt
 ###########################
 # function definitions
 
@@ -47,6 +47,60 @@ def pseudonymize(dataframe, config):
     dataframe.drop(columns=['UID'] + attribute_to_pseudonymize, inplace=True)
     return dataframe
 
+def mean_absolute_error(dataframeAccumulate, bVector):
+    
+    true_values = dataframeAccumulate["query_output"]
+    normalised_mae = []
+    mean_normalised_mae = []
+
+    # iterating over the number of categories = len(sensitivity)
+    # if len(sensitivity) = 1, i.e. there is one category
+    if bVector.ndim == 1:
+        # the expected value of mae for laplace is b, dividing by true value to normalize
+        for true_value in true_values:
+            normalised_mae.append(bVector/true_value)
+        normalised_mae = np.array(normalised_mae)
+    else:
+        # the expected value of mae for laplace is b, dividing by true value to normalize
+        normalised_mae = [bVector[i,:]/true_values[i] for i in range(len(true_values))]
+        normalised_mae = np.array(normalised_mae)
+       
+    # num_vectors is equal to the length of the epsilon vector
+    num_vectors = normalised_mae.shape[1]
+    mean_normalised_mae = np.zeros(num_vectors)
+
+    print(num_vectors)
+    # iterating over the number of epsilons
+    for i in range((num_vectors)):
+        # taking the means of the columns of the vector
+        mean_normalised_mae[i] = np.mean(normalised_mae[:, i]) 
+
+    ######################################################################
+    # print statements for testing
+
+    # print("dataframeAccumulate.columns:", dataframeAccumulate.columns)
+    # print("bVector.shape", bVector.shape)
+    # print("true_values.shape:", true_values.shape)
+    # print("normalised MAE: ", normalised_mae)
+    # print("shape MAE: ", (normalised_mae.shape))
+    # print(mean_normalised_mae, len(mean_normalised_mae))
+
+    return mean_normalised_mae
+
+# function to plot/table the mean_normalised_mae against the epsilon vector 
+def plot_normalised_mae(mean_normalised_mae, config):
+    plt.close()
+    chosen_epsilon = config['differential_privacy']['dp_epsilon']
+    epsilonVector = np.arange(0.1,5,chosen_epsilon)
+    # epsilonVector = np.logspace(-5, 0, 1000)
+    plt.plot(epsilonVector, mean_normalised_mae)
+    plt.plot(chosen_epsilon, mean_normalised_mae[int((chosen_epsilon-0.1)/chosen_epsilon)], 'x', markersize=5, markerfacecolor='red')
+    plt.xlabel('Epsilon')
+    plt.ylabel('Normalised Mean Absolute Error')
+    plt.title('Normalised Mean Absolute Error vs Epsilon')
+    plt.grid(True)
+    plt.show()
+    return
 ###########################
 # function to handle order of operations and select config
 def oop_handler(config):

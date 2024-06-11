@@ -1,6 +1,6 @@
 import scripts.medicalModules as medmod
 import scripts.chunkHandlingModules as chmod
-
+import scripts.utilities as utils
 
 def medicalPipeline(config, operations, fileList):
     if ("suppress" or "pseudonymize") in operations:
@@ -24,7 +24,10 @@ def medicalPipeline(config, operations, fileList):
             config, fileList
         )
         print("Performing Differential Privacy")
-        privateAggregateDataframe = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, config)
+        privateAggregateDataframe, bVector = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, config)
+
+        mean_normalised_mae = utils.mean_absolute_error(dataframeAccumulateDP, bVector)  
+        utils.plot_normalised_mae(mean_normalised_mae, config)
 
     if "dp" in operations:
         return privateAggregateDataframe

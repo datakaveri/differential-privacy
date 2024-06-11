@@ -86,7 +86,6 @@ def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange
     # noise generation
     # TODO:// Epsilon prime consideration
     b = sensitivity/dpConfig["dp_epsilon_step"]
-    bVariance = 2 * (b * b)
     noise = np.random.laplace(0, b, len(dataframeAccumulate))
     print(len(noise))
     # noise addition

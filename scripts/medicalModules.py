@@ -122,32 +122,34 @@ def k_anonymize(dataframe, config):
                 r_count = mx_age
     return r_count
 
-def medicalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange = 1):
+def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
     dpConfig = configFile['differential_privacy']
     # count = dataframeAccumulate['query_output'].sum()
     epsilon = dpConfig["dp_epsilon"]
+    epsilonVector = np.arange(0.1,5,epsilon)
+    # epsilonVector = np.logspace(-5, 0, 1000)
     output_attribute = dpConfig["dp_output_attribute"]
     if dpConfig["dp_query"] == "count":
         sensitivity = 1
         # no epsilon vector is generated
         b = sensitivity/epsilon
+        bVector = sensitivity/epsilonVector
         noise = np.random.laplace(0,b,len(dataframeAccumulate))
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe[f"Noisy {output_attribute}"] = privateAggregateDataframe["query_output"] + noise
         privateAggregateDataframe.drop(columns = ["query_output"], inplace = True)
-        return privateAggregateDataframe
     elif dpConfig["dp_query"] == "mean":
         # count = dataframeAccumulate["count"]
         sensitivity = []
         for category in dataframeAccumulate[dpConfig["dp_aggregate_attribute"]]:
             count = dataframeAccumulate.loc[dataframeAccumulate[dpConfig["dp_aggregate_attribute"]] == category,'count']
             sensitivity.append(dpConfig["dp_max_value_sensitivity"] / count)
-        # aggregation_attribute = dpConfig["dp_aggregate_attribute"]
         sensitivity = np.array(sensitivity)
         b = sensitivity/epsilon
+        bVector = sensitivity/epsilonVector
         noise = [np.random.laplace(0, b, 1) for b in b]
         noise = np.array(noise).flatten()
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe[f"Noisy {output_attribute}"] = privateAggregateDataframe["query_output"] + noise
         privateAggregateDataframe.drop(columns = ["count", "query_output"], inplace = True)
-        return privateAggregateDataframe
+    return privateAggregateDataframe, bVector

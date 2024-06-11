@@ -156,7 +156,6 @@ def chunkAccumulatorMedicalKAnon(dataframeChunk, medicalConfigDict):
     )
     return chunkHistogram
 
-
 # accumulating chunks with appropriate processing for KAnon
 def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
     lengthList = []
