@@ -50,7 +50,6 @@ def temporalEventFiltering(dataframe, configFile):
     print('########################################################################################')
     return dataframe
 
-# //TODO: Are two kinds of filtering required?
 # Filtering by average number of events per HAT per day
 def spatioTemporalEventFiltering(dataframe, configFile):
     # assigning required variables
@@ -73,23 +72,24 @@ def spatioTemporalEventFiltering(dataframe, configFile):
     return dataframe
 
 # performing differential privacy
-def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange):
+def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange, max_count):
     dpConfig = configFile["differential_privacy"]
     count = dataframeAccumulate["query_output"].sum()
-
+    epsilon = dpConfig["dp_epsilon_step"]
+    epsilonVector = np.arange(0.1,5,epsilon)
     # appropriate sensitivity computation
     if dpConfig["dp_query"] == "mean":
-        sensitivity = (dpConfig["global_max_value"] - dpConfig["global_min_value"])/(count)
+        sensitivity = (max_count*(dpConfig["global_max_value"] - dpConfig["global_min_value"]))/(count)
     elif dpConfig["dp_query"] == "count":
         sensitivity = (1/timeRange)
     
     # noise generation
-    # TODO:// Epsilon prime consideration
-    b = sensitivity/dpConfig["dp_epsilon_step"]
+    b = sensitivity/epsilon
+    bVector = sensitivity/epsilonVector
     noise = np.random.laplace(0, b, len(dataframeAccumulate))
     print(len(noise))
     # noise addition
     privateAggregateDataframe = dataframeAccumulate.copy()
     privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
     # print(privateAggregateDataframe)
-    return privateAggregateDataframe
+    return privateAggregateDataframe, bVector

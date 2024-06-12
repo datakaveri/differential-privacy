@@ -52,7 +52,13 @@ def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
     dataframeAccumulator = dataframeChunk.groupby(groupby_attributes).agg(
         query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"])
     ).reset_index()
-    return dataframeAccumulator
+
+    # TODO://How to generalize the HAT input for this accumulator 
+    dataframeCountAccumulator = dataframeAccumulator.groupby(['HAT']).agg(
+        max_count=("query_output", 'max'))
+    dataframeCountAccumulator.reset_index(inplace = True)
+    return dataframeAccumulator, dataframeCountAccumulator
+
 
 
 # function to perform s/t generalization, filtering, query building for chunks
@@ -60,6 +66,7 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
     # assume that the appropriate config has been selected already based on UI input
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
+    dataframeCountAccumulate = pd.DataFrame()
     startDay, endDay = [], []
     dpConfig = spatioTemporalConfigDict["differential_privacy"]
     print("Performing spatio-temporal generalization and filtering")
@@ -95,35 +102,38 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
         )
         
         # update the max and min dates
-        # if len(dataframeAccumulate) == 0:
-        #     dataframeAccumulate = dataframeChunk
-        #     startDay = dataframeChunk['Date'].min()
-        #     endDay = dataframeChunk['Date'].max()
-        # else:
-        #     startDay = min(startDay, dataframeChunk['Date'].min())
-        #     endDay = max(endDay, dataframeChunk['Date'].max())
         startDay.append(dataframeChunk['Date'].min())
         endDay.append(dataframeChunk['Date'].max())
+
         # filtering HATS by average number of events per day
         dataframeChunk = stmod.spatioTemporalEventFiltering(
             dataframeChunk, spatioTemporalConfigDict
         )
 
         # accumulating chunks for dp query building
-        dataframeAccumulator = chunkAccumulatorSpatioTemporal(dataframeChunk, dpConfig)
+        dataframeAccumulator, dataframeCountAccumulator = chunkAccumulatorSpatioTemporal(dataframeChunk, dpConfig)
 
         # creating accumulated dataframe
         dataframeAccumulate = pd.concat(
             [dataframeAccumulate, dataframeAccumulator], ignore_index=True
         )
+        
         print("The length of the accumulate dataframe is: ", len(dataframeAccumulate))
     
-    timeRange = 1 + (max(endDay) - min(startDay)).days    
+        dataframeCountAccumulate = pd.concat(
+            [dataframeCountAccumulate, dataframeCountAccumulator], ignore_index=True
+        )
 
-    print(dataframeAccumulate)
-    print(dataframeAccumulate.info())
+
+    timeRange = 1 + (max(endDay) - min(startDay)).days    
+    max_count = dataframeCountAccumulate["max_count"].max()
+    # uncomment for testing
+    # print(dataframeAccumulate)
+    # print(dataframeAccumulate.info())
+    # print(dataframeCountAccumulate)
+    # print(dataframeCountAccumulate["max_count"].max())
     print("End of Accumulation")
-    return dataframeAccumulate, timeRange
+    return dataframeAccumulate, timeRange, max_count
 
 
 # function to accumulate chunks with appropriate query building for DP

@@ -1,5 +1,6 @@
 import scripts.spatioTemporalModules as stmod
 import scripts.chunkHandlingModules as chmod
+import scripts.utilities as utils
 
 def spatioTemporalPipeline(config, operations, fileList):
 
@@ -11,14 +12,16 @@ def spatioTemporalPipeline(config, operations, fileList):
 
     if "dp" in operations:
         print("Performing Chunk Accumulation for DP")
-        dataframeAccumulateDP, timeRange = chmod.chunkHandlingSpatioTemporal(config, 
+        dataframeAccumulateDP, timeRange, max_count = chmod.chunkHandlingSpatioTemporal(config, 
                                                                 fileList)
-        
 
         print("Performing Differential Privacy")
-        privateAggregateDataframe = stmod.spatioTemporalDifferentialPrivacy(dataframeAccumulateDP, 
+        privateAggregateDataframe, bVector = stmod.spatioTemporalDifferentialPrivacy(dataframeAccumulateDP, 
                                                                         config, 
-                                                                        timeRange)
+                                                                        timeRange, max_count)
+    
+        mean_normalised_mae = utils.mean_absolute_error(dataframeAccumulateDP, bVector)
+    
     if "dp" in operations:
         return privateAggregateDataframe
     if ("suppress" or "pseudonymize") in operations and ("dp") not in operations:

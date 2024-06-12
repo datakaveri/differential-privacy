@@ -73,17 +73,20 @@ def mean_absolute_error(dataframeAccumulate, bVector):
     # iterating over the number of epsilons
     for i in range((num_vectors)):
         # taking the means of the columns of the vector
+        if i == 1:
+            print("this is the sum of the 1st column: ", np.nansum(normalised_mae[:,i]))
+            print(normalised_mae[:,1])
         mean_normalised_mae[i] = np.mean(normalised_mae[:, i]) 
 
     ######################################################################
     # print statements for testing
 
-    # print("dataframeAccumulate.columns:", dataframeAccumulate.columns)
-    # print("bVector.shape", bVector.shape)
-    # print("true_values.shape:", true_values.shape)
-    # print("normalised MAE: ", normalised_mae)
-    # print("shape MAE: ", (normalised_mae.shape))
-    # print(mean_normalised_mae, len(mean_normalised_mae))
+    print("dataframeAccumulate.columns:", dataframeAccumulate.columns)
+    print("bVector.shape", bVector.shape)
+    print("true_values.shape:", true_values.shape)
+    print("normalised MAE: ", normalised_mae)
+    print("shape MAE: ", (normalised_mae.shape))
+    print(mean_normalised_mae, len(mean_normalised_mae))
 
     return mean_normalised_mae
 
@@ -99,8 +102,17 @@ def plot_normalised_mae(mean_normalised_mae, config):
     plt.ylabel('Normalised Mean Absolute Error')
     plt.title('Normalised Mean Absolute Error vs Epsilon')
     plt.grid(True)
-    plt.show()
+    # plt.show()
+    
+    # create a json file with epsilonVector and mean_normalised_mae
+    # output = []
+    # for e, m in zip(epsilonVector, mean_normalised_mae):
+    #     output.append({'epsilon': e, 'mean_normalised_mae': m})
+    # with open('pipelineOutput/epsilonVector_mean_normalised_mae.json', 'w') as f:
+    #     json.dump(output, f)
     return
+
+
 ###########################
 # function to handle order of operations and select config
 def oop_handler(config):

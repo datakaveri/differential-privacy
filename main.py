@@ -36,7 +36,8 @@ spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
 ]
 
 # necessary file reads
-config = utils.read_config("testCases/medicalDP.json") 
+config_file_name = "testCases/spatioDP.json"
+config = utils.read_config(config_file_name) 
 # data = utils.read_data(config["data_file"])
 
 # function to handle dataset choice
@@ -68,5 +69,8 @@ print(data)
 # TODO: Add Normalized MAE vs Epsilon computation and output
 # mods.output_handler(data, config)
 
+
+
+# data.to_json("pipelineOutput/testOutput_spatioS&P.json")
 
 
