@@ -102,7 +102,7 @@ def plot_normalised_mae(mean_normalised_mae, config):
     plt.ylabel('Normalised Mean Absolute Error')
     plt.title('Normalised Mean Absolute Error vs Epsilon')
     plt.grid(True)
-    # plt.show()
+    plt.show()
     
     # create a json file with epsilonVector and mean_normalised_mae
     # output = []
@@ -132,40 +132,27 @@ def oop_handler(config):
         operations.append("dp")
     return operations
 
-def output_handler(dataframe_list, config):
-    output_attribute = config["dp_output_attribute"]
-    aggregation_attribute = config["dp_aggregate_attribute"]
-    combined_df = pd.concat(dataframe_list, axis=0)
-    combined_df = (
-        combined_df.groupby(["epsilon", aggregation_attribute])
-        .agg({f"Noisy {output_attribute}": list, output_attribute: list})
-        .reset_index()
-    )
-    data_dict = combined_df.to_dict(orient="records")
-    # Group the data by 'epsilon' and create dictionaries with the desired structure
-    grouped_data = {}
-    for entry in data_dict:
-        epsilon_value = entry["epsilon"]
-        if epsilon_value not in grouped_data:
-            grouped_data[epsilon_value] = []
-        grouped_data[epsilon_value].append(
-            {
-                aggregation_attribute: entry[aggregation_attribute],
-                f"Noisy {output_attribute}": entry[f"Noisy {output_attribute}"],
-                output_attribute: entry[output_attribute],
-            }
-        )
+# TODO: Rewrite output_handler
+def output_handler(data):
+    data['timeSlot'] = data['HAT'].apply(lambda x: x[:2])
+    formatted_data = {}
+    for idx, row in data.iterrows():
+        hat_string = row['HAT']
+        hat_time = hat_string[:2]
+        hat_id = hat_string[2:]
+        if hat_id not in formatted_data:
+            formatted_data[hat_id] = {}
+        if hat_time not in formatted_data[hat_id]:
+            formatted_data[hat_id][hat_time] = []
+        formatted_data[hat_id][hat_time].append({
+            'HAT': hat_id,
+            'query_output': row['query_output'],
+            'noisy_output': row['noisy_output']
+        })
+    with open("pipelineOutput/testOutput_formatted.json", "w") as f:
+        json.dump(output_handler(data), f, indent=4)
+    data.to_json("pipelineOutput/testOutput_formatTest.json")
+    return formatted_data
 
-    # Convert grouped data to a list of dictionaries
-    result_list = [
-        {"epsilon": key, "data": value} for key, value in grouped_data.items()
-    ]
 
-    # Convert list of dictionaries to JSON format
-    json_data = json.dumps(result_list, indent=4)
 
-    # # Writing JSON data to a file
-    with open("nestedEpsTestOutputHisto.json", "w") as json_file:
-        json_file.write(json_data)
-        print("Output File Generated")
-    return json_data

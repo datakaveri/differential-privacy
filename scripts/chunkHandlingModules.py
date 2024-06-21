@@ -49,16 +49,23 @@ def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
     print("Accumulating chunks for building DP Query")
     dpConfig = spatioTemporalConfigDict
     groupby_attributes = dpConfig["dp_aggregate_attribute"]
-    dataframeAccumulator = dataframeChunk.groupby(groupby_attributes).agg(
+    if dpConfig["dp_query"] == "mean":
+        dataframeAccumulator = dataframeChunk.groupby(groupby_attributes).agg(
         query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"])
-    ).reset_index()
+        ).reset_index()
+    elif dpConfig["dp_query"] == "count":
+        # filter the values of speed by the threshold value
+        print("Before dropping values less than the user defined threshold, the number of records is: ", len(dataframeChunk))
+        dataframeChunk = dataframeChunk[dataframeChunk[dpConfig["dp_output_attribute"]] >= dpConfig['dp_query_value_threshold']]
+        print("After dropping values less than the user defined threshold, the number of records is: ", len(dataframeChunk))
+        dataframeAccumulator = dataframeChunk.groupby(groupby_attributes).agg(
+        query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"])
+        ).reset_index()
 
-    # TODO://How to generalize the HAT input for this accumulator 
     dataframeCountAccumulator = dataframeAccumulator.groupby(['HAT']).agg(
-        max_count=("query_output", 'max'))
+        count=("query_output", 'count'))
     dataframeCountAccumulator.reset_index(inplace = True)
     return dataframeAccumulator, dataframeCountAccumulator
-
 
 
 # function to perform s/t generalization, filtering, query building for chunks
@@ -112,29 +119,41 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
 
         # accumulating chunks for dp query building
         dataframeAccumulator, dataframeCountAccumulator = chunkAccumulatorSpatioTemporal(dataframeChunk, dpConfig)
-
+    
         # creating accumulated dataframe
         dataframeAccumulate = pd.concat(
             [dataframeAccumulate, dataframeAccumulator], ignore_index=True
         )
-        
-        print("The length of the accumulate dataframe is: ", len(dataframeAccumulate))
+
+        if dpConfig["dp_query"] == "mean":
+            dfAccumulateCombined = dataframeAccumulate.groupby(dpConfig["dp_aggregate_attribute"]).agg({
+                                                            'query_output': dpConfig['dp_query']}
+                                                            ).reset_index()
+        elif dpConfig["dp_query"] == "count":
+            dfAccumulateCombined = dataframeAccumulate.groupby(dpConfig["dp_aggregate_attribute"]).agg({
+                                                            'query_output': 'sum'}
+                                                            ).reset_index()
+           
+        print("The length of the accumulate dataframe is: ", len(dfAccumulateCombined))
     
         dataframeCountAccumulate = pd.concat(
             [dataframeCountAccumulate, dataframeCountAccumulator], ignore_index=True
         )
 
+        dfCountAccumulateCombined = dataframeCountAccumulate.groupby(['HAT']).agg({
+                                                            'count': 'sum'}
+                                                            ).reset_index()
 
     timeRange = 1 + (max(endDay) - min(startDay)).days    
-    max_count = dataframeCountAccumulate["max_count"].max()
+    max_count = dfCountAccumulateCombined["count"].max()
     # uncomment for testing
     # print(dataframeAccumulate)
+    # print(dfAccumulateCombined)
     # print(dataframeAccumulate.info())
     # print(dataframeCountAccumulate)
     # print(dataframeCountAccumulate["max_count"].max())
     print("End of Accumulation")
-    return dataframeAccumulate, timeRange, max_count
-
+    return dfAccumulateCombined, timeRange, max_count
 
 # function to accumulate chunks with appropriate query building for DP
 def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
@@ -147,7 +166,6 @@ def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
         .reset_index()
     )
     return dataframeAccumulator
-
 
 # preprocessing to accumulate chunks for k-anon
 def chunkAccumulatorMedicalKAnon(dataframeChunk, medicalConfigDict):

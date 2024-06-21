@@ -1,11 +1,8 @@
 # import statements
 import scripts.medicalPipeline as medpipe
 import scripts.spatioTemporalPipeline as stpipe
-# import scripts.medicalModules as medmod
-# import scripts.spatioTemporalModules as stmod
-# import scripts.chunkHandlingModules as chmod
 import scripts.utilities as utils
-
+import json
 # for testing
 medicalFileList = ["data/syntheticMedicalChunks/medical_data_split_file_0.json",
                     "data/syntheticMedicalChunks/medical_data_split_file_1.json",
@@ -66,11 +63,8 @@ if dataset == "spatioTemporal":
 print(data)
 
 # TODO: Add output format handling (json dumps)
-# TODO: Add Normalized MAE vs Epsilon computation and output
 # mods.output_handler(data, config)
 
 
 
-# data.to_json("pipelineOutput/testOutput_spatioS&P.json")
-
-
+# formatted_data = utils.output_handler(data)
