@@ -33,7 +33,7 @@ spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
 ]
 
 # necessary file reads
-config_file_name = "testCases/spatioDP.json"
+config_file_name = "testConfigs/spatioDP.json"
 config = utils.read_config(config_file_name) 
 # data = utils.read_data(config["data_file"])
 

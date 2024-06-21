@@ -1,18 +1,6 @@
 {
   "data_type": "spatioTemporal",
   "spatioTemporal": {
-    "suppress": [
-      "trip_direction",
-      "last_stop_arrival_time",
-      "route_id",
-      "actual_trip_start_time",
-      "trip_delay",
-      "vehicle_label",
-      "last_stop_id",
-      "id",
-      "location.type"
-    ],
-    "pseudonymize": ["license_plate", "trip_id"],
     "spatial_generalize": {
       "spatial_attribute": "location.coordinates",
       "h3_resolution": 7,
@@ -26,9 +14,10 @@
       "end_time": 20
     },
     "differential_privacy": {
-      "dp_query": "mean",
+      "dp_query": "count",
       "dp_output_attribute": "speed",
-      "dp_aggregate_attribute": ["HAT"],
+      "dp_aggregate_attribute": ["HAT", "Date", "license_plate"],
+      "dp_query_value_threshold": 30,
       "dp_epsilon_step": 0.1,
       "global_max_value": 65,
       "global_min_value": 0
