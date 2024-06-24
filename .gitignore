@@ -136,3 +136,6 @@ dmypy.json
 data/suratITMSDPtest.json
 
 pipelineOutput
+
+data/spatioTemporalChunks
+data/syntheticMedicalChunks
