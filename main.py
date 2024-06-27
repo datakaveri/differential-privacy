@@ -63,8 +63,4 @@ if dataset == "spatioTemporal":
 print(data)
 
 # TODO: Add output format handling (json dumps)
-# mods.output_handler(data, config)
-
-
-
 # formatted_data = utils.output_handler(data)

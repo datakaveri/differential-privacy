@@ -102,7 +102,7 @@ def plot_normalised_mae(mean_normalised_mae, config):
     plt.ylabel('Normalised Mean Absolute Error')
     plt.title('Normalised Mean Absolute Error vs Epsilon')
     plt.grid(True)
-    plt.show()
+    # plt.show()
     
     # create a json file with epsilonVector and mean_normalised_mae
     # output = []

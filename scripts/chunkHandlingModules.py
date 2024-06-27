@@ -43,30 +43,20 @@ def chunkHandlingCommon(configDict, operations, fileList):
     # print(dataframeAccumulate.info())
     return dataframeAccumulate
 
-
+# TODO: Implement fixed query choices only
 # function to accumulate chunks with appropriate query building for DP
 def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
     print("Accumulating chunks for building DP Query")
     dpConfig = spatioTemporalConfigDict
     groupby_attributes = dpConfig["dp_aggregate_attribute"]
-    if dpConfig["dp_query"] == "mean":
-        dataframeAccumulator = dataframeChunk.groupby(groupby_attributes).agg(
-        query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"])
-        ).reset_index()
-    elif dpConfig["dp_query"] == "count":
-        # filter the values of speed by the threshold value
-        print("Before dropping values less than the user defined threshold, the number of records is: ", len(dataframeChunk))
-        dataframeChunk = dataframeChunk[dataframeChunk[dpConfig["dp_output_attribute"]] >= dpConfig['dp_query_value_threshold']]
-        print("After dropping values less than the user defined threshold, the number of records is: ", len(dataframeChunk))
-        dataframeAccumulator = dataframeChunk.groupby(groupby_attributes).agg(
-        query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"])
-        ).reset_index()
 
-    dataframeCountAccumulator = dataframeAccumulator.groupby(['HAT']).agg(
-        count=("query_output", 'count'))
-    dataframeCountAccumulator.reset_index(inplace = True)
-    return dataframeAccumulator, dataframeCountAccumulator
+    dataframeAccumulator = dataframeChunk.groupby(groupby_attributes).agg(
+    output_attribute_sum=(dpConfig["dp_output_attribute"], 'sum'),
+    output_attribute_count=(dpConfig["dp_output_attribute"], 'count'),
+    output_attribute_max = (dpConfig["dp_output_attribute"], 'max')).reset_index()
 
+    # print(dataframeAccumulator)
+    return dataframeAccumulator
 
 # function to perform s/t generalization, filtering, query building for chunks
 def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
@@ -118,40 +108,56 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
         )
 
         # accumulating chunks for dp query building
-        dataframeAccumulator, dataframeCountAccumulator = chunkAccumulatorSpatioTemporal(dataframeChunk, dpConfig)
+        dataframeAccumulator = chunkAccumulatorSpatioTemporal(dataframeChunk, dpConfig)
     
         # creating accumulated dataframe
         dataframeAccumulate = pd.concat(
             [dataframeAccumulate, dataframeAccumulator], ignore_index=True
         )
+        # print(dataframeAccumulate)
 
-        if dpConfig["dp_query"] == "mean":
-            dfAccumulateCombined = dataframeAccumulate.groupby(dpConfig["dp_aggregate_attribute"]).agg({
-                                                            'query_output': dpConfig['dp_query']}
-                                                            ).reset_index()
-        elif dpConfig["dp_query"] == "count":
-            dfAccumulateCombined = dataframeAccumulate.groupby(dpConfig["dp_aggregate_attribute"]).agg({
-                                                            'query_output': 'sum'}
-                                                            ).reset_index()
-           
-        print("The length of the accumulate dataframe is: ", len(dfAccumulateCombined))
+    # aggregating to combine colection of discrete dataframe objects created by pd.concat
+    dfAccumulateCombined = dataframeAccumulate.groupby(dpConfig["dp_aggregate_attribute"]).agg(
+                                                        counts=('output_attribute_count','sum'), # sum of counts
+                                                        sums=('output_attribute_sum','sum'), # sum of sums
+                                                        max=('output_attribute_max','max') # max of max
+                                                        ).reset_index()
+    # print(dfAccumulateCombined)
     
-        dataframeCountAccumulate = pd.concat(
-            [dataframeCountAccumulate, dataframeCountAccumulator], ignore_index=True
-        )
+    if dpConfig["dp_query"] == "mean":
+        # mean of speed values per HAT
+        dfAccumulateCombined = dfAccumulateCombined.groupby('HAT').agg(
+                                                        sum_of_counts=('counts','sum'), # sum of sum of counts for all license plates, Dates
+                                                        sum_of_sums=('sums','sum') # sum of sum of sums for all license plates, Dates
+                                                        ).reset_index()
+        dfAccumulateCombined['query_output'] = dfAccumulateCombined['sum_of_sums']/dfAccumulateCombined['sum_of_counts']
+        max_count = dfAccumulateCombined["sum_of_counts"].max()
+        print('max_count', max_count)
+        
+    elif dpConfig["dp_query"] == "count":
+        # count of license plates per HAT per Date for which the max speed value is greater than the user defined threshold value
 
-        dfCountAccumulateCombined = dataframeCountAccumulate.groupby(['HAT']).agg({
-                                                            'count': 'sum'}
-                                                            ).reset_index()
+        dfAccumulateCombined = dfAccumulateCombined.groupby(['HAT', 'Date']).agg(
+                                                        count_of_license_plates=('max', lambda x: (x > dpConfig['dp_query_value_threshold']).sum())
+                                                        ).reset_index()
+        # print("dfAC after threshold enforced", dfAccumulateCombined)
+        # print(len(dfAccumulateCombined))
 
+        # taking the mean across all days of the count of license plates per 'HAT' combination where the maximum value is greater than a threshold
+        dfAccumulateCombined = dfAccumulateCombined.groupby(['HAT']).agg(
+                                                        mean_of_count_of_license_plates=('count_of_license_plates', 'mean')
+                                                        ).reset_index()
+        # print("dfAC mean across all days", dfAccumulateCombined)
+        # print("The length of the accumulate dataframe is: ", len(dfAccumulateCombined))
+                    
     timeRange = 1 + (max(endDay) - min(startDay)).days    
-    max_count = dfCountAccumulateCombined["count"].max()
+    
     # uncomment for testing
     # print(dataframeAccumulate)
     # print(dfAccumulateCombined)
     # print(dataframeAccumulate.info())
     # print(dataframeCountAccumulate)
-    # print(dataframeCountAccumulate["max_count"].max())
+
     print("End of Accumulation")
     return dfAccumulateCombined, timeRange, max_count
 
@@ -224,7 +230,6 @@ def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
 def chunkHandlingMedicalDP(medicalConfigDict, fileList):
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
-    kAnonAccumulate = pd.Series()
     print(medicalConfigDict)
     dpConfig = medicalConfigDict["differential_privacy"]
     for file in fileList:

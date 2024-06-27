@@ -50,7 +50,7 @@ def temporalEventFiltering(dataframe, configFile):
     print('########################################################################################')
     return dataframe
 
-# Filtering by average number of events per HAT per day
+# Filtering by average number of events(license plates) per HAT per day
 def spatioTemporalEventFiltering(dataframe, configFile):
     # assigning required variables
     configFile = configFile["spatial_generalize"]
