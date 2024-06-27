@@ -72,24 +72,32 @@ def spatioTemporalEventFiltering(dataframe, configFile):
     return dataframe
 
 # performing differential privacy
-def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange, max_count):
+def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange):
     dpConfig = configFile["differential_privacy"]
     count = dataframeAccumulate["query_output"].sum()
     epsilon = dpConfig["dp_epsilon_step"]
     epsilonVector = np.arange(0.1,5,epsilon)
+
     # appropriate sensitivity computation
     if dpConfig["dp_query"] == "mean":
-        sensitivity = (max_count*(dpConfig["global_max_value"] - dpConfig["global_min_value"]))/(count)
+        max_of_counts = dataframeAccumulate['max_of_counts']
+        sum_of_counts = dataframeAccumulate['sum_of_counts']
+        sensitivity = (max_of_counts*(dpConfig["global_max_value"] - dpConfig["global_min_value"]))/(sum_of_counts)
+        bVector = np.zeros((len(sensitivity), len(epsilonVector)))
+        for i in range(len(epsilonVector)):
+            bVector[:, i] = sensitivity/epsilonVector[i]
     elif dpConfig["dp_query"] == "count":
         sensitivity = (1/timeRange)
-    
+        bVector = sensitivity/epsilonVector
+
     # noise generation
     b = sensitivity/epsilon
-    bVector = sensitivity/epsilonVector
+
+    # noise = np.random.laplace(0, bVector, (len(dataframeAccumulate), len(epsilonVector)))
     noise = np.random.laplace(0, b, len(dataframeAccumulate))
     print(len(noise))
     # noise addition
     privateAggregateDataframe = dataframeAccumulate.copy()
     privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
-    # print(privateAggregateDataframe)
+    print(privateAggregateDataframe)
     return privateAggregateDataframe, bVector
