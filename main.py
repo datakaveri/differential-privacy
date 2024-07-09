@@ -58,9 +58,13 @@ print(dataset, operations)
 if dataset == "medical":
     data = medpipe.medicalPipeline(config, operations, fileList)
 if dataset == "spatioTemporal":
-    data = stpipe.spatioTemporalPipeline(config, operations, fileList)
-
+    if "dp" in operations:
+        data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) # type: ignore
+        mean_absolute_error, averaged_mean_absolute_error = utils.mean_absolute_error(bVector)
+    elif ("suppress" or "pseudonymize") in operations and ("dp") not in operations:
+        data = stpipe.spatioTemporalPipeline(config, operations, fileList)
 print(data)
 
 # TODO: Add output format handling (json dumps)
-# formatted_data = utils.output_handler(data)
+formatted_error = utils.output_handler_mae(mean_absolute_error, averaged_mean_absolute_error)
+formatted_data = utils.output_handler(data)

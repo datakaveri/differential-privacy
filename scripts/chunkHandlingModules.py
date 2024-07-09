@@ -58,12 +58,47 @@ def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
     # print(dataframeAccumulator)
     return dataframeAccumulator
 
+def queryBuilderSpatioTemporal(dfAccumulateCombined, dpConfig):
+    if dpConfig["dp_query"] == "mean":
+            dfSensitivity = dfAccumulateCombined.groupby(['HAT', 'license_plate']).agg(
+                                                sum_of_counts_per_lp=('output_attribute_count', 'sum') #sum of counts per license plate
+                                                ).reset_index()
+            
+            dfSensitivity = dfSensitivity.groupby('HAT').agg(
+                                                max_of_sum_of_counts_per_lp=('sum_of_counts_per_lp', 'max') # max of sum of counts per license plate
+                                                ).reset_index()
+            
+            # mean of speed values per HAT
+            dfAccumulateCombined = dfAccumulateCombined.groupby('HAT').agg(
+                                                            sum_of_counts=('output_attribute_count','sum'), # sum of counts for all license plates, Dates
+                                                            sum_of_sums=('output_attribute_sum','sum') # sum of sums for all license plates, Dates
+                                                            ).reset_index()
+
+            dfAccumulateCombined['query_output'] = dfAccumulateCombined['sum_of_sums']/dfAccumulateCombined['sum_of_counts']
+            dfAccumulateCombined['max_of_sum_of_counts_per_lp'] = dfSensitivity['max_of_sum_of_counts_per_lp']
+    elif dpConfig["dp_query"] == "count":
+        # count of license plates per HAT per Date for which the max speed value is greater than the user defined threshold value
+        dfAccumulateCombined = dfAccumulateCombined.groupby(['HAT', 'Date']).agg(
+                                                        count_of_license_plates=('max', lambda x: (x > dpConfig['dp_query_value_threshold']).sum())
+                                                        ).reset_index()
+        # print("dfAC after threshold enforced", dfAccumulateCombined)
+        # print(len(dfAccumulateCombined))
+
+        # taking the mean across all days of the count of license plates per 'HAT' combination where the maximum value is greater than a threshold
+        dfAccumulateCombined = dfAccumulateCombined.groupby(['HAT']).agg(
+                                                        mean_of_counts=('count_of_license_plates', 'mean') # mean of counts of license plate max values across all days
+                                                        ).reset_index()
+        dfAccumulateCombined.rename(columns={'mean_of_counts':'query_output'}, inplace = True)
+
+        # print("dfAC mean across all days", dfAccumulateCombined)
+        # print("The length of the accumulate dataframe is: ", len(dfAccumulateCombined))
+    return dfAccumulateCombined
+
 # function to perform s/t generalization, filtering, query building for chunks
 def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
     # assume that the appropriate config has been selected already based on UI input
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
-    dataframeCountAccumulate = pd.DataFrame()
     startDay, endDay = [], []
     dpConfig = spatioTemporalConfigDict["differential_privacy"]
     print("Performing spatio-temporal generalization and filtering")
@@ -102,10 +137,10 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
         startDay.append(dataframeChunk['Date'].min())
         endDay.append(dataframeChunk['Date'].max())
 
-        # filtering HATS by average number of events per day
-        dataframeChunk = stmod.spatioTemporalEventFiltering(
-            dataframeChunk, spatioTemporalConfigDict
-        )
+        # # filtering HATS by average number of events per day
+        # dataframeChunk = stmod.spatioTemporalEventFiltering(
+        #     dataframeChunk, spatioTemporalConfigDict
+        # )
 
         # accumulating chunks for dp query building
         dataframeAccumulator = chunkAccumulatorSpatioTemporal(dataframeChunk, dpConfig)
@@ -115,41 +150,27 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
             [dataframeAccumulate, dataframeAccumulator], ignore_index=True
         )
         # print(dataframeAccumulate)
-
-    # aggregating to combine colection of discrete dataframe objects created by pd.concat
-    dfAccumulateCombined = dataframeAccumulate.groupby(dpConfig["dp_aggregate_attribute"]).agg(
-                                                        counts=('output_attribute_count','sum'), # sum of counts
-                                                        sums=('output_attribute_sum','sum'), # sum of sums
-                                                        max=('output_attribute_max','max') # max of max
+        # aggregating to combine colection of discrete dataframe objects created by pd.concat
+        dataframeAccumulateAgg = dataframeAccumulate.groupby(dpConfig["dp_aggregate_attribute"]).agg(
+                                                        output_attribute_count=('output_attribute_count','sum'), # sum of counts
+                                                        output_attribute_sum=('output_attribute_sum','sum'), # sum of sums
+                                                        output_attribute_max=('output_attribute_max','max') # max of max
                                                         ).reset_index()
-    # print(dfAccumulateCombined)
-    
-    if dpConfig["dp_query"] == "mean":
-        # mean of speed values per HAT
-        dfAccumulateCombined = dfAccumulateCombined.groupby('HAT').agg(
-                                                        sum_of_counts=('counts','sum'), # sum of sum of counts for all license plates, Dates
-                                                        sum_of_sums=('sums','sum'), # sum of sum of sums for all license plates, Dates
-                                                        max_of_counts=('counts', 'max') # max of sum of counts for all license plates, Dates (for user contribution-sensitivity)
-                                                        ).reset_index()
-        dfAccumulateCombined['query_output'] = dfAccumulateCombined['sum_of_sums']/dfAccumulateCombined['sum_of_counts']
         
-    elif dpConfig["dp_query"] == "count":
-        # count of license plates per HAT per Date for which the max speed value is greater than the user defined threshold value
-        dfAccumulateCombined = dfAccumulateCombined.groupby(['HAT', 'Date']).agg(
-                                                        count_of_license_plates=('max', lambda x: (x > dpConfig['dp_query_value_threshold']).sum())
-                                                        ).reset_index()
-        # print("dfAC after threshold enforced", dfAccumulateCombined)
-        # print(len(dfAccumulateCombined))
+        dataframeAccumulate = pd.DataFrame()
+        dataframeAccumulate = dataframeAccumulateAgg
 
-        # taking the mean across all days of the count of license plates per 'HAT' combination where the maximum value is greater than a threshold
-        dfAccumulateCombined = dfAccumulateCombined.groupby(['HAT']).agg(
-                                                        mean_of_counts=('count_of_license_plates', 'mean') # mean of counts of license plate max values across all days
-                                                        ).reset_index()
-        dfAccumulateCombined.rename(columns={'mean_of_counts':'query_output'}, inplace = True)
+    # print(dfAccumulateCombined)
 
-        # print("dfAC mean across all days", dfAccumulateCombined)
-        # print("The length of the accumulate dataframe is: ", len(dfAccumulateCombined))
-                    
+    dfAccumulateCombined = dataframeAccumulate
+
+    # filtering HATS by average number of events per day
+    dfAccumulateCombined = stmod.spatioTemporalEventFiltering(
+        dfAccumulateCombined, spatioTemporalConfigDict
+    )
+    
+    dfAccumulateCombined = queryBuilderSpatioTemporal(dfAccumulateCombined, dpConfig)
+    
     timeRange = 1 + (max(endDay) - min(startDay)).days    
     
     # uncomment for testing

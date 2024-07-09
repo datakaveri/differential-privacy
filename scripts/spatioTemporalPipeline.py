@@ -16,13 +16,11 @@ def spatioTemporalPipeline(config, operations, fileList):
                                                                 fileList)
 
         print("Performing Differential Privacy")
-        privateAggregateDataframe, bVector = stmod.spatioTemporalDifferentialPrivacy(dataframeAccumulateDP, 
+        privateAggregateDataframe, bVector = stmod.spatioTemporalDifferentialPrivacy(dataframeAccumulateDP,
                                                                         config, 
                                                                         timeRange)
     
-        mean_normalised_mae = utils.mean_absolute_error(dataframeAccumulateDP, bVector)
-    
     if "dp" in operations:
-        return privateAggregateDataframe
+        return privateAggregateDataframe, bVector
     if ("suppress" or "pseudonymize") in operations and ("dp") not in operations:
         return dataframeAccumulate

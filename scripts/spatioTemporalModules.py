@@ -74,18 +74,21 @@ def spatioTemporalEventFiltering(dataframe, configFile):
 # performing differential privacy
 def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange):
     dpConfig = configFile["differential_privacy"]
-    count = dataframeAccumulate["query_output"].sum()
-    epsilon = dpConfig["dp_epsilon_step"]
-    epsilonVector = np.arange(0.1,5,epsilon)
+    epsilon = dpConfig["dp_epsilon"]
+    epsilon_step = dpConfig["dp_epsilon_step"]
+    epsilonVector = np.arange(1,30,epsilon_step)
 
     # appropriate sensitivity computation
     if dpConfig["dp_query"] == "mean":
-        max_of_counts = dataframeAccumulate['max_of_counts']
+        max_of_sum_of_counts_per_lp = dataframeAccumulate['max_of_sum_of_counts_per_lp']
         sum_of_counts = dataframeAccumulate['sum_of_counts']
-        sensitivity = (max_of_counts*(dpConfig["global_max_value"] - dpConfig["global_min_value"]))/(sum_of_counts)
+        sensitivity = (max_of_sum_of_counts_per_lp*(dpConfig["global_max_value"] - dpConfig["global_min_value"]))/(sum_of_counts)
         bVector = np.zeros((len(sensitivity), len(epsilonVector)))
+        # dfBVector = pd.DataFrame()
         for i in range(len(epsilonVector)):
             bVector[:, i] = sensitivity/epsilonVector[i]
+        bVector = pd.DataFrame(bVector, index=dataframeAccumulate.index, columns=epsilonVector)
+        bVector['HAT'] = dataframeAccumulate['HAT']
     elif dpConfig["dp_query"] == "count":
         sensitivity = (1/timeRange)
         bVector = sensitivity/epsilonVector
@@ -97,7 +100,7 @@ def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange
     noise = np.random.laplace(0, b, len(dataframeAccumulate))
     print(len(noise))
     # noise addition
-    privateAggregateDataframe = dataframeAccumulate.copy()
+    privateAggregateDataframe = dataframeAccumulate.copy(deep=True)
     privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
     print(privateAggregateDataframe)
     return privateAggregateDataframe, bVector

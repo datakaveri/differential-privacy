@@ -47,7 +47,89 @@ def pseudonymize(dataframe, config):
     dataframe.drop(columns=['UID'] + attribute_to_pseudonymize, inplace=True)
     return dataframe
 
-def mean_absolute_error(dataframeAccumulate, bVector):
+def mean_absolute_error(bVector):
+    mean_absolute_error = bVector
+    mean_absolute_error = mean_absolute_error.set_index('HAT')
+    averaged_mean_absolute_error = np.mean(mean_absolute_error, axis=0) # averaged over all the HATs  
+    return mean_absolute_error, averaged_mean_absolute_error
+
+
+# function to plot/table the mean_normalised_mae against the epsilon vector 
+
+def output_handler_mae(mean_absolute_error, averaged_mean_absolute_error):
+    mean_absolute_error = mean_absolute_error.to_json(orient='index')
+    with open('pipelineOutput/EpsVSMAEperHAT.json', 'w') as outfile:
+        outfile.write(mean_absolute_error)
+    
+    averaged_mean_absolute_error = averaged_mean_absolute_error.to_json(orient='index')
+    with open('pipelineOutput/EpsVSMAE.json', 'w') as outfile:
+        outfile.write(averaged_mean_absolute_error)
+    return 
+
+def plot_normalised_mae(mean_normalised_mae, config):
+    plt.close()
+    chosen_epsilon = config['differential_privacy']['dp_epsilon']
+    epsilonVector = np.arange(0.1,5,chosen_epsilon)
+    # epsilonVector = np.logspace(-5, 0, 1000)
+    plt.plot(epsilonVector, mean_normalised_mae)
+    plt.plot(chosen_epsilon, mean_normalised_mae[int((chosen_epsilon-0.1)/chosen_epsilon)], 'x', markersize=5, markerfacecolor='red')
+    plt.xlabel('Epsilon')
+    plt.ylabel('Normalised Mean Absolute Error')
+    plt.title('Normalised Mean Absolute Error vs Epsilon')
+    plt.grid(True)
+    # plt.show()
+    
+    # create a json file with epsilonVector and mean_normalised_mae
+    # output = []
+    # for e, m in zip(epsilonVector, mean_normalised_mae):
+    #     output.append({'epsilon': e, 'mean_normalised_mae': m})
+    # with open('pipelineOutput/epsilonVector_mean_normalised_mae.json', 'w') as f:
+    #     json.dump(output, f)
+    return
+
+###########################
+# function to handle order of operations and select config
+def oop_handler(config):
+    operations = []
+    dataType = config["data_type"]
+    if dataType == "medical":
+        config = config["medical"]
+    elif dataType == "spatioTemporal":
+        config = config["spatioTemporal"]
+    if "suppress" in config:
+        operations.append("suppress")
+    if "pseudonymize" in config:
+        operations.append("pseudonymize")
+    if "generalize" in config:
+        operations.append("k_anonymize")
+    if "differential_privacy" in config:
+        operations.append("dp")
+    return operations
+
+# TODO: Rewrite output_handler
+def output_handler(data):
+    data['timeSlot'] = data['HAT'].apply(lambda x: x[:2])
+    formatted_data = {}
+    for idx, row in data.iterrows():
+        hat_string = row['HAT']
+        hat_time = hat_string[:2]
+        hat_id = hat_string[2:]
+        if hat_id not in formatted_data:
+            formatted_data[hat_id] = {}
+        if hat_time not in formatted_data[hat_id]:
+            formatted_data[hat_id][hat_time] = []
+        formatted_data[hat_id][hat_time].append({
+            'HAT': hat_id,
+            'query_output': row['query_output'],
+            'noisy_output': row['noisy_output']
+        })
+    with open("pipelineOutput/testOutput_formatUpdated.json", "w") as f:
+        json.dump(output_handler(data), f, indent=4)
+    data.to_json("pipelineOutput/testOutput_formatTest.json")
+    return formatted_data
+
+
+def normalized_mean_absolute_error(dataframeAccumulate, bVector):
     
     true_values = dataframeAccumulate["query_output"]
     normalised_mae = []
@@ -89,70 +171,6 @@ def mean_absolute_error(dataframeAccumulate, bVector):
     print(mean_normalised_mae, len(mean_normalised_mae))
 
     return mean_normalised_mae
-
-# function to plot/table the mean_normalised_mae against the epsilon vector 
-def plot_normalised_mae(mean_normalised_mae, config):
-    plt.close()
-    chosen_epsilon = config['differential_privacy']['dp_epsilon']
-    epsilonVector = np.arange(0.1,5,chosen_epsilon)
-    # epsilonVector = np.logspace(-5, 0, 1000)
-    plt.plot(epsilonVector, mean_normalised_mae)
-    plt.plot(chosen_epsilon, mean_normalised_mae[int((chosen_epsilon-0.1)/chosen_epsilon)], 'x', markersize=5, markerfacecolor='red')
-    plt.xlabel('Epsilon')
-    plt.ylabel('Normalised Mean Absolute Error')
-    plt.title('Normalised Mean Absolute Error vs Epsilon')
-    plt.grid(True)
-    # plt.show()
-    
-    # create a json file with epsilonVector and mean_normalised_mae
-    # output = []
-    # for e, m in zip(epsilonVector, mean_normalised_mae):
-    #     output.append({'epsilon': e, 'mean_normalised_mae': m})
-    # with open('pipelineOutput/epsilonVector_mean_normalised_mae.json', 'w') as f:
-    #     json.dump(output, f)
-    return
-
-
-###########################
-# function to handle order of operations and select config
-def oop_handler(config):
-    operations = []
-    dataType = config["data_type"]
-    if dataType == "medical":
-        config = config["medical"]
-    elif dataType == "spatioTemporal":
-        config = config["spatioTemporal"]
-    if "suppress" in config:
-        operations.append("suppress")
-    if "pseudonymize" in config:
-        operations.append("pseudonymize")
-    if "generalize" in config:
-        operations.append("k_anonymize")
-    if "differential_privacy" in config:
-        operations.append("dp")
-    return operations
-
-# TODO: Rewrite output_handler
-def output_handler(data):
-    data['timeSlot'] = data['HAT'].apply(lambda x: x[:2])
-    formatted_data = {}
-    for idx, row in data.iterrows():
-        hat_string = row['HAT']
-        hat_time = hat_string[:2]
-        hat_id = hat_string[2:]
-        if hat_id not in formatted_data:
-            formatted_data[hat_id] = {}
-        if hat_time not in formatted_data[hat_id]:
-            formatted_data[hat_id][hat_time] = []
-        formatted_data[hat_id][hat_time].append({
-            'HAT': hat_id,
-            'query_output': row['query_output'],
-            'noisy_output': row['noisy_output']
-        })
-    with open("pipelineOutput/testOutput_formatted.json", "w") as f:
-        json.dump(output_handler(data), f, indent=4)
-    data.to_json("pipelineOutput/testOutput_formatTest.json")
-    return formatted_data
 
 
 
