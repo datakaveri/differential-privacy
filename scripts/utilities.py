@@ -4,7 +4,12 @@ import numpy as np
 import json
 import hashlib
 import matplotlib.pyplot as plt
+import logging
 ###########################
+
+# select logging level
+logging.basicConfig(level = logging.INFO)
+
 # function definitions
 
 # read config
@@ -49,23 +54,44 @@ def pseudonymize(dataframe, config):
 
 def mean_absolute_error(bVector):
     mean_absolute_error = bVector
-    mean_absolute_error = mean_absolute_error.set_index('HAT')
-    averaged_mean_absolute_error = np.mean(mean_absolute_error, axis=0) # averaged over all the HATs  
-    return mean_absolute_error, averaged_mean_absolute_error
+    return mean_absolute_error
+
+def post_processing(data, config):
+    dpConfig = config["differential_privacy"]
+    if dpConfig['dp_query'] == 'mean':
+        data['noisy_output'] = data['noisy_output'].clip(0)
+    elif dpConfig['dp_query'] == 'count':
+        data['noisy_output'] = data['noisy_output'].round()
+    return data
 
 
-# function to plot/table the mean_normalised_mae against the epsilon vector 
+def output_handler_mae(mean_absolute_error, config):
+    dpConfig = config["differential_privacy"]
+    if dpConfig['dp_query'] == 'mean':
+        averaged_mean_absolute_error = np.mean(mean_absolute_error, axis=0) # averaged over all the HATs  
+        averaged_mean_absolute_error = averaged_mean_absolute_error.to_json(orient='index')
+        mean_absolute_error = mean_absolute_error.set_index('HAT')
+        mean_absolute_error = mean_absolute_error.to_json(orient='index')
+        file_name = 'pipelineOutput/EpsVSMAEperHAT'
+        with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
+            outfile.write(mean_absolute_error)
+        logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+        file_name = 'pipelineOutput/EpsVSMAE'
+        with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
+            outfile.write(averaged_mean_absolute_error) 
+        logging.info('%s query averaged error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
 
-def output_handler_mae(mean_absolute_error, averaged_mean_absolute_error):
-    mean_absolute_error = mean_absolute_error.to_json(orient='index')
-    with open('pipelineOutput/EpsVSMAEperHAT.json', 'w') as outfile:
-        outfile.write(mean_absolute_error)
-    
-    averaged_mean_absolute_error = averaged_mean_absolute_error.to_json(orient='index')
-    with open('pipelineOutput/EpsVSMAE.json', 'w') as outfile:
-        outfile.write(averaged_mean_absolute_error)
+    elif dpConfig['dp_query'] == 'count':
+        # mean_absolute_error = mean_absolute_error.squeeze(axis=0)
+        mean_absolute_error = mean_absolute_error[0]
+        mean_absolute_error = mean_absolute_error.to_json(orient='index')
+        file_name = 'pipelineOutput/EpsVSMAE'
+        with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
+            outfile.write(mean_absolute_error)
+        logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return 
 
+# function to plot/table the mean_normalised_mae against the epsilon vector 
 def plot_normalised_mae(mean_normalised_mae, config):
     plt.close()
     chosen_epsilon = config['differential_privacy']['dp_epsilon']
@@ -107,30 +133,22 @@ def oop_handler(config):
     return operations
 
 # TODO: Rewrite output_handler
-def output_handler(data):
-    data['timeSlot'] = data['HAT'].apply(lambda x: x[:2])
-    formatted_data = {}
-    for idx, row in data.iterrows():
-        hat_string = row['HAT']
-        hat_time = hat_string[:2]
-        hat_id = hat_string[2:]
-        if hat_id not in formatted_data:
-            formatted_data[hat_id] = {}
-        if hat_time not in formatted_data[hat_id]:
-            formatted_data[hat_id][hat_time] = []
-        formatted_data[hat_id][hat_time].append({
-            'HAT': hat_id,
-            'query_output': row['query_output'],
-            'noisy_output': row['noisy_output']
-        })
-    with open("pipelineOutput/testOutput_formatUpdated.json", "w") as f:
-        json.dump(output_handler(data), f, indent=4)
-    data.to_json("pipelineOutput/testOutput_formatTest.json")
-    return formatted_data
+def output_handler_spatioTemp_data(data, config):
+    dpConfig = config['differential_privacy']
+    data = data[['HAT', 'query_output','noisy_output']]
+    data = data.set_index('HAT')
+    data = data.to_json(orient='index')
+    file_name = 'pipelineOutput/noisyQueryOutput'
+    with open(f"{file_name}_{dpConfig['dp_query']}.json", "w") as outfile:
+        outfile.write(data)
+    logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+    return data
 
 
+#################################################################
+# DEPRECATED
 def normalized_mean_absolute_error(dataframeAccumulate, bVector):
-    
+
     true_values = dataframeAccumulate["query_output"]
     normalised_mae = []
     mean_normalised_mae = []

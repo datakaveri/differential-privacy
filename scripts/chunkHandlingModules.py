@@ -5,19 +5,22 @@ import numpy as np
 import scripts.utilities as utils
 import scripts.spatioTemporalModules as stmod
 import scripts.medicalModules as medmod
+import logging
 
+# select logging level
+logging.basicConfig(level = logging.INFO)
 
 # function to handle chunked dataframe for pseudonymization and suppression
 def chunkHandlingCommon(configDict, operations, fileList):
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
-    print("Suppressing and Pseudonymizing selected columns")
+    logging.info("Suppressing and Pseudonymizing selected columns")
     for file in fileList:
         lengthList.append(file)
         with open(file, "r") as dfile:
             dataDict = json.load(dfile)
             dataframeChunk = pd.json_normalize(dataDict)
-            print(
+            logging.info(
                 "The loaded file is: "
                 + file
                 + " with shape "
@@ -30,12 +33,12 @@ def chunkHandlingCommon(configDict, operations, fileList):
         # supressing columns
         if "suppress" in operations:
             dataframeChunk = utils.suppress(dataframeChunk, configDict)
-            print("Performing Attribute Suppression for chunk ", len(lengthList))
+            logging.info("Performing Attribute Suppression for chunk ", len(lengthList))
         
         # pseudonymizing columns
         if "pseudonymize" in operations:
             dataframeChunk = utils.pseudonymize(dataframeChunk, configDict)
-            print("Performing Attribute Pseudonymization for chunk ", len(lengthList))
+            logging.info("Performing Attribute Pseudonymization for chunk ", len(lengthList))
 
         dataframeAccumulate = pd.concat(
             [dataframeAccumulate, dataframeChunk], ignore_index=True
@@ -46,7 +49,7 @@ def chunkHandlingCommon(configDict, operations, fileList):
 # TODO: Implement fixed query choices only
 # function to accumulate chunks with appropriate query building for DP
 def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
-    print("Accumulating chunks for building DP Query")
+    logging.info("Accumulating chunks for building DP Query")
     dpConfig = spatioTemporalConfigDict
     groupby_attributes = dpConfig["dp_aggregate_attribute"]
 
@@ -79,10 +82,10 @@ def queryBuilderSpatioTemporal(dfAccumulateCombined, dpConfig):
     elif dpConfig["dp_query"] == "count":
         # count of license plates per HAT per Date for which the max speed value is greater than the user defined threshold value
         dfAccumulateCombined = dfAccumulateCombined.groupby(['HAT', 'Date']).agg(
-                                                        count_of_license_plates=('max', lambda x: (x > dpConfig['dp_query_value_threshold']).sum())
+                                                        count_of_license_plates=('output_attribute_max', lambda x: (x > dpConfig['dp_query_value_threshold']).sum())
                                                         ).reset_index()
-        # print("dfAC after threshold enforced", dfAccumulateCombined)
-        # print(len(dfAccumulateCombined))
+        # logging.debug("dfAC after threshold enforced"+ str(dfAccumulateCombined))
+        # logging.debug(str(len(dfAccumulateCombined)))
 
         # taking the mean across all days of the count of license plates per 'HAT' combination where the maximum value is greater than a threshold
         dfAccumulateCombined = dfAccumulateCombined.groupby(['HAT']).agg(
@@ -90,8 +93,8 @@ def queryBuilderSpatioTemporal(dfAccumulateCombined, dpConfig):
                                                         ).reset_index()
         dfAccumulateCombined.rename(columns={'mean_of_counts':'query_output'}, inplace = True)
 
-        # print("dfAC mean across all days", dfAccumulateCombined)
-        # print("The length of the accumulate dataframe is: ", len(dfAccumulateCombined))
+        # logging.debug("dfAC mean across all days", dfAccumulateCombined)
+        # logging.debug("The length of the accumulate dataframe is: "+ str(len(dfAccumulateCombined)))
     return dfAccumulateCombined
 
 # function to perform s/t generalization, filtering, query building for chunks
@@ -101,14 +104,14 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
     dataframeAccumulate = pd.DataFrame()
     startDay, endDay = [], []
     dpConfig = spatioTemporalConfigDict["differential_privacy"]
-    print("Performing spatio-temporal generalization and filtering")
+    logging.info("Performing spatio-temporal generalization and filtering")
     for file in fileList:
         lengthList.append(file)
-        print("The chunk number is: ", (len(lengthList)))
+        logging.info("The chunk number is: "+ str(len(lengthList)))
         with open(file, "r") as dfile:
             dataDict = json.load(dfile)
             dataframeChunk = pd.json_normalize(dataDict)
-            print(
+            logging.info(
                 "The loaded file is: "
                 + file
                 + " with shape "
@@ -179,13 +182,13 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
     # print(dataframeAccumulate.info())
     # print(dataframeCountAccumulate)
 
-    print("End of Accumulation")
+    logging.info("End of Accumulation")
     return dfAccumulateCombined, timeRange
 
 # function to accumulate chunks with appropriate query building for DP
 def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
     dpConfig = medicalConfigDict["differential_privacy"]
-    print("Accumulating chunks for building DP Query")
+    logging.info("Accumulating chunks for building DP Query")
     dataframeAccumulator = (
         dataframeChunk.groupby([dpConfig["dp_aggregate_attribute"]])
         .agg(query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"]),
@@ -217,16 +220,16 @@ def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
     # dataframeAccumulate = pd.DataFrame()
     # dataframeAccumulateNew = pd.DataFrame()
     kAnonAccumulate = pd.Series()
-    print(medicalConfigDict)
+    # print(medicalConfigDict)
     # dpConfig = medicalConfigDict["differential_privacy"]
     # kConfig = medicalConfigDict["k_anonymize"]
     for file in fileList:
         lengthList.append(file)
-        print("The chunk number is: ", (len(lengthList)))
+        logging.info("The chunk number is: "+ str(len(lengthList)))
         with open(file, "r") as dfile:
             dataDict = json.load(dfile)
             dataframeChunk = pd.json_normalize(dataDict)
-            print(
+            logging.info(
                 "The loaded file is: "
                 + file
                 + " with shape "
@@ -251,15 +254,16 @@ def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
 def chunkHandlingMedicalDP(medicalConfigDict, fileList):
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
-    print(medicalConfigDict)
+    # print(medicalConfigDict)
     dpConfig = medicalConfigDict["differential_privacy"]
     for file in fileList:
         lengthList.append(file)
-        print("The chunk number is: ", (len(lengthList)))
+        logging.info("#########################################")
+        logging.info("The chunk number is: "+ str(len(lengthList)))
         with open(file, "r") as dfile:
             dataDict = json.load(dfile)
             dataframeChunk = pd.json_normalize(dataDict)
-            print(
+            logging.info(
                 "The loaded file is: "
                 + file
                 + " with shape "
@@ -275,7 +279,7 @@ def chunkHandlingMedicalDP(medicalConfigDict, fileList):
             [dataframeAccumulate, dataframeAccumulator], ignore_index=True
         )
         # print(dataframeAccumulate)
-        print("The length of the accumulate dataframe is: ", len(dataframeAccumulate))
+        logging.info("The length of the accumulate dataframe is: ", len(dataframeAccumulate))
 
     # concat just adds on rows, so grouping again using the same parameters and computing the query again
     if dpConfig["dp_query"] == "mean":
@@ -292,6 +296,6 @@ def chunkHandlingMedicalDP(medicalConfigDict, fileList):
             .agg(query_output=("query_output", "sum"))
             .reset_index()
         )
-    print(dpAccumulate)
-    print(dpAccumulate.info())
+    # print(dpAccumulate)
+    # print(dpAccumulate.info())
     return dpAccumulate

@@ -52,19 +52,23 @@ def dataset_handler(config):
 # checking the dataset order of operations selected
 operations = utils.oop_handler(config)
 dataset, config, fileList = dataset_handler(config)
-print(dataset, operations)
+# print(dataset, operations)
 
 # selecting appropriate pipeline
 if dataset == "medical":
     data = medpipe.medicalPipeline(config, operations, fileList)
+
 if dataset == "spatioTemporal":
+
     if "dp" in operations:
-        data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) # type: ignore
-        mean_absolute_error, averaged_mean_absolute_error = utils.mean_absolute_error(bVector)
+        data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
+        data = utils.post_processing(data, config)
+        mean_absolute_error = utils.mean_absolute_error(bVector)
+        formatted_error = utils.output_handler_mae(mean_absolute_error, config)
+        formatted_data = utils.output_handler_spatioTemp_data(data, config)
+
     elif ("suppress" or "pseudonymize") in operations and ("dp") not in operations:
         data = stpipe.spatioTemporalPipeline(config, operations, fileList)
-print(data)
+# print(data)
 
 # TODO: Add output format handling (json dumps)
-formatted_error = utils.output_handler_mae(mean_absolute_error, averaged_mean_absolute_error)
-formatted_data = utils.output_handler(data)

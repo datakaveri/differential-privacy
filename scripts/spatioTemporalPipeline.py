@@ -1,21 +1,26 @@
 import scripts.spatioTemporalModules as stmod
 import scripts.chunkHandlingModules as chmod
 import scripts.utilities as utils
+import logging
+
+# select logging level
+logging.basicConfig(level = logging.INFO)
+
 
 def spatioTemporalPipeline(config, operations, fileList):
 
     if "suppress" or "pseudonymize" in operations:
-        print("Performing common chunk accumulation functions")
+        logging.info("Performing common chunk accumulation functions")
         dataframeAccumulate = chmod.chunkHandlingCommon(config, 
                                                         operations, 
                                                     fileList)
 
     if "dp" in operations:
-        print("Performing Chunk Accumulation for DP")
+        logging.info("Performing Chunk Accumulation for DP")
         dataframeAccumulateDP, timeRange = chmod.chunkHandlingSpatioTemporal(config, 
                                                                 fileList)
 
-        print("Performing Differential Privacy")
+        logging.info("Performing Differential Privacy")
         privateAggregateDataframe, bVector = stmod.spatioTemporalDifferentialPrivacy(dataframeAccumulateDP,
                                                                         config, 
                                                                         timeRange)
