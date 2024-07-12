@@ -32,28 +32,9 @@ spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
             'data/spatioTemporalChunks/split_file_4.json',
 ]
 
-# necessary file reads
-config_file_name = "testConfigs/spatioDP.json"
+config_file_name = "testConfigs/spatioS&P.json"
 config = utils.read_config(config_file_name)
 
-# prompt user to select query
-print("Select query:")
-print("1. Count")
-print("2. Mean")
-
-choice = input("Enter choice (1 or 2): ")
-
-choice = choice.strip()
-while choice not in ['1', '2']:
-    print("Invalid choice. Please enter '1' or '2':")
-    choice = input("Enter choice (1 or 2): ")
-    choice = choice.strip()
-
-if choice == '1':
-    config["spatioTemporal"]["differential_privacy"]["dp_query"] = "count"
-elif choice == '2':
-    config["spatioTemporal"]["differential_privacy"]["dp_query"] = "mean"
-# data = utils.read_data(config["data_file"])
 
 # function to handle dataset choice
 def dataset_handler(config):
@@ -79,6 +60,8 @@ if dataset == "medical":
 if dataset == "spatioTemporal":
 
     if "dp" in operations:
+        # Prompt user for query
+        config = utils.prompt_user_for_query(config)   
         data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
         data = utils.post_processing(data, config)
         mean_absolute_error = utils.mean_absolute_error(bVector)

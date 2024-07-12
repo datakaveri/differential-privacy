@@ -33,12 +33,12 @@ def chunkHandlingCommon(configDict, operations, fileList):
         # supressing columns
         if "suppress" in operations:
             dataframeChunk = utils.suppress(dataframeChunk, configDict)
-            logging.info("Performing Attribute Suppression for chunk ", len(lengthList))
+            logging.info("Performing Attribute Suppression for chunk " + str(len(lengthList)))
         
         # pseudonymizing columns
         if "pseudonymize" in operations:
             dataframeChunk = utils.pseudonymize(dataframeChunk, configDict)
-            logging.info("Performing Attribute Pseudonymization for chunk ", len(lengthList))
+            logging.info("Performing Attribute Pseudonymization for chunk " + str(len(lengthList)))
 
         dataframeAccumulate = pd.concat(
             [dataframeAccumulate, dataframeChunk], ignore_index=True
@@ -46,7 +46,6 @@ def chunkHandlingCommon(configDict, operations, fileList):
     # print(dataframeAccumulate.info())
     return dataframeAccumulate
 
-# TODO: Implement fixed query choices only
 # function to accumulate chunks with appropriate query building for DP
 def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
     logging.info("Accumulating chunks for building DP Query")

@@ -25,6 +25,30 @@ def read_data(dataFile):
         dataframe = pd.json_normalize(data)
     return dataframe
 
+def prompt_user_for_query(config):
+    """
+    Prompt user to select query (count or mean) and update config accordingly.
+    """
+    print("Select query:")
+    print("1. Count")
+    print("2. Mean")
+
+    choice = input("Enter choice (1 or 2): ")
+
+    choice = choice.strip()
+    while choice not in ['1', '2']:
+        print("Invalid choice. Please enter '1' or '2':")
+        choice = input("Enter choice (1 or 2): ")
+        choice = choice.strip()
+
+
+    if choice == '1':
+        config["spatioTemporal"]["differential_privacy"]["dp_query"] = "count"
+    elif choice == '2':
+        config["spatioTemporal"]["differential_privacy"]["dp_query"] = "mean"
+
+    return config
+
 # drop duplicates
 def deduplicate(dataframe):
     # df.drop_duplicates does not work on dataframes containing lists
@@ -58,8 +82,8 @@ def mean_absolute_error(bVector):
 
 def post_processing(data, config):
     dpConfig = config["differential_privacy"]
-    if dpConfig['dp_query'] == 'mean':
-        data['noisy_output'] = data['noisy_output'].clip(0)
+    # if dpConfig['dp_query'] == 'mean':
+    data['noisy_output'] = data['noisy_output'].clip(0)
     # elif dpConfig['dp_query'] == 'count':
     #     data['noisy_output'] = data['noisy_output'].round()
     return data
