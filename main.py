@@ -34,7 +34,25 @@ spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
 
 # necessary file reads
 config_file_name = "testConfigs/spatioDP.json"
-config = utils.read_config(config_file_name) 
+config = utils.read_config(config_file_name)
+
+# prompt user to select query
+print("Select query:")
+print("1. Count")
+print("2. Mean")
+
+choice = input("Enter choice (1 or 2): ")
+
+choice = choice.strip()
+while choice not in ['1', '2']:
+    print("Invalid choice. Please enter '1' or '2':")
+    choice = input("Enter choice (1 or 2): ")
+    choice = choice.strip()
+
+if choice == '1':
+    config["spatioTemporal"]["differential_privacy"]["dp_query"] = "count"
+elif choice == '2':
+    config["spatioTemporal"]["differential_privacy"]["dp_query"] = "mean"
 # data = utils.read_data(config["data_file"])
 
 # function to handle dataset choice

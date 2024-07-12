@@ -60,8 +60,8 @@ def post_processing(data, config):
     dpConfig = config["differential_privacy"]
     if dpConfig['dp_query'] == 'mean':
         data['noisy_output'] = data['noisy_output'].clip(0)
-    elif dpConfig['dp_query'] == 'count':
-        data['noisy_output'] = data['noisy_output'].round()
+    # elif dpConfig['dp_query'] == 'count':
+    #     data['noisy_output'] = data['noisy_output'].round()
     return data
 
 
@@ -113,7 +113,17 @@ def plot_normalised_mae(mean_normalised_mae, config):
     #     json.dump(output, f)
     return
 
-###########################
+def output_handler_spatioTemp_data(data, config):
+    dpConfig = config['differential_privacy']
+    data = data[['HAT', 'query_output','noisy_output']]
+    data = data.set_index('HAT')
+    data = data.to_json(orient='index')
+    file_name = 'pipelineOutput/noisyQueryOutput'
+    with open(f"{file_name}_{dpConfig['dp_query']}.json", "w") as outfile:
+        outfile.write(data)
+    logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+    return data
+
 # function to handle order of operations and select config
 def oop_handler(config):
     operations = []
@@ -131,19 +141,6 @@ def oop_handler(config):
     if "differential_privacy" in config:
         operations.append("dp")
     return operations
-
-# TODO: Rewrite output_handler
-def output_handler_spatioTemp_data(data, config):
-    dpConfig = config['differential_privacy']
-    data = data[['HAT', 'query_output','noisy_output']]
-    data = data.set_index('HAT')
-    data = data.to_json(orient='index')
-    file_name = 'pipelineOutput/noisyQueryOutput'
-    with open(f"{file_name}_{dpConfig['dp_query']}.json", "w") as outfile:
-        outfile.write(data)
-    logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
-    return data
-
 
 #################################################################
 # DEPRECATED
