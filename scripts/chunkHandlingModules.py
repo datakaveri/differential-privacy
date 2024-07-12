@@ -12,6 +12,36 @@ logging.basicConfig(level = logging.INFO)
 
 # function to handle chunked dataframe for pseudonymization and suppression
 def chunkHandlingCommon(configDict, operations, fileList):
+    """
+    Perform common operations on a list of JSON files and return a single DataFrame.
+
+    Args:
+        configDict (dict): A dictionary containing configuration parameters.
+        operations (list): A list of strings specifying the operations to perform.
+        fileList (list): A list of file paths to the JSON files.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the accumulated data from all the JSON files.
+
+    Raises:
+        None
+
+    Description:
+        This function reads a list of JSON files, performs common operations on each chunk of data, and accumulates the results into a single DataFrame. 
+
+        The operations performed include:
+        - Suppressing and pseudonymizing selected columns.
+
+        The function iterates over each file in the `fileList`, loads the JSON data into a DataFrame, and performs the following operations:
+        - Dropping duplicates.
+        - Suppressing columns if "suppress" is present in the `operations` list.
+        - Pseudonymizing columns if "pseudonymize" is present in the `operations` list.
+
+        The resulting DataFrame is accumulated into the `dataframeAccumulate` DataFrame using `pd.concat`.
+
+        The final DataFrame is returned.
+
+    """
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
     logging.info("Suppressing and Pseudonymizing selected columns")
@@ -46,8 +76,20 @@ def chunkHandlingCommon(configDict, operations, fileList):
     # print(dataframeAccumulate.info())
     return dataframeAccumulate
 
-# function to accumulate chunks with appropriate query building for DP
 def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
+    """
+    Accumulates chunks for building a DP query.
+
+    Args:
+        dataframeChunk (pandas.DataFrame): The chunked dataframe to be accumulated.
+        spatioTemporalConfigDict (dict): A dictionary containing the configuration for spatio-temporal generalization and filtering.
+
+    Returns:
+        pandas.DataFrame: The accumulated dataframe for building the DP query.
+
+    This function groups the dataframeChunk by the attributes specified in the spatioTemporalConfigDict and performs aggregations on the specified output attribute. The resulting dataframe contains the sum, count, and maximum values of the output attribute for each group. The function logs a message indicating the start of the accumulation process.
+
+    """
     logging.info("Accumulating chunks for building DP Query")
     dpConfig = spatioTemporalConfigDict
     groupby_attributes = dpConfig["dp_aggregate_attribute"]
@@ -61,6 +103,36 @@ def chunkAccumulatorSpatioTemporal(dataframeChunk, spatioTemporalConfigDict):
     return dataframeAccumulator
 
 def queryBuilderSpatioTemporal(dfAccumulateCombined, dpConfig):
+    """
+    Builds a query based on the given DataFrame `dfAccumulateCombined` and `dpConfig` for spatial-temporal data.
+
+    Parameters:
+        dfAccumulateCombined (pandas.DataFrame): The DataFrame containing the accumulated spatial-temporal data.
+        dpConfig (dict): The configuration dictionary for the differential privacy query.
+
+    Returns:
+        pandas.DataFrame: The DataFrame with the query results.
+
+    Description:
+        This function builds a query based on the given DataFrame `dfAccumulateCombined` and `dpConfig` for spatial-temporal data.
+        The query is determined by the value of `dpConfig["dp_query"]`.
+
+        If `dpConfig["dp_query"]` is "mean", the function performs the following steps:
+        1. Group the DataFrame by ['HAT', 'license_plate'] and calculate the sum of counts per license plate.
+        2. Group the DataFrame by 'HAT' and calculate the maximum of the sum of counts per license plate.
+        3. Group the DataFrame by 'HAT' and calculate the sum of counts for all license plates and Dates.
+        4. Calculate the sum of sums for all license plates and Dates.
+        5. Calculate the mean of the sum of sums divided by the sum of counts.
+        6. Add the maximum of sum of counts per license plate as a new column.
+
+        If `dpConfig["dp_query"]` is "count", the function performs the following steps:
+        1. Group the DataFrame by ['HAT', 'Date'] and calculate the count of license plates where the max speed value is greater than the user defined threshold value.
+        2. Group the DataFrame by 'HAT' and calculate the mean of the count of license plate max values across all days.
+        3. Rename the 'mean_of_counts' column to 'query_output'.
+
+        The resulting DataFrame contains the query results.
+
+    """
     if dpConfig["dp_query"] == "mean":
             dfSensitivity = dfAccumulateCombined.groupby(['HAT', 'license_plate']).agg(
                                                 sum_of_counts_per_lp=('output_attribute_count', 'sum') #sum of counts per license plate
@@ -96,8 +168,18 @@ def queryBuilderSpatioTemporal(dfAccumulateCombined, dpConfig):
         # logging.debug("The length of the accumulate dataframe is: "+ str(len(dfAccumulateCombined)))
     return dfAccumulateCombined
 
-# function to perform s/t generalization, filtering, query building for chunks
 def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
+    """
+    Handles the spatio-temporal generalization and filtering of chunks of data.
+
+    Args:
+        spatioTemporalConfigDict (dict): A dictionary containing the configuration for spatio-temporal generalization and filtering.
+        fileList (list): A list of file paths representing the chunks of data to be processed.
+
+    Returns:
+        tuple: A tuple containing the combined and filtered dataframe of accumulated chunks and the time range of the data.
+
+    """
     # assume that the appropriate config has been selected already based on UI input
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
@@ -278,7 +360,7 @@ def chunkHandlingMedicalDP(medicalConfigDict, fileList):
             [dataframeAccumulate, dataframeAccumulator], ignore_index=True
         )
         # print(dataframeAccumulate)
-        logging.info("The length of the accumulate dataframe is: ", len(dataframeAccumulate))
+        logging.info("The length of the accumulate dataframe is: " + str(len(dataframeAccumulate)))
 
     # concat just adds on rows, so grouping again using the same parameters and computing the query again
     if dpConfig["dp_query"] == "mean":
