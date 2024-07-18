@@ -1,4 +1,5 @@
 # import statements
+from calendar import c
 import pandas as pd
 import numpy as np
 import json
@@ -10,8 +11,37 @@ import logging
 # select logging level
 logging.basicConfig(level = logging.INFO)
 
-# function definitions
+# for testing
+medicalFileList = ["data/syntheticMedicalChunks/medical_data_split_file_0.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_1.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_2.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_3.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_4.json"
+                    ]
 
+# for testing
+
+# spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
+#             'data/spatioTemporalChunks/split_file_1.json',
+#             'data/spatioTemporalChunks/split_file_2.json',
+#             'data/spatioTemporalChunks/split_file_3.json',
+#             'data/spatioTemporalChunks/split_file_4.json',
+#             'data/spatioTemporalChunks/split_file_5.json',
+#             'data/spatioTemporalChunks/split_file_6.json',
+#             'data/spatioTemporalChunks/split_file_7.json',
+#             'data/spatioTemporalChunks/split_file_8.json',
+#             'data/spatioTemporalChunks/split_file_9.json'
+#             ]
+
+spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
+            'data/spatioTemporalChunks/split_file_1.json',
+            'data/spatioTemporalChunks/split_file_2.json',
+            'data/spatioTemporalChunks/split_file_3.json',
+            'data/spatioTemporalChunks/split_file_4.json',
+]
+
+# function definitions
+##################################
 # read config
 def read_config(configFile):
     with open(configFile, "r") as cfile:
@@ -25,29 +55,118 @@ def read_data(dataFile):
         dataframe = pd.json_normalize(data)
     return dataframe
 
-def prompt_user_for_query(config):
+def user_input_handler(config):
     """
-    Prompt user to select query (count or mean) and update config accordingly.
+    Prompt user to select dataset (medical or spatiotemporal) and processing options (suppression/pseudonymization, k-anonymization, or differential privacy) and update config accordingly.
     """
-    print("Select query:")
-    print("1. Count")
-    print("2. Mean")
+    print("Select dataset:")
+    print("1. Synthetic Medical Data")
+    print("2. Real-World SpatioTemporal ITMS Data")
 
-    choice = input("Enter choice (1 or 2): ")
+    dataset_choice = input("Enter choice (1 or 2): ")
 
-    choice = choice.strip()
-    while choice not in ['1', '2']:
+    dataset_choice = dataset_choice.strip()
+    while dataset_choice not in ['1', '2']:
         print("Invalid choice. Please enter '1' or '2':")
-        choice = input("Enter choice (1 or 2): ")
-        choice = choice.strip()
+        dataset_choice = input("Enter choice (1 or 2): ")
+        dataset_choice = dataset_choice.strip()
 
+    if dataset_choice == '1':
+        config = config["medical"] # for testing only
+        dataset = "medical"
+        fileList = medicalFileList
+        print("Select processing options:")
+        print("1. Suppression")
+        print("2. Pseudonymization")
+        print("3. K-anonymization")
+        print("4. Differential Privacy")
 
-    if choice == '1':
-        config["spatioTemporal"]["differential_privacy"]["dp_query"] = "count"
-    elif choice == '2':
-        config["spatioTemporal"]["differential_privacy"]["dp_query"] = "mean"
+        processing_choice = input("Enter choice (1, 2, 3 or 4): ")
 
-    return config
+        processing_choice = processing_choice.strip()
+        while processing_choice not in ['1', '2', '3', '4']:
+            print("Invalid choice. Please enter '1', '2', '3' or '4':")
+            processing_choice = input("Enter choice (1, 2, 3 or 4): ")
+            processing_choice = processing_choice.strip()
+
+        if processing_choice == '1':
+            config = config["suppress"]
+            config = {"suppress": config}
+            # print(config)
+        elif processing_choice == '2':
+            config = config["pseudonymize"]
+            config = {"pseudonymize": config}
+        elif processing_choice == '3':
+            config = config["k_anonymize"]
+            config = {"k_anonymize": config}
+            # print(config)
+        elif processing_choice == '4':
+            print("Select query:")
+            print("1. Count")
+            print("2. Mean")
+
+            query_choice = input("Enter choice (1 or 2): ")
+
+            query_choice = query_choice.strip()
+            while query_choice not in ['1', '2']:
+                print("Invalid choice. Please enter '1' or '2':")
+                query_choice = input("Enter choice (1 or 2): ")
+                query_choice = query_choice.strip()
+
+            if query_choice == '1':
+                config["differential_privacy"]["dp_query"] = "count"
+                config["differential_privacy"]["dp_output_attribute"] = "Test Result"
+                config["differential_privacy"]["dp_aggregate_attribute"] = "PIN Code"
+
+            elif query_choice == '2':
+                config["differential_privacy"]["dp_query"] = "mean"
+                config["differential_privacy"]["dp_output_attribute"] = "Time to Negative"
+                config["differential_privacy"]["dp_aggregate_attribute"] = "Gender"
+
+    elif dataset_choice == '2':
+        config = config["spatioTemporal"] # for testing only 
+        dataset = "spatioTemporal"
+        fileList = spatioTemporalFileList
+        print("Select processing options:")
+        print("1. Suppression")
+        print("2. Pseudonymization")
+        print("3. Differential Privacy")
+
+        processing_choice = input("Enter choice (1, 2 or 3): ")
+
+        processing_choice = processing_choice.strip()
+        while processing_choice not in ['1', '2', '3']:
+            print("Invalid choice. Please enter '1', '2', or '3':")
+            processing_choice = input("Enter choice (1, 2 or 3): ")
+            processing_choice = processing_choice.strip()
+
+        if processing_choice == '1':
+            config = config["suppress"]
+            config = {"suppress": config}
+        # print(config)
+        elif processing_choice == '2':
+            config = config["pseudonymize"]
+            config = {"pseudonymize": config}
+        elif processing_choice == '3':
+            print("Select query:")
+            print("1. Count")
+            print("2. Mean")
+
+            query_choice = input("Enter choice (1 or 2): ")
+
+            query_choice = query_choice.strip()
+            while query_choice not in ['1', '2']:
+                print("Invalid choice. Please enter '1' or '2':")
+                query_choice = input("Enter choice (1 or 2): ")
+                query_choice = query_choice.strip()
+
+            if query_choice == '1':
+                config["differential_privacy"]["dp_query"] = "count"
+
+            elif query_choice == '2':
+                config["differential_privacy"]["dp_query"] = "mean"
+
+    return config, dataset, fileList
 
 # drop duplicates
 def deduplicate(dataframe):
@@ -82,25 +201,38 @@ def mean_absolute_error(bVector):
 
 def post_processing(data, config):
     dpConfig = config["differential_privacy"]
-    # if dpConfig['dp_query'] == 'mean':
-    data['noisy_output'] = data['noisy_output'].clip(0)
-    # elif dpConfig['dp_query'] == 'count':
-    #     data['noisy_output'] = data['noisy_output'].round()
+    if dpConfig['dp_query'] == 'mean':
+        data['noisy_output'] = data['noisy_output'].clip(0)
+        data['noisy_output'] = data['noisy_output'].round(3)
+    elif dpConfig['dp_query'] == 'count':
+        data['noisy_output'] = data['noisy_output'].clip(0)
+        data['noisy_output'] = data['noisy_output'].round(1)
     return data
 
+# function to handle dataset choice
+def dataset_handler(config):
+    if config["data_type"] == "medical":
+        config = config["medical"] # for testing only
+        dataset = "medical"
+        fileList = medicalFileList
+    elif config["data_type"] == "spatioTemporal":
+        config = config["spatioTemporal"] # for testing only 
+        dataset = "spatioTemporal"
+        fileList = spatioTemporalFileList
+    return dataset, config, fileList
 
-def output_handler_mae(mean_absolute_error, config):
+def output_handler_spatioTemp_mae(mean_absolute_error, config):
     dpConfig = config["differential_privacy"]
     if dpConfig['dp_query'] == 'mean':
         averaged_mean_absolute_error = np.mean(mean_absolute_error, axis=0) # averaged over all the HATs  
         averaged_mean_absolute_error = averaged_mean_absolute_error.to_json(orient='index')
         mean_absolute_error = mean_absolute_error.set_index('HAT')
         mean_absolute_error = mean_absolute_error.to_json(orient='index')
-        file_name = 'pipelineOutput/EpsVSMAEperHAT'
+        file_name = 'pipelineOutput/spatioTemporal_EpsVSMAEperHAT'
         with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
             outfile.write(mean_absolute_error)
         logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
-        file_name = 'pipelineOutput/EpsVSMAE'
+        file_name = 'pipelineOutput/spatioTemporal_EpsVSMAE'
         with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
             outfile.write(averaged_mean_absolute_error) 
         logging.info('%s query averaged error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
@@ -115,52 +247,54 @@ def output_handler_mae(mean_absolute_error, config):
         logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return 
 
-# function to plot/table the mean_normalised_mae against the epsilon vector 
-def plot_normalised_mae(mean_normalised_mae, config):
-    plt.close()
-    chosen_epsilon = config['differential_privacy']['dp_epsilon']
-    epsilonVector = np.arange(0.1,5,chosen_epsilon)
-    # epsilonVector = np.logspace(-5, 0, 1000)
-    plt.plot(epsilonVector, mean_normalised_mae)
-    plt.plot(chosen_epsilon, mean_normalised_mae[int((chosen_epsilon-0.1)/chosen_epsilon)], 'x', markersize=5, markerfacecolor='red')
-    plt.xlabel('Epsilon')
-    plt.ylabel('Normalised Mean Absolute Error')
-    plt.title('Normalised Mean Absolute Error vs Epsilon')
-    plt.grid(True)
-    # plt.show()
-    
-    # create a json file with epsilonVector and mean_normalised_mae
-    # output = []
-    # for e, m in zip(epsilonVector, mean_normalised_mae):
-    #     output.append({'epsilon': e, 'mean_normalised_mae': m})
-    # with open('pipelineOutput/epsilonVector_mean_normalised_mae.json', 'w') as f:
-    #     json.dump(output, f)
+def output_handler_medical_mae(mean_absolute_error, config):
+    dpConfig = config["differential_privacy"]
+    if dpConfig["dp_query"] == 'count':
+        mean_absolute_error = mean_absolute_error[0]
+        mean_absolute_error = mean_absolute_error.to_json(orient='index')
+    elif dpConfig["dp_query"] == 'mean':
+        mean_absolute_error = mean_absolute_error.to_json(orient='index')
+    file_name = 'pipelineOutput/medical_EpsVSMAE'
+    with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
+        outfile.write(mean_absolute_error)
+    logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return
+
+def output_handler_medical_data(data, config):
+    dpConfig = config['differential_privacy']
+    if dpConfig['dp_query'] == 'count':
+        # data = pd.DataFrame(data)
+        aggregate_attribute = dpConfig['dp_aggregate_attribute']
+        data = data.set_index(aggregate_attribute)
+    elif dpConfig['dp_query'] == 'mean':
+        aggregate_attribute = dpConfig['dp_aggregate_attribute']
+        data = data.set_index(aggregate_attribute)
+    data = data.to_json(orient='index')
+    file_name = 'pipelineOutput/medical_noisyQueryOutput'
+    with open(f"{file_name}_{dpConfig['dp_query']}.json", "w") as outfile:
+        outfile.write(data)
+    logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+    return data
 
 def output_handler_spatioTemp_data(data, config):
     dpConfig = config['differential_privacy']
     data = data[['HAT', 'query_output','noisy_output']]
     data = data.set_index('HAT')
     data = data.to_json(orient='index')
-    file_name = 'pipelineOutput/noisyQueryOutput'
+    file_name = 'pipelineOutput/spatioTemporal_noisyQueryOutput'
     with open(f"{file_name}_{dpConfig['dp_query']}.json", "w") as outfile:
         outfile.write(data)
     logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return data
 
 # function to handle order of operations and select config
-def oop_handler(config):
+def oop_handler(config, dataset):
     operations = []
-    dataType = config["data_type"]
-    if dataType == "medical":
-        config = config["medical"]
-    elif dataType == "spatioTemporal":
-        config = config["spatioTemporal"]
     if "suppress" in config:
         operations.append("suppress")
     if "pseudonymize" in config:
         operations.append("pseudonymize")
-    if "generalize" in config:
+    if "k_anonymize" in config:
         operations.append("k_anonymize")
     if "differential_privacy" in config:
         operations.append("dp")
@@ -168,6 +302,7 @@ def oop_handler(config):
 
 #################################################################
 # DEPRECATED
+# function to compute the normalized mae
 def normalized_mean_absolute_error(dataframeAccumulate, bVector):
 
     true_values = dataframeAccumulate["query_output"]
@@ -211,5 +346,24 @@ def normalized_mean_absolute_error(dataframeAccumulate, bVector):
 
     return mean_normalised_mae
 
-
-
+# function to plot/table the mean_normalised_mae against the epsilon vector 
+def plot_normalised_mae(mean_normalised_mae, config):
+    plt.close()
+    chosen_epsilon = config['differential_privacy']['dp_epsilon']
+    epsilonVector = np.arange(0.1,5,chosen_epsilon)
+    # epsilonVector = np.logspace(-5, 0, 1000)
+    plt.plot(epsilonVector, mean_normalised_mae)
+    plt.plot(chosen_epsilon, mean_normalised_mae[int((chosen_epsilon-0.1)/chosen_epsilon)], 'x', markersize=5, markerfacecolor='red')
+    plt.xlabel('Epsilon')
+    plt.ylabel('Normalised Mean Absolute Error')
+    plt.title('Normalised Mean Absolute Error vs Epsilon')
+    plt.grid(True)
+    # plt.show()
+    
+    # create a json file with epsilonVector and mean_normalised_mae
+    # output = []
+    # for e, m in zip(epsilonVector, mean_normalised_mae):
+    #     output.append({'epsilon': e, 'mean_normalised_mae': m})
+    # with open('pipelineOutput/epsilonVector_mean_normalised_mae.json', 'w') as f:
+    #     json.dump(output, f)
+    return

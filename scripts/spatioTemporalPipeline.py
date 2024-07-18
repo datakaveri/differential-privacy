@@ -27,5 +27,7 @@ def spatioTemporalPipeline(config, operations, fileList):
     
     if "dp" in operations:
         return privateAggregateDataframe, bVector
-    if ("suppress" or "pseudonymize") in operations and ("dp") not in operations:
+    if ("suppress") in operations:
+        return dataframeAccumulate
+    if ("pseudonymize") in operations:
         return dataframeAccumulate

@@ -44,7 +44,7 @@ def chunkHandlingCommon(configDict, operations, fileList):
     """
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
-    logging.info("Suppressing and Pseudonymizing selected columns")
+    logging.info("Suppressing or Pseudonymizing selected columns")
     for file in fileList:
         lengthList.append(file)
         with open(file, "r") as dfile:
@@ -289,7 +289,7 @@ def chunkAccumulatorMedicalKAnon(dataframeChunk, medicalConfigDict):
 
     # counting no. of users in each bin
     chunkHistogram = (
-        dataframeChunk[medicalConfigDict["generalize"]]
+        dataframeChunk[medicalConfigDict["k_anonymize"]["generalize"]]
         .value_counts()
         .reindex(bins[:-1], fill_value=0)
     )
@@ -326,7 +326,7 @@ def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
     # reassigning column names
     kAnonAccumulate = pd.DataFrame(
         {
-            medicalConfigDict["generalize"]: kAnonAccumulate.index,
+            medicalConfigDict["k_anonymize"]["generalize"]: kAnonAccumulate.index,
             "Count": kAnonAccumulate.values,
         }
     )

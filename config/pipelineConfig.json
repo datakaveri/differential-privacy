@@ -1,12 +1,12 @@
 {
   "data_file": "../data/sampleHealthData_positivity.json",
-  "data_type": "spatioTemporal",
+  "data_type": "",
   "medical": {
     "suppress": ["Date of Birth", "Address", "Lab Results"],
     "pseudonymize": ["Name", "Patient ID"],
-    "generalize": "Age",
     "k_anonymize": {
-      "k": 500,
+      "generalize": "Age",
+      "k": 100,
       "min_bin_value": 0,
       "max_bin_value": 101
     },
@@ -44,9 +44,11 @@
       "end_time": 20
     },
     "differential_privacy": {
-      "dp_query": "count",
+      "dp_query": "mean",
       "dp_output_attribute": "speed",
       "dp_aggregate_attribute": ["HAT", "Date", "license_plate"],
+      "dp_query_value_threshold": 60,
+      "dp_epsilon": 1,
       "dp_epsilon_step": 0.1,
       "global_max_value": 65,
       "global_min_value": 0

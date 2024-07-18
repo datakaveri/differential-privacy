@@ -94,7 +94,7 @@ def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange
         bVector['HAT'] = dataframeAccumulate['HAT']
         
     elif dpConfig["dp_query"] == "count":
-        sensitivity = (1/timeRange)
+        sensitivity = 1
         bVector = np.zeros((1, len(epsilonVector)))
         bVector = sensitivity/epsilonVector
         bVector = pd.DataFrame(bVector, index=epsilonVector)
@@ -107,5 +107,4 @@ def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange
     # noise addition
     privateAggregateDataframe = dataframeAccumulate.copy(deep=True)
     privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
-    # print(privateAggregateDataframe)
     return privateAggregateDataframe, bVector

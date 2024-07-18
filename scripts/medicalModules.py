@@ -8,7 +8,7 @@ import hashlib
 ###########################
 # function to bin the ages
 def generalize(dataframe, config, bins):
-    attribute_to_generalize = config["generalize"]
+    attribute_to_generalize = config["k_anonymize"]["generalize"]
     dataframe["Age Bin"] = pd.cut(
         dataframe[attribute_to_generalize], bins, ordered=True
     )
@@ -92,6 +92,7 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
         # no epsilon vector is generated
         b = sensitivity/epsilon
         bVector = sensitivity/epsilonVector
+        bVector = pd.DataFrame(bVector, index=epsilonVector)
         noise = np.random.laplace(0,b,len(dataframeAccumulate))
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe[f"Noisy {output_attribute}"] = privateAggregateDataframe["query_output"] + noise
@@ -105,6 +106,7 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
         sensitivity = np.array(sensitivity)
         b = sensitivity/epsilon
         bVector = sensitivity/epsilonVector
+        bVector = pd.DataFrame(bVector, index=dataframeAccumulate[dpConfig["dp_aggregate_attribute"]], columns=epsilonVector)
         noise = [np.random.laplace(0, b, 1) for b in b]
         noise = np.array(noise).flatten()
         privateAggregateDataframe = dataframeAccumulate.copy()
