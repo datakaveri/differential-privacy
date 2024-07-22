@@ -268,14 +268,31 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
 
 # function to accumulate chunks with appropriate query building for DP
 def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
+    """
+    Accumulates chunks for building a DP query.
+
+    Args:
+        dataframeChunk (pandas.DataFrame): The chunked dataframe to be accumulated.
+        medicalConfigDict (dict): A dictionary containing the configuration for medical data processing.
+
+    Returns:
+        pandas.DataFrame: The accumulated dataframe for building the DP query.
+    """
     dpConfig = medicalConfigDict["differential_privacy"]
     logging.info("Accumulating chunks for building DP Query")
-    dataframeAccumulator = (
-        dataframeChunk.groupby([dpConfig["dp_aggregate_attribute"]])
-        .agg(query_output=(dpConfig["dp_output_attribute"], dpConfig["dp_query"]),
-             count=(dpConfig["dp_output_attribute"], "count"))
-        .reset_index()
-    )
+    if dpConfig["dp_query"] == "mean":
+        dataframeAccumulator = (
+            dataframeChunk.groupby([dpConfig["dp_aggregate_attribute"]])
+            .agg(sum=(dpConfig["dp_output_attribute"], "sum"),
+                count=(dpConfig["dp_output_attribute"], "count"))
+            .reset_index()
+        )
+    if dpConfig["dp_query"] == "count":
+        dataframeAccumulator = (
+            dataframeChunk.groupby([dpConfig["dp_aggregate_attribute"]])
+            .agg(count=(dpConfig["dp_output_attribute"], "count"))
+            .reset_index()
+        )
     return dataframeAccumulator
 
 # preprocessing to accumulate chunks for k-anon
@@ -333,6 +350,18 @@ def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
     return kAnonAccumulate
 
 def chunkHandlingMedicalDP(medicalConfigDict, fileList):
+    """
+    Accumulates chunks of medical data for differential privacy query building.
+
+    Args:
+        medicalConfigDict (dict): A dictionary containing the configuration for medical data processing.
+        fileList (list): A list of file paths to the chunks of medical data.
+
+    Returns:
+        pandas.DataFrame: The accumulated dataframe for building the DP query.
+
+    This function takes a list of file paths to chunks of medical data and accumulates them into a single dataframe for building a differential privacy query. It iterates over each file in the fileList, loads the data from the file, normalizes it into a dataframe, and accumulates it into the dataframeAccumulate. After accumulating all the chunks, it groups the dataframeAccumulate by the specified attribute and computes the query based on the dpConfig["dp_query"] parameter. If the query is "mean", it computes the mean of the sum and count for each group and stores it in the "query_output" column. If the query is "count", it computes the sum of the count for each group and stores it in the "query_output" column. The final dataframe is returned.
+    """
     lengthList = []
     dataframeAccumulate = pd.DataFrame()
     # print(medicalConfigDict)
@@ -359,6 +388,7 @@ def chunkHandlingMedicalDP(medicalConfigDict, fileList):
         dataframeAccumulate = pd.concat(
             [dataframeAccumulate, dataframeAccumulator], ignore_index=True
         )
+
         # print(dataframeAccumulate)
         logging.info("The length of the accumulate dataframe is: " + str(len(dataframeAccumulate)))
 
@@ -367,14 +397,15 @@ def chunkHandlingMedicalDP(medicalConfigDict, fileList):
         # print("test", dataframeAccumulate)
         dpAccumulate = (
             dataframeAccumulate.groupby([dpConfig["dp_aggregate_attribute"]])
-            .agg(query_output=("query_output", dpConfig["dp_query"]),
-                 count=("count", "sum"))
+            .agg(count=("count", "sum"), # sum of counts
+                 sum=("sum", "sum")) # sum of sums
             .reset_index()
         )
+        dpAccumulate["query_output"] = dpAccumulate["sum"] / dpAccumulate["count"]
     elif dpConfig["dp_query"] == "count":
         dpAccumulate = (
             dataframeAccumulate.groupby([dpConfig["dp_aggregate_attribute"]])
-            .agg(query_output=("query_output", "sum"))
+            .agg(query_output=("count", "sum"))
             .reset_index()
         )
     # print(dpAccumulate)

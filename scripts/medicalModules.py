@@ -1,8 +1,7 @@
 # import statements
 import pandas as pd
 import numpy as np
-import json
-import hashlib
+
 
 # function definitions
 ###########################
@@ -17,6 +16,16 @@ def generalize(dataframe, config, bins):
 # function to k-anonymize
 
 def k_anonymize(dataframe, config):
+    """
+    A function to perform k-anonymization on a given dataframe based on the configuration provided.
+
+    Parameters:
+    - dataframe: Pandas DataFrame containing the data to be k-anonymized.
+    - config: Dictionary containing the configuration settings for k-anonymization.
+
+    Returns:
+    - The final bin size after k-anonymization is applied.
+    """
     # start with each bin size 1
     kConfig = config["k_anonymize"]
     k = kConfig["k"]
@@ -80,7 +89,31 @@ def k_anonymize(dataframe, config):
                 r_count = mx_age
     return r_count
 
+def user_assignment_k_anonymize(optimal_bin_width, data, config):
+    bin_edges = np.arange(config["k_anonymize"]["min_bin_value"], config["k_anonymize"]["max_bin_value"]  + optimal_bin_width, optimal_bin_width)
+    data['Age Bin'] = pd.cut(data['Age'], bins=bin_edges, include_lowest=True)
+    return data
+
 def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
+    """
+    Applies differential privacy to a medical dataframe based on the given configuration.
+
+    Parameters:
+    - dataframeAccumulate (pandas.DataFrame): The dataframe containing the medical data.
+    - configFile (dict): The configuration file containing the differential privacy parameters.
+
+    Returns:
+    - privateAggregateDataframe (pandas.DataFrame): The dataframe with differential privacy applied.
+    - bVector (pandas.DataFrame): The dataframe containing the b values used for differential privacy.
+
+    This function applies differential privacy to a medical dataframe based on the given configuration. It takes in a dataframe containing the medical data and a configuration file containing the differential privacy parameters. The function then calculates the epsilon vector based on the given epsilon value in the configuration file. 
+
+    If the differential privacy query is "count", the function calculates the sensitivity as 1 and generates the b vector based on the epsilon vector. It then generates random noise using the Laplace distribution and adds it to the "query_output" column of the dataframe. The function drops the "query_output" column and returns the modified dataframe and the b vector.
+
+    If the differential privacy query is "mean", the function calculates the sensitivity for each category in the specified aggregate attribute column. It then generates the b vector based on the sensitivity and epsilon vector. It generates random noise using the Laplace distribution and adds it to the "query_output" column of the dataframe. The function drops the "count" and "query_output" columns and returns the modified dataframe and the b vector.
+
+    Note: The function assumes that the input dataframe contains a "query_output" column.
+    """
     dpConfig = configFile['differential_privacy']
     # count = dataframeAccumulate['query_output'].sum()
     epsilon = dpConfig["dp_epsilon"]

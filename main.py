@@ -22,13 +22,14 @@ if dataset == "medical":
         data, bVector = medpipe.medicalPipelineDP(config, operations, fileList)
         mean_absolute_error = utils.mean_absolute_error(bVector)
         formatted_error = utils.output_handler_medical_mae(mean_absolute_error, config)
-        formatted_data = utils.output_handler_medical_data(data, config)
+        formatted_data = utils.output_handler_medical_dp_data(data, config)
         print("dp",data)
         # print(formatted_error)
     elif "k_anonymize" in operations:
         print("reached k-anon")
-        optimal_bin_width = medpipe.medicalPipelineKAnon(config, operations, fileList)  
-        print("optimal bin width: ", optimal_bin_width)
+        k_anonymized_data = medpipe.medicalPipelineKAnon(config, operations, fileList)  
+        formatted_data = utils.output_handler_k_anon(k_anonymized_data, config)
+        # print("optimal bin width: ", optimal_bin_width)
     elif ("suppress") in operations:
         data = medpipe.medicalPipelineSuppressPseudonymize(config, operations, fileList)
         print(data)
@@ -44,7 +45,7 @@ if dataset == "spatioTemporal":
         data = utils.post_processing(data, config)
         mean_absolute_error = utils.mean_absolute_error(bVector)
         formatted_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)
-        formatted_data = utils.output_handler_spatioTemp_data(data, config)
+        formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
 
     elif ("suppress") in operations:
         data = stpipe.spatioTemporalPipeline(config, operations, fileList)

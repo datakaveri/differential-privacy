@@ -221,6 +221,15 @@ def dataset_handler(config):
         fileList = spatioTemporalFileList
     return dataset, config, fileList
 
+def output_handler_k_anon(data, config):
+    data.drop(columns=[config["k_anonymize"]["generalize"]], inplace=True)
+    print(data)
+    data = data.to_json(orient='index')
+    file_name = 'pipelineOutput/output_k_anon'
+    with open(f"{file_name}.json", 'w') as outfile:
+        outfile.write(data)
+    return data
+
 def output_handler_spatioTemp_mae(mean_absolute_error, config):
     dpConfig = config["differential_privacy"]
     if dpConfig['dp_query'] == 'mean':
@@ -260,7 +269,7 @@ def output_handler_medical_mae(mean_absolute_error, config):
     logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return
 
-def output_handler_medical_data(data, config):
+def output_handler_medical_dp_data(data, config):
     dpConfig = config['differential_privacy']
     if dpConfig['dp_query'] == 'count':
         # data = pd.DataFrame(data)
@@ -276,7 +285,7 @@ def output_handler_medical_data(data, config):
     logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return data
 
-def output_handler_spatioTemp_data(data, config):
+def output_handler_spatioTemp_dp_data(data, config):
     dpConfig = config['differential_privacy']
     data = data[['HAT', 'query_output','noisy_output']]
     data = data.set_index('HAT')

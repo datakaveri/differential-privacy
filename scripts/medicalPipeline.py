@@ -1,29 +1,34 @@
 import scripts.medicalModules as medmod
 import scripts.chunkHandlingModules as chmod
 import scripts.utilities as utils
+import logging
+
+# select logging level
+logging.basicConfig(level = logging.INFO)
 
 def medicalPipelineSuppressPseudonymize(config, operations, fileList):
-    print("Performing common chunk accumulation functions")
+    logging.info("Performing common chunk accumulation functions")
     dataframeAccumulate = chmod.chunkHandlingCommon(
         config, operations, fileList
     )
     return dataframeAccumulate
 
 def medicalPipelineKAnon(config, operations, fileList):
-    print("Performing Chunk Accumulation for k-anon")
+    logging.info("Performing Chunk Accumulation for k-anon")
     dataframeAccumulateKAnon = chmod.chunkHandlingMedicalKAnon(
         config, fileList
     )
-    print("Performing k-anonymization")
-    optimalBinWidth = medmod.k_anonymize(dataframeAccumulateKAnon, config)
-    return optimalBinWidth
+    logging.info("Performing k-anonymization")
+    optimal_bin_width = medmod.k_anonymize(dataframeAccumulateKAnon, config)
+    data = medmod.user_assignment_k_anonymize(optimal_bin_width, dataframeAccumulateKAnon, config)
+    return data
 
 def medicalPipelineDP(config, operations, fileList):
-    print("Performing Chunk Accumulation for DP")
+    logging.info("Performing Chunk Accumulation for DP")
     dataframeAccumulateDP = chmod.chunkHandlingMedicalDP(
         config, fileList
     )
-    print("Performing Differential Privacy")
+    logging.info("Performing Differential Privacy")
     privateAggregateDataframe, bVector = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, config)
     return privateAggregateDataframe, bVector
 
