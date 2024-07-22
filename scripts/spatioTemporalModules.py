@@ -2,6 +2,10 @@
 import pandas as pd
 import numpy as np
 import h3
+import logging
+
+# select logging level
+logging.basicConfig(level = logging.INFO)
 
 # functions for generalization
 ##############################################################
@@ -37,7 +41,7 @@ def temporalGeneralization(dataframe, configFile):
 # assigning HATs from H3index and timeslot
 def HATcreation(dataframe):
     dataframe["HAT"] = ( dataframe["Timeslot"].astype(str) + " " + dataframe["h3index"])
-    print('\nNumber of unique HATs created is: ' + str(dataframe['HAT'].nunique()))
+    logging.info('Number of unique HATs created is: ' + str(dataframe['HAT'].nunique()))
     return dataframe
 
 # Filtering time slots by start and end time from config file
@@ -46,11 +50,11 @@ def temporalEventFiltering(dataframe, configFile):
     startTime = configFile["start_time"]
     endTime = configFile["end_time"]
     dataframe = dataframe[(dataframe["Timeslot"] >= startTime) & (dataframe["Timeslot"] <= endTime) ]
-    print('Number of unique timeslots left after temporal event filtering is: ' + str(dataframe['Timeslot'].nunique()))
-    print('########################################################################################')
+    logging.info('Number of unique timeslots left after temporal event filtering is: ' + str(dataframe['Timeslot'].nunique()))
+    # logging.info('########################################################################################')
     return dataframe
 
-# Filtering by average number of events per HAT per day
+# Filtering by average number of events(license plates) per HAT per day
 def spatioTemporalEventFiltering(dataframe, configFile):
     # assigning required variables
     configFile = configFile["spatial_generalize"]
@@ -67,29 +71,40 @@ def spatioTemporalEventFiltering(dataframe, configFile):
     dfFiltered = dfFiltered[dfFiltered[f"count_{filterAttribute}"] >= limit]
     dfFiltered = dataframe[filterBy[0]].isin(dfFiltered[filterBy[0]])
     dataframe = dataframe[dfFiltered]
-    print('Number of unique HATs left after spatio-temporal event filtering is: ' + str(dataframe['HAT'].nunique()))
-    print('########################################################################################')
+    logging.info('Number of unique HATs left after spatio-temporal event filtering is: ' + str(dataframe['HAT'].nunique()))
+    # logging.info('########################################################################################')
     return dataframe
 
 # performing differential privacy
-def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange, max_count):
+def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange):
     dpConfig = configFile["differential_privacy"]
-    count = dataframeAccumulate["query_output"].sum()
-    epsilon = dpConfig["dp_epsilon_step"]
-    epsilonVector = np.arange(0.1,5,epsilon)
+    epsilon = dpConfig["dp_epsilon"]
+    epsilon_step = dpConfig["dp_epsilon_step"]
+    epsilonVector = np.arange(1,30,epsilon_step).round(2)
+
     # appropriate sensitivity computation
     if dpConfig["dp_query"] == "mean":
-        sensitivity = (max_count*(dpConfig["global_max_value"] - dpConfig["global_min_value"]))/(count)
+        max_of_sum_of_counts_per_lp = dataframeAccumulate['max_of_sum_of_counts_per_lp']
+        sum_of_counts = dataframeAccumulate['sum_of_counts']
+        sensitivity = (max_of_sum_of_counts_per_lp*(dpConfig["global_max_value"] - dpConfig["global_min_value"]))/(sum_of_counts)
+        bVector = np.zeros((len(sensitivity), len(epsilonVector)))
+        for i in range(len(epsilonVector)):
+            bVector[:, i] = sensitivity/epsilonVector[i]
+        bVector = pd.DataFrame(bVector, index=dataframeAccumulate.index, columns=epsilonVector)
+        bVector['HAT'] = dataframeAccumulate['HAT']
+        
     elif dpConfig["dp_query"] == "count":
-        sensitivity = (1/timeRange)
-    
+        sensitivity = 1
+        bVector = np.zeros((1, len(epsilonVector)))
+        bVector = sensitivity/epsilonVector
+        bVector = pd.DataFrame(bVector, index=epsilonVector)
     # noise generation
     b = sensitivity/epsilon
-    bVector = sensitivity/epsilonVector
+
+    # noise = np.random.laplace(0, bVector, (len(dataframeAccumulate), len(epsilonVector)))
     noise = np.random.laplace(0, b, len(dataframeAccumulate))
-    print(len(noise))
+    # print(len(noise))
     # noise addition
-    privateAggregateDataframe = dataframeAccumulate.copy()
+    privateAggregateDataframe = dataframeAccumulate.copy(deep=True)
     privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
-    # print(privateAggregateDataframe)
     return privateAggregateDataframe, bVector

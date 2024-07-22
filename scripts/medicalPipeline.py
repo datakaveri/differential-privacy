@@ -1,37 +1,36 @@
 import scripts.medicalModules as medmod
 import scripts.chunkHandlingModules as chmod
 import scripts.utilities as utils
+import logging
 
-def medicalPipeline(config, operations, fileList):
-    if ("suppress" or "pseudonymize") in operations:
-        print("Performing common chunk accumulation functions")
-        dataframeAccumulate = chmod.chunkHandlingCommon(
-            config, operations, fileList
-        )
+# select logging level
+logging.basicConfig(level = logging.INFO)
 
-    if "k_anonymize" in operations:
-        print("Performing Chunk Accumulation for k-anon")
-        dataframeAccumulateKAnon = chmod.chunkHandlingMedicalKAnon(
-            config, fileList
-        )
-        print("Performing k-anonymization")
-        optimalBinWidth = medmod.k_anonymize(dataframeAccumulateKAnon, config)
+def medicalPipelineSuppressPseudonymize(config, operations, fileList):
+    logging.info("Performing common chunk accumulation functions")
+    dataframeAccumulate = chmod.chunkHandlingCommon(
+        config, operations, fileList
+    )
+    return dataframeAccumulate
 
+def medicalPipelineKAnon(config, operations, fileList):
+    logging.info("Performing Chunk Accumulation for k-anon")
+    dataframeAccumulateKAnon = chmod.chunkHandlingMedicalKAnon(
+        config, fileList
+    )
+    logging.info("Performing k-anonymization")
+    optimal_bin_width = medmod.k_anonymize(dataframeAccumulateKAnon, config)
+    data = medmod.user_assignment_k_anonymize(optimal_bin_width, dataframeAccumulateKAnon, config)
+    return data
 
-    if "dp" in operations:
-        print("Performing Chunk Accumulation forDP")
-        dataframeAccumulateDP = chmod.chunkHandlingMedicalDP(
-            config, fileList
-        )
-        print("Performing Differential Privacy")
-        privateAggregateDataframe, bVector = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, config)
+def medicalPipelineDP(config, operations, fileList):
+    logging.info("Performing Chunk Accumulation for DP")
+    dataframeAccumulateDP = chmod.chunkHandlingMedicalDP(
+        config, fileList
+    )
+    logging.info("Performing Differential Privacy")
+    privateAggregateDataframe, bVector = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, config)
+    return privateAggregateDataframe, bVector
 
-        mean_normalised_mae = utils.mean_absolute_error(dataframeAccumulateDP, bVector)  
-        utils.plot_normalised_mae(mean_normalised_mae, config)
+        # utils.plot_normalised_mae(mean_normalised_mae, config)
 
-    if "dp" in operations:
-        return privateAggregateDataframe
-    if ("suppress" or "pseudonymize") in operations and ("dp" or "k_anonymize") not in operations:
-        return dataframeAccumulate
-    if "k_anonymize" in operations:
-        return optimalBinWidth

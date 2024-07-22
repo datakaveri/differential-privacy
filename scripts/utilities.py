@@ -1,12 +1,47 @@
 # import statements
+from calendar import c
 import pandas as pd
 import numpy as np
 import json
 import hashlib
 import matplotlib.pyplot as plt
+import logging
 ###########################
-# function definitions
 
+# select logging level
+logging.basicConfig(level = logging.INFO)
+
+# for testing
+medicalFileList = ["data/syntheticMedicalChunks/medical_data_split_file_0.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_1.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_2.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_3.json",
+                    "data/syntheticMedicalChunks/medical_data_split_file_4.json"
+                    ]
+
+# for testing
+
+# spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
+#             'data/spatioTemporalChunks/split_file_1.json',
+#             'data/spatioTemporalChunks/split_file_2.json',
+#             'data/spatioTemporalChunks/split_file_3.json',
+#             'data/spatioTemporalChunks/split_file_4.json',
+#             'data/spatioTemporalChunks/split_file_5.json',
+#             'data/spatioTemporalChunks/split_file_6.json',
+#             'data/spatioTemporalChunks/split_file_7.json',
+#             'data/spatioTemporalChunks/split_file_8.json',
+#             'data/spatioTemporalChunks/split_file_9.json'
+#             ]
+
+spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
+            'data/spatioTemporalChunks/split_file_1.json',
+            'data/spatioTemporalChunks/split_file_2.json',
+            'data/spatioTemporalChunks/split_file_3.json',
+            'data/spatioTemporalChunks/split_file_4.json',
+]
+
+# function definitions
+##################################
 # read config
 def read_config(configFile):
     with open(configFile, "r") as cfile:
@@ -19,6 +54,119 @@ def read_data(dataFile):
         data = json.load(dfile)
         dataframe = pd.json_normalize(data)
     return dataframe
+
+def user_input_handler(config):
+    """
+    Prompt user to select dataset (medical or spatiotemporal) and processing options (suppression/pseudonymization, k-anonymization, or differential privacy) and update config accordingly.
+    """
+    print("Select dataset:")
+    print("1. Synthetic Medical Data")
+    print("2. Real-World SpatioTemporal ITMS Data")
+
+    dataset_choice = input("Enter choice (1 or 2): ")
+
+    dataset_choice = dataset_choice.strip()
+    while dataset_choice not in ['1', '2']:
+        print("Invalid choice. Please enter '1' or '2':")
+        dataset_choice = input("Enter choice (1 or 2): ")
+        dataset_choice = dataset_choice.strip()
+
+    if dataset_choice == '1':
+        config = config["medical"] # for testing only
+        dataset = "medical"
+        fileList = medicalFileList
+        print("Select processing options:")
+        print("1. Suppression")
+        print("2. Pseudonymization")
+        print("3. K-anonymization")
+        print("4. Differential Privacy")
+
+        processing_choice = input("Enter choice (1, 2, 3 or 4): ")
+
+        processing_choice = processing_choice.strip()
+        while processing_choice not in ['1', '2', '3', '4']:
+            print("Invalid choice. Please enter '1', '2', '3' or '4':")
+            processing_choice = input("Enter choice (1, 2, 3 or 4): ")
+            processing_choice = processing_choice.strip()
+
+        if processing_choice == '1':
+            config = config["suppress"]
+            config = {"suppress": config}
+            # print(config)
+        elif processing_choice == '2':
+            config = config["pseudonymize"]
+            config = {"pseudonymize": config}
+        elif processing_choice == '3':
+            config = config["k_anonymize"]
+            config = {"k_anonymize": config}
+            # print(config)
+        elif processing_choice == '4':
+            print("Select query:")
+            print("1. Count")
+            print("2. Mean")
+
+            query_choice = input("Enter choice (1 or 2): ")
+
+            query_choice = query_choice.strip()
+            while query_choice not in ['1', '2']:
+                print("Invalid choice. Please enter '1' or '2':")
+                query_choice = input("Enter choice (1 or 2): ")
+                query_choice = query_choice.strip()
+
+            if query_choice == '1':
+                config["differential_privacy"]["dp_query"] = "count"
+                config["differential_privacy"]["dp_output_attribute"] = "Test Result"
+                config["differential_privacy"]["dp_aggregate_attribute"] = "PIN Code"
+
+            elif query_choice == '2':
+                config["differential_privacy"]["dp_query"] = "mean"
+                config["differential_privacy"]["dp_output_attribute"] = "Days to Negative"
+                config["differential_privacy"]["dp_aggregate_attribute"] = "Gender"
+
+    elif dataset_choice == '2':
+        config = config["spatioTemporal"] # for testing only 
+        dataset = "spatioTemporal"
+        fileList = spatioTemporalFileList
+        print("Select processing options:")
+        print("1. Suppression")
+        print("2. Pseudonymization")
+        print("3. Differential Privacy")
+
+        processing_choice = input("Enter choice (1, 2 or 3): ")
+
+        processing_choice = processing_choice.strip()
+        while processing_choice not in ['1', '2', '3']:
+            print("Invalid choice. Please enter '1', '2', or '3':")
+            processing_choice = input("Enter choice (1, 2 or 3): ")
+            processing_choice = processing_choice.strip()
+
+        if processing_choice == '1':
+            config = config["suppress"]
+            config = {"suppress": config}
+        # print(config)
+        elif processing_choice == '2':
+            config = config["pseudonymize"]
+            config = {"pseudonymize": config}
+        elif processing_choice == '3':
+            print("Select query:")
+            print("1. Count")
+            print("2. Mean")
+
+            query_choice = input("Enter choice (1 or 2): ")
+
+            query_choice = query_choice.strip()
+            while query_choice not in ['1', '2']:
+                print("Invalid choice. Please enter '1' or '2':")
+                query_choice = input("Enter choice (1 or 2): ")
+                query_choice = query_choice.strip()
+
+            if query_choice == '1':
+                config["differential_privacy"]["dp_query"] = "count"
+
+            elif query_choice == '2':
+                config["differential_privacy"]["dp_query"] = "mean"
+
+    return config, dataset, fileList
 
 # drop duplicates
 def deduplicate(dataframe):
@@ -47,8 +195,126 @@ def pseudonymize(dataframe, config):
     dataframe.drop(columns=['UID'] + attribute_to_pseudonymize, inplace=True)
     return dataframe
 
-def mean_absolute_error(dataframeAccumulate, bVector):
-    
+def mean_absolute_error(bVector):
+    mean_absolute_error = bVector
+    return mean_absolute_error
+
+def post_processing(data, config):
+    dpConfig = config["differential_privacy"]
+    output_attribute = dpConfig["dp_output_attribute"]
+    if dpConfig['dp_query'] == 'mean':
+        data[f"Noisy {output_attribute}"] = data[f"Noisy {output_attribute}"].clip(0)
+        data[f"Noisy {output_attribute}"] = data[f"Noisy {output_attribute}"].round(3)
+    elif dpConfig['dp_query'] == 'count':
+        data[f"Noisy {dpConfig['dp_query']}"] = data[f"Noisy {dpConfig['dp_query']}"].clip(0)
+        data[f"Noisy {dpConfig['dp_query']}"] = data[f"Noisy {dpConfig['dp_query']}"].round(0)
+    return data
+
+# function to handle dataset choice
+def dataset_handler(config):
+    if config["data_type"] == "medical":
+        config = config["medical"] # for testing only
+        dataset = "medical"
+        fileList = medicalFileList
+    elif config["data_type"] == "spatioTemporal":
+        config = config["spatioTemporal"] # for testing only 
+        dataset = "spatioTemporal"
+        fileList = spatioTemporalFileList
+    return dataset, config, fileList
+
+def output_handler_k_anon(data, config):
+    data.drop(columns=[config["k_anonymize"]["generalize"]], inplace=True)
+    print(data)
+    data = data.to_json(orient='index')
+    file_name = 'pipelineOutput/output_k_anon'
+    with open(f"{file_name}.json", 'w') as outfile:
+        outfile.write(data)
+    return data
+
+def output_handler_spatioTemp_mae(mean_absolute_error, config):
+    dpConfig = config["differential_privacy"]
+    if dpConfig['dp_query'] == 'mean':
+        averaged_mean_absolute_error = np.mean(mean_absolute_error, axis=0) # averaged over all the HATs  
+        averaged_mean_absolute_error = averaged_mean_absolute_error.to_json(orient='index')
+        mean_absolute_error = mean_absolute_error.set_index('HAT')
+        mean_absolute_error = mean_absolute_error.to_json(orient='index')
+        file_name = 'pipelineOutput/spatioTemporal_EpsVSMAEperHAT'
+        with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
+            outfile.write(mean_absolute_error)
+        logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+        file_name = 'pipelineOutput/spatioTemporal_EpsVSMAE'
+        with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
+            outfile.write(averaged_mean_absolute_error) 
+        logging.info('%s query averaged error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+
+    elif dpConfig['dp_query'] == 'count':
+        # mean_absolute_error = mean_absolute_error.squeeze(axis=0)
+        mean_absolute_error = mean_absolute_error[0]
+        mean_absolute_error = mean_absolute_error.to_json(orient='index')
+        file_name = 'pipelineOutput/EpsVSMAE'
+        with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
+            outfile.write(mean_absolute_error)
+        logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+    return 
+
+def output_handler_medical_mae(mean_absolute_error, config):
+    dpConfig = config["differential_privacy"]
+    if dpConfig["dp_query"] == 'count':
+        mean_absolute_error = mean_absolute_error[0]
+        mean_absolute_error = mean_absolute_error.to_json(orient='index')
+    elif dpConfig["dp_query"] == 'mean':
+        mean_absolute_error = mean_absolute_error.to_json(orient='index')
+    file_name = 'pipelineOutput/medical_EpsVSMAE'
+    with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
+        outfile.write(mean_absolute_error)
+    logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+    return
+
+def output_handler_medical_dp_data(data, config):
+    dpConfig = config['differential_privacy']
+    if dpConfig['dp_query'] == 'count':
+        # data = pd.DataFrame(data)
+        aggregate_attribute = dpConfig['dp_aggregate_attribute']
+        data = data.set_index(aggregate_attribute)
+    elif dpConfig['dp_query'] == 'mean':
+        aggregate_attribute = dpConfig['dp_aggregate_attribute']
+        data = data.set_index(aggregate_attribute)
+    data = data.to_json(orient='index')
+    file_name = 'pipelineOutput/medical_noisyQueryOutput'
+    with open(f"{file_name}_{dpConfig['dp_query']}.json", "w") as outfile:
+        outfile.write(data)
+    logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+    return data
+
+def output_handler_spatioTemp_dp_data(data, config):
+    dpConfig = config['differential_privacy']
+    data = data[['HAT', 'query_output','noisy_output']]
+    data = data.set_index('HAT')
+    data = data.to_json(orient='index')
+    file_name = 'pipelineOutput/spatioTemporal_noisyQueryOutput'
+    with open(f"{file_name}_{dpConfig['dp_query']}.json", "w") as outfile:
+        outfile.write(data)
+    logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+    return data
+
+# function to handle order of operations and select config
+def oop_handler(config, dataset):
+    operations = []
+    if "suppress" in config:
+        operations.append("suppress")
+    if "pseudonymize" in config:
+        operations.append("pseudonymize")
+    if "k_anonymize" in config:
+        operations.append("k_anonymize")
+    if "differential_privacy" in config:
+        operations.append("dp")
+    return operations
+
+#################################################################
+# DEPRECATED
+# function to compute the normalized mae
+def normalized_mean_absolute_error(dataframeAccumulate, bVector):
+
     true_values = dataframeAccumulate["query_output"]
     normalised_mae = []
     mean_normalised_mae = []
@@ -102,7 +368,7 @@ def plot_normalised_mae(mean_normalised_mae, config):
     plt.ylabel('Normalised Mean Absolute Error')
     plt.title('Normalised Mean Absolute Error vs Epsilon')
     plt.grid(True)
-    plt.show()
+    # plt.show()
     
     # create a json file with epsilonVector and mean_normalised_mae
     # output = []
@@ -111,48 +377,3 @@ def plot_normalised_mae(mean_normalised_mae, config):
     # with open('pipelineOutput/epsilonVector_mean_normalised_mae.json', 'w') as f:
     #     json.dump(output, f)
     return
-
-
-###########################
-# function to handle order of operations and select config
-def oop_handler(config):
-    operations = []
-    dataType = config["data_type"]
-    if dataType == "medical":
-        config = config["medical"]
-    elif dataType == "spatioTemporal":
-        config = config["spatioTemporal"]
-    if "suppress" in config:
-        operations.append("suppress")
-    if "pseudonymize" in config:
-        operations.append("pseudonymize")
-    if "generalize" in config:
-        operations.append("k_anonymize")
-    if "differential_privacy" in config:
-        operations.append("dp")
-    return operations
-
-# TODO: Rewrite output_handler
-def output_handler(data):
-    data['timeSlot'] = data['HAT'].apply(lambda x: x[:2])
-    formatted_data = {}
-    for idx, row in data.iterrows():
-        hat_string = row['HAT']
-        hat_time = hat_string[:2]
-        hat_id = hat_string[2:]
-        if hat_id not in formatted_data:
-            formatted_data[hat_id] = {}
-        if hat_time not in formatted_data[hat_id]:
-            formatted_data[hat_id][hat_time] = []
-        formatted_data[hat_id][hat_time].append({
-            'HAT': hat_id,
-            'query_output': row['query_output'],
-            'noisy_output': row['noisy_output']
-        })
-    with open("pipelineOutput/testOutput_formatted.json", "w") as f:
-        json.dump(output_handler(data), f, indent=4)
-    data.to_json("pipelineOutput/testOutput_formatTest.json")
-    return formatted_data
-
-
-

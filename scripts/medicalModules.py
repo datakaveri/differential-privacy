@@ -1,14 +1,13 @@
 # import statements
 import pandas as pd
 import numpy as np
-import json
-import hashlib
+
 
 # function definitions
 ###########################
 # function to bin the ages
 def generalize(dataframe, config, bins):
-    attribute_to_generalize = config["generalize"]
+    attribute_to_generalize = config["k_anonymize"]["generalize"]
     dataframe["Age Bin"] = pd.cut(
         dataframe[attribute_to_generalize], bins, ordered=True
     )
@@ -17,6 +16,16 @@ def generalize(dataframe, config, bins):
 # function to k-anonymize
 
 def k_anonymize(dataframe, config):
+    """
+    A function to perform k-anonymization on a given dataframe based on the configuration provided.
+
+    Parameters:
+    - dataframe: Pandas DataFrame containing the data to be k-anonymized.
+    - config: Dictionary containing the configuration settings for k-anonymization.
+
+    Returns:
+    - The final bin size after k-anonymization is applied.
+    """
     # start with each bin size 1
     kConfig = config["k_anonymize"]
     k = kConfig["k"]
@@ -80,11 +89,36 @@ def k_anonymize(dataframe, config):
                 r_count = mx_age
     return r_count
 
+def user_assignment_k_anonymize(optimal_bin_width, data, config):
+    bin_edges = np.arange(config["k_anonymize"]["min_bin_value"], config["k_anonymize"]["max_bin_value"]  + optimal_bin_width, optimal_bin_width)
+    data['Age Bin'] = pd.cut(data['Age'], bins=bin_edges, include_lowest=True)
+    return data
+
 def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
+    """
+    Applies differential privacy to a medical dataframe based on the given configuration.
+
+    Parameters:
+    - dataframeAccumulate (pandas.DataFrame): The dataframe containing the medical data.
+    - configFile (dict): The configuration file containing the differential privacy parameters.
+
+    Returns:
+    - privateAggregateDataframe (pandas.DataFrame): The dataframe with differential privacy applied.
+    - bVector (pandas.DataFrame): The dataframe containing the b values used for differential privacy.
+
+    This function applies differential privacy to a medical dataframe based on the given configuration. It takes in a dataframe containing the medical data and a configuration file containing the differential privacy parameters. The function then calculates the epsilon vector based on the given epsilon value in the configuration file. 
+
+    If the differential privacy query is "count", the function calculates the sensitivity as 1 and generates the b vector based on the epsilon vector. It then generates random noise using the Laplace distribution and adds it to the "query_output" column of the dataframe. The function drops the "query_output" column and returns the modified dataframe and the b vector.
+
+    If the differential privacy query is "mean", the function calculates the sensitivity for each category in the specified aggregate attribute column. It then generates the b vector based on the sensitivity and epsilon vector. It generates random noise using the Laplace distribution and adds it to the "query_output" column of the dataframe. The function drops the "count" and "query_output" columns and returns the modified dataframe and the b vector.
+
+    Note: The function assumes that the input dataframe contains a "query_output" column.
+    """
     dpConfig = configFile['differential_privacy']
     # count = dataframeAccumulate['query_output'].sum()
     epsilon = dpConfig["dp_epsilon"]
-    epsilonVector = np.arange(0.1,5,epsilon)
+    epsilon_step = dpConfig["dp_epsilon_step"]
+    epsilonVector = np.arange(0.01,10,epsilon_step).round(2)
     # epsilonVector = np.logspace(-5, 0, 1000)
     output_attribute = dpConfig["dp_output_attribute"]
     if dpConfig["dp_query"] == "count":
@@ -92,22 +126,25 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
         # no epsilon vector is generated
         b = sensitivity/epsilon
         bVector = sensitivity/epsilonVector
+        bVector = pd.DataFrame(bVector, index=epsilonVector)
         noise = np.random.laplace(0,b,len(dataframeAccumulate))
         privateAggregateDataframe = dataframeAccumulate.copy()
-        privateAggregateDataframe[f"Noisy {output_attribute}"] = privateAggregateDataframe["query_output"] + noise
-        privateAggregateDataframe.drop(columns = ["query_output"], inplace = True)
+        privateAggregateDataframe[f"Noisy {dpConfig['dp_query']}"] = privateAggregateDataframe["query_output"] + noise
+        # privateAggregateDataframe.drop(columns = ["query_output"], inplace = True)
     elif dpConfig["dp_query"] == "mean":
         # count = dataframeAccumulate["count"]
         sensitivity = []
         for category in dataframeAccumulate[dpConfig["dp_aggregate_attribute"]]:
             count = dataframeAccumulate.loc[dataframeAccumulate[dpConfig["dp_aggregate_attribute"]] == category,'count']
-            sensitivity.append(dpConfig["dp_max_value_sensitivity"] / count)
+        # count = dataframeAccumulate['count']
+            sensitivity.append(dpConfig["dp_max_value_output_attribute"] / count)
         sensitivity = np.array(sensitivity)
         b = sensitivity/epsilon
         bVector = sensitivity/epsilonVector
-        noise = [np.random.laplace(0, b, 1) for b in b]
+        bVector = pd.DataFrame(bVector, index=dataframeAccumulate[dpConfig["dp_aggregate_attribute"]], columns=epsilonVector)
+        noise = [np.random.laplace(0, b_value, 1) for b_value in b]
         noise = np.array(noise).flatten()
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe[f"Noisy {output_attribute}"] = privateAggregateDataframe["query_output"] + noise
-        privateAggregateDataframe.drop(columns = ["count", "query_output"], inplace = True)
+        privateAggregateDataframe.drop(columns = ["count", "sum"], inplace = True)
     return privateAggregateDataframe, bVector
