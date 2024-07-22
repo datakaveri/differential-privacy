@@ -139,3 +139,5 @@ pipelineOutput
 
 data/spatioTemporalChunks
 data/syntheticMedicalChunks
+
+scripts/__pycache__
