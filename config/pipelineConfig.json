@@ -6,16 +6,18 @@
     "pseudonymize": ["Name", "Patient ID"],
     "k_anonymize": {
       "generalize": "Age",
-      "k": 100,
+      "k": 500,
       "min_bin_value": 0,
       "max_bin_value": 101
     },
     "differential_privacy": {
       "dp_query": "mean",
-      "dp_output_attribute": "Time to Negative",
+      "dp_output_attribute": "Days To Negative",
+      "dp_selected_output": "",
       "dp_aggregate_attribute": "Gender",
-      "dp_max_value_sensitivity": 50,
-      "dp_epsilon": 0.1
+      "dp_max_value_output_attribute": 50,
+      "dp_epsilon": 0.1,
+      "dp_epsilon_step": 0.1
     }
   },
   "spatioTemporal": {

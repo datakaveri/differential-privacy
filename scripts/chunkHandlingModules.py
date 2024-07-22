@@ -281,6 +281,8 @@ def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
     dpConfig = medicalConfigDict["differential_privacy"]
     logging.info("Accumulating chunks for building DP Query")
     if dpConfig["dp_query"] == "mean":
+        # filtering out all the zero values from the selected output attribute
+        dataframeChunk = dataframeChunk[dataframeChunk[dpConfig["dp_output_attribute"]] != 0]
         dataframeAccumulator = (
             dataframeChunk.groupby([dpConfig["dp_aggregate_attribute"]])
             .agg(sum=(dpConfig["dp_output_attribute"], "sum"),
@@ -288,6 +290,15 @@ def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
             .reset_index()
         )
     if dpConfig["dp_query"] == "count":
+
+        # Filter the dataframeChunk to only include rows where the value of the column specified by dpConfig["dp_output_attribute"] matches the value specified by dpConfig["dp_selected_output"] and include only the columns specified by dpConfig["dp_aggregate_attribute"] and dpConfig["dp_output_attribute"].
+
+        dataframeChunk = dataframeChunk[
+            dataframeChunk[dpConfig["dp_output_attribute"]] == dpConfig["dp_selected_output"]
+        ][
+            [dpConfig["dp_aggregate_attribute"], dpConfig["dp_output_attribute"]]
+        ].reset_index()
+        
         dataframeAccumulator = (
             dataframeChunk.groupby([dpConfig["dp_aggregate_attribute"]])
             .agg(count=(dpConfig["dp_output_attribute"], "count"))
@@ -397,8 +408,9 @@ def chunkHandlingMedicalDP(medicalConfigDict, fileList):
         # print("test", dataframeAccumulate)
         dpAccumulate = (
             dataframeAccumulate.groupby([dpConfig["dp_aggregate_attribute"]])
-            .agg(count=("count", "sum"), # sum of counts
-                 sum=("sum", "sum")) # sum of sums
+            .agg(sum=("sum", "sum"), # sum of sums
+                count=("count", "sum") # sum of counts
+                ) 
             .reset_index()
         )
         dpAccumulate["query_output"] = dpAccumulate["sum"] / dpAccumulate["count"]

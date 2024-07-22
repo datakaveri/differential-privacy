@@ -117,7 +117,8 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
     dpConfig = configFile['differential_privacy']
     # count = dataframeAccumulate['query_output'].sum()
     epsilon = dpConfig["dp_epsilon"]
-    epsilonVector = np.arange(0.1,5,epsilon)
+    epsilon_step = dpConfig["dp_epsilon_step"]
+    epsilonVector = np.arange(0.01,10,epsilon_step).round(2)
     # epsilonVector = np.logspace(-5, 0, 1000)
     output_attribute = dpConfig["dp_output_attribute"]
     if dpConfig["dp_query"] == "count":
@@ -128,21 +129,22 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
         bVector = pd.DataFrame(bVector, index=epsilonVector)
         noise = np.random.laplace(0,b,len(dataframeAccumulate))
         privateAggregateDataframe = dataframeAccumulate.copy()
-        privateAggregateDataframe[f"Noisy {output_attribute}"] = privateAggregateDataframe["query_output"] + noise
-        privateAggregateDataframe.drop(columns = ["query_output"], inplace = True)
+        privateAggregateDataframe[f"Noisy {dpConfig['dp_query']}"] = privateAggregateDataframe["query_output"] + noise
+        # privateAggregateDataframe.drop(columns = ["query_output"], inplace = True)
     elif dpConfig["dp_query"] == "mean":
         # count = dataframeAccumulate["count"]
         sensitivity = []
         for category in dataframeAccumulate[dpConfig["dp_aggregate_attribute"]]:
             count = dataframeAccumulate.loc[dataframeAccumulate[dpConfig["dp_aggregate_attribute"]] == category,'count']
-            sensitivity.append(dpConfig["dp_max_value_sensitivity"] / count)
+        # count = dataframeAccumulate['count']
+            sensitivity.append(dpConfig["dp_max_value_output_attribute"] / count)
         sensitivity = np.array(sensitivity)
         b = sensitivity/epsilon
         bVector = sensitivity/epsilonVector
         bVector = pd.DataFrame(bVector, index=dataframeAccumulate[dpConfig["dp_aggregate_attribute"]], columns=epsilonVector)
-        noise = [np.random.laplace(0, b, 1) for b in b]
+        noise = [np.random.laplace(0, b_value, 1) for b_value in b]
         noise = np.array(noise).flatten()
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe[f"Noisy {output_attribute}"] = privateAggregateDataframe["query_output"] + noise
-        privateAggregateDataframe.drop(columns = ["count", "query_output"], inplace = True)
+        privateAggregateDataframe.drop(columns = ["count", "sum"], inplace = True)
     return privateAggregateDataframe, bVector

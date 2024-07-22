@@ -120,7 +120,7 @@ def user_input_handler(config):
 
             elif query_choice == '2':
                 config["differential_privacy"]["dp_query"] = "mean"
-                config["differential_privacy"]["dp_output_attribute"] = "Time to Negative"
+                config["differential_privacy"]["dp_output_attribute"] = "Days to Negative"
                 config["differential_privacy"]["dp_aggregate_attribute"] = "Gender"
 
     elif dataset_choice == '2':
@@ -201,12 +201,13 @@ def mean_absolute_error(bVector):
 
 def post_processing(data, config):
     dpConfig = config["differential_privacy"]
+    output_attribute = dpConfig["dp_output_attribute"]
     if dpConfig['dp_query'] == 'mean':
-        data['noisy_output'] = data['noisy_output'].clip(0)
-        data['noisy_output'] = data['noisy_output'].round(3)
+        data[f"Noisy {output_attribute}"] = data[f"Noisy {output_attribute}"].clip(0)
+        data[f"Noisy {output_attribute}"] = data[f"Noisy {output_attribute}"].round(3)
     elif dpConfig['dp_query'] == 'count':
-        data['noisy_output'] = data['noisy_output'].clip(0)
-        data['noisy_output'] = data['noisy_output'].round(1)
+        data[f"Noisy {dpConfig['dp_query']}"] = data[f"Noisy {dpConfig['dp_query']}"].clip(0)
+        data[f"Noisy {dpConfig['dp_query']}"] = data[f"Noisy {dpConfig['dp_query']}"].round(0)
     return data
 
 # function to handle dataset choice
