@@ -200,6 +200,7 @@ def mean_absolute_error(bVector):
     return mean_absolute_error
 
 def post_processing(data, config):
+    # TODO: Decide on format of output attribute names
     dpConfig = config["differential_privacy"]
     output_attribute = dpConfig["dp_output_attribute"]
     if dpConfig['dp_query'] == 'mean':
@@ -223,12 +224,15 @@ def dataset_handler(config):
     return dataset, config, fileList
 
 def output_handler_k_anon(data, config):
+    dataset_name = data.name
+    kConfig = config["k_anonymize"]
     data.drop(columns=[config["k_anonymize"]["generalize"]], inplace=True)
-    print(data)
     data = data.to_json(orient='index')
-    file_name = 'pipelineOutput/output_k_anon'
+    file_name = f'pipelineOutput/output_k_anon_{dataset_name}'
     with open(f"{file_name}.json", 'w') as outfile:
         outfile.write(data)
+    logging.info('k-anonymized data saved to %s', file_name)
+    logging.info('k-anonymity level: %s', kConfig["k"])
     return data
 
 def output_handler_spatioTemp_mae(mean_absolute_error, config):

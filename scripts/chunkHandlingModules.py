@@ -326,7 +326,7 @@ def chunkAccumulatorMedicalKAnon(dataframeChunk, medicalConfigDict):
 # accumulating chunks with appropriate processing for KAnon
 def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
     lengthList = []
-    # dataframeAccumulate = pd.DataFrame()
+    dataframeAccumulate = pd.DataFrame()
     # dataframeAccumulateNew = pd.DataFrame()
     kAnonAccumulate = pd.Series()
     # print(medicalConfigDict)
@@ -345,6 +345,10 @@ def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
                 + str(dataframeChunk.shape)
             )
 
+        # accumulating each raw chunk
+        dataframeAccumulate = pd.concat(
+            [dataframeAccumulate, dataframeChunk], ignore_index=True
+        )
         # generalizing each chunk
         kAnonChunk = chunkAccumulatorMedicalKAnon(dataframeChunk, medicalConfigDict)
 
@@ -358,7 +362,7 @@ def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
             "Count": kAnonAccumulate.values,
         }
     )
-    return kAnonAccumulate
+    return kAnonAccumulate, dataframeAccumulate
 
 def chunkHandlingMedicalDP(medicalConfigDict, fileList):
     """
@@ -413,7 +417,7 @@ def chunkHandlingMedicalDP(medicalConfigDict, fileList):
                 ) 
             .reset_index()
         )
-        dpAccumulate["query_output"] = dpAccumulate["sum"] / dpAccumulate["count"]
+        # dpAccumulate["query_output"] = dpAccumulate["sum"] / dpAccumulate["count"]
     elif dpConfig["dp_query"] == "count":
         dpAccumulate = (
             dataframeAccumulate.groupby([dpConfig["dp_aggregate_attribute"]])
