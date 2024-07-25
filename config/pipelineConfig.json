@@ -15,7 +15,7 @@
       "dp_output_attribute": "Days To Negative",
       "dp_selected_output": "",
       "dp_aggregate_attribute": "Gender",
-      "dp_max_value_output_attribute": 50,
+      "dp_max_value_output_attribute": 20,
       "dp_epsilon": 0.1,
       "dp_epsilon_step": 0.1
     }

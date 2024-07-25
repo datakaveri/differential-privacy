@@ -1,7 +1,7 @@
 # import statements
 import pandas as pd
 import numpy as np
-
+import scripts.utilities as utils
 
 # function definitions
 ###########################
@@ -127,6 +127,7 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
         b = sensitivity/epsilon
         bVector = sensitivity/epsilonVector
         bVector = pd.DataFrame(bVector, index=epsilonVector)
+        mean_absolute_error = bVector
         noise = np.random.laplace(0,b,len(dataframeAccumulate))
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe[f"Noisy {dpConfig['dp_query']}"] = privateAggregateDataframe["query_output"] + noise
@@ -135,30 +136,29 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
         # for the mean query we need to compute the noisy sum and the noisy count indpendently and then divide the noisy sum by the noisy count to find the noisy mean
         sensitivity_count = 1
         sensitivity_sum = dpConfig["dp_max_value_output_attribute"]
-        # for category in dataframeAccumulate[dpConfig["dp_aggregate_attribute"]]:
-        #     count = dataframeAccumulate.loc[dataframeAccumulate[dpConfig["dp_aggregate_attribute"]] == category,'count']
-        #     sum = dataframeAccumulate.loc[dataframeAccumulate[dpConfig["dp_aggregate_attribute"]] == category,'sum']
-        #     sensitivity_count.append(1)
-        #     sensitivity_sum.append(dpConfig["dp_max_value_output_attribute"])
-        # sensitivity_count = np.array(sensitivity_count)
-        # sensitivity_sum = np.array(sensitivity_sum)
         b_count = sensitivity_count/(epsilon/2)
         b_sum = sensitivity_sum/(epsilon/2)
         bVector_count = sensitivity_count/epsilonVector
         bVector_sum = sensitivity_sum/epsilonVector
-        bVector_count = pd.DataFrame(bVector_count)
-        bVector_sum = pd.DataFrame(bVector_sum)
         noise_count = np.random.laplace(0, b_count, len(dataframeAccumulate))
         noise_sum = np.random.laplace(0, b_sum, len(dataframeAccumulate))
-        # noise_count = np.array(noise_count).flatten()
-        # noise_sum = np.array(noise_sum).flatten()
-        noisy_count = dataframeAccumulate["count"] + noise_count
-        noisy_sum = dataframeAccumulate["sum"] + noise_sum
+        sum = dataframeAccumulate["sum"]
+        count = dataframeAccumulate["count"]
+        noisy_count = count + noise_count
+        noisy_sum = sum + noise_sum
         noisy_mean = noisy_sum/noisy_count
+        mae_vector_category = pd.DataFrame()
+        for category in dataframeAccumulate[dpConfig["dp_aggregate_attribute"]]:
+            sum = dataframeAccumulate.loc[dataframeAccumulate[dpConfig["dp_aggregate_attribute"]] == category, 'sum'].values[0]
+            count = dataframeAccumulate.loc[dataframeAccumulate[dpConfig["dp_aggregate_attribute"]] == category, 'count'].values[0]
+            mae_vector = utils.monte_carlo_sim_mae(10e5, epsilonVector, bVector_sum, bVector_count, sum, count)
+            mae_vector = pd.DataFrame(mae_vector)
+            mae_vector_category = pd.concat([mae_vector_category, mae_vector], axis = 1)
+        mean_absolute_error = mae_vector_category.mean(axis = 1)
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe["mean"] = privateAggregateDataframe["sum"] / privateAggregateDataframe["count"]
         privateAggregateDataframe[f"Noisy {output_attribute}"] = noisy_mean
         privateAggregateDataframe.drop(columns = ["count", "sum"], inplace = True)
-        bVector = pd.concat([bVector_count, bVector_sum], axis = 1)
-        bVector = bVector.sum(axis = 1)
-    return privateAggregateDataframe, bVector
+        # bVector = pd.concat([bVector_count, bVector_sum], axis = 1)
+        # bVector = bVector.sum(axis = 1)
+    return privateAggregateDataframe, mean_absolute_error

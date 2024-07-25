@@ -19,9 +19,8 @@ print(config)
 if dataset == "medical":
 
     if "dp" in operations:
-        data, bVector = medpipe.medicalPipelineDP(config, operations, fileList)
+        data, mean_absolute_error = medpipe.medicalPipelineDP(config, operations, fileList)
         data = utils.post_processing(data, config)
-        mean_absolute_error = utils.mean_absolute_error(bVector)
         formatted_error = utils.output_handler_medical_mae(mean_absolute_error, config)
         formatted_data = utils.output_handler_medical_dp_data(data, config)
         print("dp",data)

@@ -283,6 +283,8 @@ def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
     if dpConfig["dp_query"] == "mean":
         # filtering out all the zero values from the selected output attribute
         dataframeChunk = dataframeChunk[dataframeChunk[dpConfig["dp_output_attribute"]] != 0]
+        # clipping the max valueu of the output attribute to the worst case selected by the user which is used as the sensitivity for noise computation
+        dataframeChunk[dpConfig["dp_output_attribute"]] = dataframeChunk[dpConfig["dp_output_attribute"]].clip(upper=dpConfig["dp_max_value_output_attribute"])
         dataframeAccumulator = (
             dataframeChunk.groupby([dpConfig["dp_aggregate_attribute"]])
             .agg(sum=(dpConfig["dp_output_attribute"], "sum"),

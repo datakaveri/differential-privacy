@@ -42,7 +42,6 @@ spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
 
 # function definitions
 ##################################
-# read config
 def read_config(configFile):
     with open(configFile, "r") as cfile:
         config = json.load(cfile)
@@ -228,7 +227,7 @@ def output_handler_k_anon(data, config):
     kConfig = config["k_anonymize"]
     data.drop(columns=[config["k_anonymize"]["generalize"]], inplace=True)
     data = data.to_json(orient='index')
-    file_name = f'pipelineOutput/output_k_anon_{dataset_name}'
+    file_name = f'pipelineOutput/medical_k_anon_{dataset_name}'
     with open(f"{file_name}.json", 'w') as outfile:
         outfile.write(data)
     logging.info('k-anonymized data saved to %s', file_name)
@@ -301,7 +300,6 @@ def output_handler_spatioTemp_dp_data(data, config):
     logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return data
 
-# function to handle order of operations and select config
 def oop_handler(config, dataset):
     operations = []
     if "suppress" in config:
@@ -313,6 +311,21 @@ def oop_handler(config, dataset):
     if "differential_privacy" in config:
         operations.append("dp")
     return operations
+
+def monte_carlo_sim_mae(num_iterations, epsilon_vector, bVector_sum, bVector_count, sum, count ):
+    mae_vector = []
+    for i in range(len(epsilon_vector)):
+        b_sum = bVector_sum[i]
+        b_count = bVector_count[i]
+        noisy_vector_sum = np.random.laplace(0,b_sum,int(num_iterations)) + sum
+        noisy_vector_count = np.random.laplace(0,b_count,int(num_iterations)) + count
+        noisy_mean_vector = noisy_vector_sum/noisy_vector_count
+        abs_error_vector = abs(noisy_mean_vector - (sum/count))
+        abs_error_vector_sum = abs_error_vector.sum()
+        mean_absolute_error = abs_error_vector_sum/num_iterations
+        mae_vector.append(mean_absolute_error)
+    return mae_vector
+
 
 #################################################################
 # DEPRECATED
