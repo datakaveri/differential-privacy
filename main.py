@@ -13,12 +13,9 @@ operations = config["operations"]
 config = config[dataset]
 # checking the dataset order of operations selected
 fileList = [file for file in os.popen('ls data/*.json').read().split('\n') if file]
-print(fileList)
-# dataset = utils.user_input_handler(config)  
-# operations = utils.oop_handler(config, dataset)
-# dataset, config, fileList = utils.dataset_handler(config)
-print(dataset, operations)
-print(config)
+# print(fileList)
+# print(dataset, operations)
+# print(config)
 
 # selecting appropriate pipeline
 if dataset == "medical":
