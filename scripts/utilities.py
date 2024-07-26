@@ -165,7 +165,7 @@ def user_input_handler(config):
             elif query_choice == '2':
                 config["differential_privacy"]["dp_query"] = "mean"
 
-    return config, dataset, fileList
+    return dataset
 
 # drop duplicates
 def deduplicate(dataframe):

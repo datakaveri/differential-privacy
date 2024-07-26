@@ -1,6 +1,6 @@
 {
-  "data_file": "../data/sampleHealthData_positivity.json",
-  "data_type": "",
+  "data_type": "medical",
+  "operations": ["suppress", "pseudonymize", "k_anonymize"],
   "medical": {
     "suppress": ["Date of Birth", "Address", "Lab Results"],
     "pseudonymize": ["Name", "Patient ID"],
@@ -12,7 +12,7 @@
     },
     "differential_privacy": {
       "dp_query": "mean",
-      "dp_output_attribute": "Days To Negative",
+      "dp_output_attribute": "Days to Negative",
       "dp_selected_output": "Positive",
       "dp_aggregate_attribute": "Gender",
       "dp_max_value_output_attribute": 50,
