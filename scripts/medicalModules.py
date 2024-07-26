@@ -8,7 +8,7 @@ import scripts.utilities as utils
 # function to bin the ages
 def generalize(dataframe, config, bins):
     attribute_to_generalize = config["k_anonymize"]["generalize"]
-    dataframe["Age Bin"] = pd.cut(
+    dataframe[f"{config['k_anonymize']['generalize']} Bin"] = pd.cut(
         dataframe[attribute_to_generalize], bins, ordered=True
     )
     return dataframe
@@ -91,7 +91,7 @@ def k_anonymize(dataframe, config):
 
 def user_assignment_k_anonymize(optimal_bin_width, data, config):
     bin_edges = np.arange(config["k_anonymize"]["min_bin_value"], config["k_anonymize"]["max_bin_value"]  + optimal_bin_width, optimal_bin_width)
-    data['Age Bin'] = pd.cut(data['Age'], bins=bin_edges, include_lowest=True)
+    data[f"{config['k_anonymize']['generalize']} Bin"] = pd.cut(data[config['k_anonymize']['generalize']], bins=bin_edges, include_lowest=True)
     return data
 
 def medicalDifferentialPrivacy(dataframeAccumulate, configFile):

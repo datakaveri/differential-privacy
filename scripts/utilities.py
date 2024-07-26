@@ -226,6 +226,7 @@ def output_handler_k_anon(data, config):
     dataset_name = data.name
     kConfig = config["k_anonymize"]
     data.drop(columns=[config["k_anonymize"]["generalize"]], inplace=True)
+    data[f"{kConfig['generalize']} Bin"] = data[f"{kConfig['generalize']} Bin"].astype(str)
     data = data.to_json(orient='index')
     file_name = f'pipelineOutput/medical_k_anon_{dataset_name}'
     with open(f"{file_name}.json", 'w') as outfile:
