@@ -203,11 +203,11 @@ def post_processing(data, config):
     dpConfig = config["differential_privacy"]
     output_attribute = dpConfig["dp_output_attribute"]
     if dpConfig['dp_query'] == 'mean':
-        data[f"Noisy {output_attribute}"] = data[f"Noisy {output_attribute}"].clip(0)
-        data[f"Noisy {output_attribute}"] = data[f"Noisy {output_attribute}"].round(3)
+        data["noisy_output"] = data["noisy_output"].clip(0)
+        data["noisy_output"] = data["noisy_output"].round(3)
     elif dpConfig['dp_query'] == 'count':
-        data[f"Noisy {dpConfig['dp_query']}"] = data[f"Noisy {dpConfig['dp_query']}"].clip(0)
-        data[f"Noisy {dpConfig['dp_query']}"] = data[f"Noisy {dpConfig['dp_query']}"].round(0)
+        data["noisy_output"] = data["noisy_output"].clip(0)
+        data["noisy_output"] = data["noisy_output"].round(0)
     return data
 
 # function to handle dataset choice
@@ -255,7 +255,7 @@ def output_handler_spatioTemp_mae(mean_absolute_error, config):
         # mean_absolute_error = mean_absolute_error.squeeze(axis=0)
         mean_absolute_error = mean_absolute_error[0]
         mean_absolute_error = mean_absolute_error.to_json(orient='index')
-        file_name = 'pipelineOutput/EpsVSMAE'
+        file_name = 'pipelineOutput/spatioTemporal_EpsVSMAE'
         with open(f"{file_name}_{dpConfig['dp_query']}.json", 'w') as outfile:
             outfile.write(mean_absolute_error)
         logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
@@ -276,6 +276,9 @@ def output_handler_medical_mae(mean_absolute_error, config):
 
 def output_handler_medical_dp_data(data, config):
     dpConfig = config['differential_privacy']
+    data.rename(columns = {'query_output':f'{dpConfig["dp_query"]} of {dpConfig["dp_output_attribute"]}',
+                           'noisy_output':f'noisy {dpConfig["dp_query"]} of {dpConfig["dp_output_attribute"]}'},
+                            inplace = True)
     if dpConfig['dp_query'] == 'count':
         # data = pd.DataFrame(data)
         aggregate_attribute = dpConfig['dp_aggregate_attribute']
@@ -293,6 +296,7 @@ def output_handler_medical_dp_data(data, config):
 def output_handler_spatioTemp_dp_data(data, config):
     dpConfig = config['differential_privacy']
     data = data[['HAT', 'query_output','noisy_output']]
+    data.rename(columns = {'query_output':f'{dpConfig["dp_query"]} of {dpConfig["dp_output_attribute"]}', 'noisy_output':f'noisy {dpConfig["dp_query"]} of {dpConfig["dp_output_attribute"]}'}, inplace = True)
     data = data.set_index('HAT')
     data = data.to_json(orient='index')
     file_name = 'pipelineOutput/spatioTemporal_noisyQueryOutput'
@@ -326,7 +330,6 @@ def monte_carlo_sim_mae(num_iterations, epsilon_vector, bVector_sum, bVector_cou
         mean_absolute_error = abs_error_vector_sum/num_iterations
         mae_vector.append(mean_absolute_error)
     return mae_vector
-
 
 #################################################################
 # DEPRECATED

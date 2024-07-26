@@ -14,7 +14,6 @@ def generalize(dataframe, config, bins):
     return dataframe
 
 # function to k-anonymize
-
 def k_anonymize(dataframe, config):
     """
     A function to perform k-anonymization on a given dataframe based on the configuration provided.
@@ -130,7 +129,7 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
         mean_absolute_error = bVector
         noise = np.random.laplace(0,b,len(dataframeAccumulate))
         privateAggregateDataframe = dataframeAccumulate.copy()
-        privateAggregateDataframe[f"Noisy {dpConfig['dp_query']}"] = privateAggregateDataframe["query_output"] + noise
+        privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
         # privateAggregateDataframe.drop(columns = ["query_output"], inplace = True)
     elif dpConfig["dp_query"] == "mean":
         # for the mean query we need to compute the noisy sum and the noisy count indpendently and then divide the noisy sum by the noisy count to find the noisy mean
@@ -155,9 +154,10 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
             mae_vector = pd.DataFrame(mae_vector)
             mae_vector_category = pd.concat([mae_vector_category, mae_vector], axis = 1)
         mean_absolute_error = mae_vector_category.mean(axis = 1)
+        mean_absolute_error.index=epsilonVector
         privateAggregateDataframe = dataframeAccumulate.copy()
-        privateAggregateDataframe["mean"] = privateAggregateDataframe["sum"] / privateAggregateDataframe["count"]
-        privateAggregateDataframe[f"Noisy {output_attribute}"] = noisy_mean
+        privateAggregateDataframe["query_output"] = privateAggregateDataframe["sum"] / privateAggregateDataframe["count"]
+        privateAggregateDataframe["noisy_output"] = noisy_mean
         privateAggregateDataframe.drop(columns = ["count", "sum"], inplace = True)
         # bVector = pd.concat([bVector_count, bVector_sum], axis = 1)
         # bVector = bVector.sum(axis = 1)
