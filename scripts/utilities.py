@@ -1,5 +1,4 @@
 # import statements
-from calendar import c
 import pandas as pd
 import numpy as np
 import json
@@ -119,7 +118,7 @@ def user_input_handler(config):
 
             elif query_choice == '2':
                 config["differential_privacy"]["dp_query"] = "mean"
-                config["differential_privacy"]["dp_output_attribute"] = "Days to Negative"
+                config["differential_privacy"]["dp_output_attribute"] = "Days To Negative"
                 config["differential_privacy"]["dp_aggregate_attribute"] = "Gender"
 
     elif dataset_choice == '2':
@@ -221,6 +220,29 @@ def dataset_handler(config):
         dataset = "spatioTemporal"
         fileList = spatioTemporalFileList
     return dataset, config, fileList
+
+def output_handler_suppression_pseudonymization(data, operations):
+    if "suppress" in operations and "pseudonymize" in operations:
+        file_name = f'pipelineOutput/suppression_pseudonymization'
+        data = data.to_json(orient='records')
+        with open(f"{file_name}.json", 'w') as outfile:
+            outfile.write(data)
+        logging.info('suppressed and pseudonymized data saved to %s', file_name)
+        return
+    if "suppress" in operations:
+        file_name = f'pipelineOutput/suppression'
+        data = data.to_json(orient='records')
+        with open(f"{file_name}.json", 'w') as outfile:
+            outfile.write(data)
+        logging.info('suppressed data saved to %s', file_name)
+        return
+    if "pseudonymize" in operations:
+        file_name = f'pipelineOutput/pseudonymization'
+        data = data.to_json(orient='records')
+        with open(f"{file_name}.json", 'w') as outfile:
+            outfile.write(data)
+        logging.info('pseudonymized data saved to %s', file_name)
+        return
 
 def output_handler_k_anon(data, config):
     dataset_name = data.name

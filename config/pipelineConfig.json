@@ -1,6 +1,5 @@
 {
-  "data_file": "../data/sampleHealthData_positivity.json",
-  "data_type": "",
+  "data_type": "medical",
   "medical": {
     "suppress": ["Date of Birth", "Address", "Lab Results"],
     "pseudonymize": ["Name", "Patient ID"],

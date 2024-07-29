@@ -23,7 +23,6 @@ if dataset == "medical":
         data = utils.post_processing(data, config)
         formatted_error = utils.output_handler_medical_mae(mean_absolute_error, config)
         formatted_data = utils.output_handler_medical_dp_data(data, config)
-        print("dp",data)
         # print(formatted_error)
     if "k_anonymize" in operations:
         k_anonymized_dataset, user_counts = medpipe.medicalPipelineKAnon(config, operations, fileList)  
@@ -32,10 +31,9 @@ if dataset == "medical":
         # print("optimal bin width: ", optimal_bin_width)
     if "suppress" in operations:
         data = medpipe.medicalPipelineSuppressPseudonymize(config, operations, fileList)
-        print(data)
     if "pseudonymize" in operations:
         data = medpipe.medicalPipelineSuppressPseudonymize(config, operations, fileList)
-        print(data)
+        utils.output_handler_suppression_pseudonymization(data, operations)
 
 if dataset == "spatioTemporal":
 
@@ -48,7 +46,6 @@ if dataset == "spatioTemporal":
     else:
         if "suppress" in operations:
             data = stpipe.spatioTemporalPipeline(config, operations, fileList)
-            print(data)
         if "pseudonymize" in operations:
             data = stpipe.spatioTemporalPipeline(config, operations, fileList)
-            print(data)
+        utils.output_handler_suppression_pseudonymization(data, operations)
