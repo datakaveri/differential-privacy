@@ -13,17 +13,20 @@ def medicalPipelineSuppressPseudonymize(config, operations, fileList):
     )
     return dataframeAccumulate
 
-def medicalPipelineKAnon(data, config, operations, fileList):
+def medicalPipelineKAnon(config, operations, fileList, data=None):
     logging.info("Performing Chunk Accumulation for k-anon")
     dataframeAccumulateKAnon, dataframeAccumulate = chmod.chunkHandlingMedicalKAnon(
         config, fileList
     )
     logging.info("Performing k-anonymization")
     optimal_bin_width = medmod.k_anonymize(dataframeAccumulateKAnon, config)
-    data_full = medmod.user_assignment_k_anonymize(optimal_bin_width, data, config)
-    data_full.name = 'full_dataset'
+    if "suppress" in operations or "pseudonymize" in operations:
+        data_full = medmod.user_assignment_k_anonymize(optimal_bin_width, data, config)
+    else:
+        data_full = medmod.user_assignment_k_anonymize(optimal_bin_width, dataframeAccumulate, config)
+    data_full.name = 'output'
     data_counts = medmod.user_assignment_k_anonymize(optimal_bin_width, dataframeAccumulateKAnon, config)
-    data_counts.name = 'user_counts'
+    data_counts.name = 'userCounts'
     return data_full, data_counts
 
 def medicalPipelineDP(config, operations, fileList):

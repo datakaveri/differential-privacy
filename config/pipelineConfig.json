@@ -1,6 +1,6 @@
 {
   "data_type": "medical",
-  "operations": ["suppress", "pseudonymize", "k_anonymize"],
+  "operations": ["suppress", "pseudonymize","k_anonymize"],
   "medical": {
     "suppress": ["Date of Birth", "Address", "Lab Results"],
     "pseudonymize": ["Name", "Patient ID"],
@@ -11,10 +11,10 @@
       "max_bin_value": 101
     },
     "differential_privacy": {
-      "dp_query": "mean",
-      "dp_output_attribute": "Days to Negative",
+      "dp_query": "count",
+      "dp_output_attribute": "Test Result",
       "dp_selected_output": "Positive",
-      "dp_aggregate_attribute": "Gender",
+      "dp_aggregate_attribute": "PIN Code",
       "dp_max_value_output_attribute": 50,
       "dp_epsilon": 0.1,
       "dp_epsilon_step": 0.1
