@@ -1,6 +1,7 @@
 # Ignoring deprecated files from config and scripts
-/scripts/modules.py
-/config/DPConfig.json
+config/
+data/spatioTemporalChunks
+data/syntheticMedicalChunks
 
 
 # Byte-compiled / optimized / DLL files
@@ -133,9 +134,3 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-data/suratITMSDPtest.json
-
-pipelineOutput
-
-data/spatioTemporalChunks
-data/syntheticMedicalChunks
