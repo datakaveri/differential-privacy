@@ -5,6 +5,7 @@ import json
 import hashlib
 import matplotlib.pyplot as plt
 import logging
+import os
 ###########################
 
 # select logging level
@@ -137,11 +138,11 @@ def output_handler_k_anon(data, config):
     data.drop(columns=[config["k_anonymize"]["generalize"]], inplace=True)
     data[f"{kConfig['generalize']} Bin"] = data[f"{kConfig['generalize']} Bin"].astype(str)
     data = data.to_json(orient='records')
-    file_name = f'pipelineOutput/{dataset_name}'
-    with open(f"{file_name}.json", 'w') as outfile:
-        outfile.write(data)
-    logging.info('k-anonymized data saved to %s', file_name)
-    logging.info('k-anonymity level: %s', kConfig["k"])
+    # file_name = f'pipelineOutput/{dataset_name}'
+    # with open(f"{file_name}.json", 'w') as outfile:
+    #     outfile.write(data)
+    # logging.info('k-anonymized data saved to %s', file_name)
+    # logging.info('k-anonymity level: %s', kConfig["k"])
     return data
 
 def output_handler_spatioTemp_mae(mean_absolute_error, config):
@@ -151,24 +152,24 @@ def output_handler_spatioTemp_mae(mean_absolute_error, config):
         averaged_mean_absolute_error = averaged_mean_absolute_error.to_json(orient='index')
         mean_absolute_error = mean_absolute_error.set_index('HAT')
         mean_absolute_error = mean_absolute_error.to_json(orient='index')
-        file_name = 'pipelineOutput/epsVsMaePerHat'
-        with open(f"{file_name}.json", 'w') as outfile:
-            outfile.write(mean_absolute_error)
-        logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
-        file_name = 'pipelineOutput/epsVsMae'
-        with open(f"{file_name}.json", 'w') as outfile:
-            outfile.write(averaged_mean_absolute_error) 
-        logging.info('%s query averaged error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
-
+        # file_name = 'pipelineOutput/epsVsMaePerHat'
+        # with open(f"{file_name}.json", 'w') as outfile:
+        #     outfile.write(mean_absolute_error)
+        # logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+        # file_name = 'pipelineOutput/epsVsMae'
+        # with open(f"{file_name}.json", 'w') as outfile:
+        #     outfile.write(averaged_mean_absolute_error) 
+        # logging.info('%s query averaged error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+        return mean_absolute_error, averaged_mean_absolute_error
     elif dpConfig['dp_query'] == 'count':
         # mean_absolute_error = mean_absolute_error.squeeze(axis=0)
         mean_absolute_error = mean_absolute_error[0]
         mean_absolute_error = mean_absolute_error.to_json(orient='index')
-        file_name = 'pipelineOutput/epsVsMae'
-        with open(f"{file_name}.json", 'w') as outfile:
-            outfile.write(mean_absolute_error)
-        logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
-    return 
+        # file_name = 'pipelineOutput/epsVsMae'
+        # with open(f"{file_name}.json", 'w') as outfile:
+        #     outfile.write(mean_absolute_error)
+        # logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+        return mean_absolute_error
 
 def output_handler_medical_mae(mean_absolute_error, config):
     dpConfig = config["differential_privacy"]
@@ -177,11 +178,11 @@ def output_handler_medical_mae(mean_absolute_error, config):
         mean_absolute_error = mean_absolute_error.to_json(orient='index')
     elif dpConfig["dp_query"] == 'mean':
         mean_absolute_error = mean_absolute_error.to_json(orient='index')
-    file_name = 'pipelineOutput/epsVsMae'
-    with open(f"{file_name}.json", 'w') as outfile:
-        outfile.write(mean_absolute_error)
-    logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
-    return
+    # file_name = 'pipelineOutput/epsVsMae'
+    # with open(f"{file_name}.json", 'w') as outfile:
+    #     outfile.write(mean_absolute_error)
+    # logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+    return mean_absolute_error
 
 def output_handler_medical_dp_data(data, config):
     dpConfig = config['differential_privacy']
@@ -196,44 +197,16 @@ def output_handler_medical_dp_data(data, config):
         aggregate_attribute = dpConfig['dp_aggregate_attribute']
         data = data.set_index(aggregate_attribute)
     data = data.to_json(orient='index')
-    file_name = 'pipelineOutput/output'
-    with open(f"{file_name}.json", "w") as outfile:
-        outfile.write(data)
-    logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+    # file_name = 'pipelineOutput/output'
+    # with open(f"{file_name}.json", "w") as outfile:
+    #     outfile.write(data)
+    # logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return data
 
     # function to format output
-def output_handler_medical_noise_vector(dataframe_list):
-    combined_df = pd.concat(dataframe_list, axis = 0)
-    combined_df =  combined_df.groupby(["epsilon","PIN Code"]).agg({"Noisy Positivity Ratio": list, "Positivity Ratio": list}).reset_index()
-    data_dict = combined_df.to_dict(orient="records")
-
-    # Group the data by 'epsilon' and create dictionaries with the desired structure
-    grouped_data = {}
-    for entry in data_dict:
-        epsilon_value = entry['epsilon']
-        if epsilon_value not in grouped_data:
-            grouped_data[epsilon_value] = []
-        grouped_data[epsilon_value].append({
-            'PIN Code': entry['PIN Code'],
-            'Noisy Positivity Ratio': entry['Noisy Positivity Ratio'],
-            'Positivity Ratio': entry['Positivity Ratio']
-        })
-
-    # Convert grouped data to a list of dictionaries
-    result_list = [{'epsilon': key, 'data': value} for key, value in grouped_data.items()]
-
-    # Convert list of dictionaries to JSON format
-    json_data = json.dumps(result_list, indent=4)
-
-    # Writing JSON data to a file
-    with open('nestedEpsTestOutput.json', 'w') as json_file:
-        json_file.write(json_data)
-        print("Output File Generated")
-    # json_data = json.dumps(data_dict, indent = 3)
-    # with open('testOutput.json', 'w') as f:
-    #     f.write(json_data)
-    return
+def output_handler_medical_noise_vector(data):
+    data = data.to_json(orient='index')
+    return data
 
 def output_handler_spatioTemp_dp_data(data, config):
     dpConfig = config['differential_privacy']
@@ -241,11 +214,23 @@ def output_handler_spatioTemp_dp_data(data, config):
     data.rename(columns = {'query_output':f'{dpConfig["dp_query"]} of {dpConfig["dp_output_attribute"]}', 'noisy_output':f'noisy {dpConfig["dp_query"]} of {dpConfig["dp_output_attribute"]}'}, inplace = True)
     data = data.set_index('HAT')
     data = data.to_json(orient='index')
-    file_name = 'pipelineOutput/output'
-    with open(f"{file_name}.json", "w") as outfile:
-        outfile.write(data)
-    logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
+    # file_name = 'pipelineOutput/output'
+    # with open(f"{file_name}.json", "w") as outfile:
+    #     outfile.write(data)
+    # logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return data
+
+def output_concatenator(**kwargs):
+    concat_output = {}
+    for key, output in kwargs.items():
+        output = json.loads(output)
+        concat_output[key] = output
+
+    with open('pipelineOutput/concat_output.json', 'w') as outfile:
+        json.dump(concat_output, outfile, indent=4)
+
+    print("Concatenated output written to pipelineOutput/concat_output.json")
+    return concat_output
 
 def oop_handler(config, dataset):
     operations = []
