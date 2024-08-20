@@ -17,41 +17,39 @@ def main_process(config):
     if dataset == "medical": 
         try:
             if "dp" in operations:
-                data, mean_absolute_error = medpipe.medicalPipelineDP(config, operations, fileList)
+                data, mean_absolute_error, noisy_query_output_for_epsilon_vector = medpipe.medicalPipelineDP(config, operations, fileList)
                 data = utils.post_processing(data, config)
                 formatted_error = utils.output_handler_medical_mae(mean_absolute_error, config)
                 formatted_data = utils.output_handler_medical_dp_data(data, config)
-
+                formatted_noise_vector = utils.output_handler_medical_noise_vector(noisy_query_output_for_epsilon_vector)
+                concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error, noise_vector = formatted_noise_vector)
             if "k_anonymize" in operations:
                 # if "suppress" in operations or "pseudonymize" in operations:
                 data = medpipe.medicalPipelineSuppressPseudonymize(config, operations, fileList)
                 k_anonymized_dataset, user_counts = medpipe.medicalPipelineKAnon(config, operations, fileList, data)  
                 formatted_data = utils.output_handler_k_anon(k_anonymized_dataset, config)
                 formatted_user_counts = utils.output_handler_k_anon(user_counts, config)
+                concat_output = utils.output_concatenator(anonymised_output = formatted_data, user_counts = formatted_user_counts)
         except Exception as e:
             print("Error: ", e)
-            formatted_data = []
     if dataset == "spatioTemporal":
         try:
             if "dp" in operations:
-                data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
-                data = utils.post_processing(data, config)
-                mean_absolute_error = utils.mean_absolute_error(bVector)
-                formatted_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)
-                formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
-                if "suppress" in operations:
-                    formatted_data = stpipe.spatioTemporalPipeline(config, operations, fileList)
-                if "pseudonymize" in operations:
-                    formatted_data = stpipe.spatioTemporalPipeline(config, operations, fileList)
+                if config["differential_privacy"]["dp_query"] == 'mean':
+                    data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
+                    data = utils.post_processing(data, config)
+                    mean_absolute_error = utils.mean_absolute_error(bVector)
+                    formatted_error, formatted_averaged_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)          
+                    formatted_data = utils.output_handlrer_spatioTemp_dp_data(data, config)
+                    concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error_per_hat = formatted_error, epsilon_vs_averaged_error = formatted_averaged_error)
+                if config["differential_privacy"]["dp_query"] == 'count':
+                    data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
+                    data = utils.post_processing(data, config)
+                    mean_absolute_error = utils.mean_absolute_error(bVector)
+                    formatted_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)
+                    formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
+                    concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error)
         except Exception as e:
             print("Error: ", e)
-            formatted_data = []
-    return formatted_data
+    return concat_output
 
-    # TODO: Add output format handling (json dumps)
-    # mods.output_handler(data, config)
-
-
-
-
-# formatted_data = utils.output_handler(data)

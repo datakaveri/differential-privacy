@@ -38,7 +38,7 @@ if dataset == "spatioTemporal":
             data = utils.post_processing(data, config)
             mean_absolute_error = utils.mean_absolute_error(bVector)
             formatted_error, formatted_averaged_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)          
-            formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
+            formatted_data = utils.output_handlrer_spatioTemp_dp_data(data, config)
             concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error_per_hat = formatted_error, epsilon_vs_averaged_error = formatted_averaged_error)
         if config["differential_privacy"]["dp_query"] == 'count':
             data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 

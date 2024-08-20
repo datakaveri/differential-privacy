@@ -11,8 +11,8 @@ server_config.read('server_config.cfg')
 
 main_server_ip = server_config.get('DP_SERVER', 'ip')
 main_server_port = server_config.get('DP_SERVER', 'port')
-db_server_ip = server_config.get('DB_SERVER', 'ip')
-db_server_port = server_config.get('DB_SERVER', 'port')
+# db_server_ip = server_config.get('DB_SERVER', 'ip')
+# db_server_port = server_config.get('DB_SERVER', 'port')
 
 
 def send_response(response):
