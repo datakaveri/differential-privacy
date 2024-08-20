@@ -1,4 +1,5 @@
 # import statements
+from flask import config
 import pandas as pd
 import numpy as np
 import h3
@@ -31,10 +32,11 @@ def spatialGeneralization(dataframe, configFile):
 def temporalGeneralization(dataframe, configFile):
     configFile = configFile["temporal_generalize"]
     temporalAttribute = configFile["temporal_attribute"]
+    TSR = configFile["timeslot_resolution"]
     dataframe["Date"] = pd.to_datetime(dataframe[temporalAttribute]).dt.date
     dataframe["Time"] = pd.to_datetime(dataframe[temporalAttribute]).dt.time
     time = dataframe["Time"]
-    dataframe["Timeslot"] = time.apply(lambda x: x.hour)
+    dataframe["Timeslot"] = time.apply(lambda x: f'{x.hour}_{((x.minute)//TSR)*TSR}')
     dataframe.drop(columns = temporalAttribute, inplace = True)
     return dataframe
 
@@ -47,10 +49,16 @@ def HATcreation(dataframe):
 # Filtering time slots by start and end time from config file
 def temporalEventFiltering(dataframe, configFile):
     configFile = configFile["temporal_generalize"]
+    temporalAttribute = configFile["temporal_attribute"]
+    dataframe["Date"] = pd.to_datetime(dataframe[temporalAttribute]).dt.date
+    dataframe["Time"] = pd.to_datetime(dataframe[temporalAttribute]).dt.time
+    time = dataframe["Time"]
+    dataframe["hour"] = time.apply(lambda x: x.hour)
     startTime = configFile["start_time"]
     endTime = configFile["end_time"]
-    dataframe = dataframe[(dataframe["Timeslot"] >= startTime) & (dataframe["Timeslot"] <= endTime) ]
-    logging.info('Number of unique timeslots left after temporal event filtering is: ' + str(dataframe['Timeslot'].nunique()))
+    dataframe = dataframe[(dataframe["hour"] >= startTime) & (dataframe["hour"] <= endTime)]
+    dataframe.reset_index()
+    logging.info('Number of unique hours left after temporal event filtering is: ' + str(dataframe['hour'].nunique()))
     # logging.info('########################################################################################')
     return dataframe
 
@@ -80,28 +88,29 @@ def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange
     dpConfig = configFile["differential_privacy"]
     epsilon = dpConfig["dp_epsilon"]
     epsilon_step = dpConfig["dp_epsilon_step"]
-    epsilonVector = np.arange(1,30,epsilon_step).round(2)
+    epsilon_vector = np.array([0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100])
+    # epsilonVector = np.arange(1,30,epsilon_step).round(2)
 
     # appropriate sensitivity computation
     if dpConfig["dp_query"] == "mean":
         max_of_sum_of_counts_per_lp = dataframeAccumulate['max_of_sum_of_counts_per_lp']
         sum_of_counts = dataframeAccumulate['sum_of_counts']
         sensitivity = (max_of_sum_of_counts_per_lp*(dpConfig["global_max_value"] - dpConfig["global_min_value"]))/(sum_of_counts)
-        bVector = np.zeros((len(sensitivity), len(epsilonVector)))
-        for i in range(len(epsilonVector)):
-            bVector[:, i] = sensitivity/epsilonVector[i]
-        bVector = pd.DataFrame(bVector, index=dataframeAccumulate.index, columns=epsilonVector)
+        bVector = np.zeros((len(sensitivity), len(epsilon_vector)))
+        for i in range(len(epsilon_vector)):
+            bVector[:, i] = sensitivity/epsilon_vector[i]
+        bVector = pd.DataFrame(bVector, index=dataframeAccumulate.index, columns=epsilon_vector)
         bVector['HAT'] = dataframeAccumulate['HAT']
         
     elif dpConfig["dp_query"] == "count":
         sensitivity = 1
-        bVector = np.zeros((1, len(epsilonVector)))
-        bVector = sensitivity/epsilonVector
-        bVector = pd.DataFrame(bVector, index=epsilonVector)
+        bVector = np.zeros((1, len(epsilon_vector)))
+        bVector = sensitivity/epsilon_vector
+        bVector = pd.DataFrame(bVector, index=epsilon_vector)
     # noise generation
     b = sensitivity/epsilon
 
-    # noise = np.random.laplace(0, bVector, (len(dataframeAccumulate), len(epsilonVector)))
+    # noise = np.random.laplace(0, bVector, (len(dataframeAccumulate), len(epsilon_vector)))
     noise = np.random.laplace(0, b, len(dataframeAccumulate))
     # print(len(noise))
     # noise addition

@@ -1,6 +1,6 @@
 {
-  "data_type": "medical",
-  "operations": ["suppress", "pseudonymize","k_anonymize"],
+  "data_type": "spatioTemporal",
+  "operations": ["dp"],
   "medical": {
     "suppress": ["Date of Birth", "Address", "Lab Results"],
     "pseudonymize": ["Name", "Patient ID"],
@@ -11,12 +11,12 @@
       "max_bin_value": 101
     },
     "differential_privacy": {
-      "dp_query": "count",
-      "dp_output_attribute": "Test Result",
+      "dp_query": "mean",
+      "dp_output_attribute": "Days To Negative",
       "dp_selected_output": "Positive",
-      "dp_aggregate_attribute": "PIN Code",
+      "dp_aggregate_attribute": "Gender",
       "dp_max_value_output_attribute": 50,
-      "dp_epsilon": 0.1,
+      "dp_epsilon": 0.01,
       "dp_epsilon_step": 0.1
     }
   },
@@ -37,19 +37,20 @@
       "spatial_attribute": "location.coordinates",
       "h3_resolution": 7,
       "filter_attribute": "license_plate",
-      "filter_event_occurences": 30,
+      "filter_event_occurences": 5,
       "filter_attribute_by": ["HAT", "Date"]
     },
     "temporal_generalize": {
       "temporal_attribute": "observationDateTime",
+      "timeslot_resolution": 15,
       "start_time": 9,
       "end_time": 20
     },
     "differential_privacy": {
-      "dp_query": "mean",
+      "dp_query": "count",
       "dp_output_attribute": "speed",
       "dp_aggregate_attribute": ["HAT", "Date", "license_plate"],
-      "dp_query_value_threshold": 60,
+      "dp_query_value_threshold": 50,
       "dp_epsilon": 1,
       "dp_epsilon_step": 0.1,
       "global_max_value": 65,

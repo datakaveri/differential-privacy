@@ -117,28 +117,42 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
     # count = dataframeAccumulate['query_output'].sum()
     epsilon = dpConfig["dp_epsilon"]
     epsilon_step = dpConfig["dp_epsilon_step"]
-    epsilonVector = np.arange(0.01,10,epsilon_step).round(2)
+    epsilon_vector = np.array([0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100])
+    noise_vector = []
+    noisy_query_output = []
     # epsilonVector = np.logspace(-5, 0, 1000)
     output_attribute = dpConfig["dp_output_attribute"]
     if dpConfig["dp_query"] == "count":
         sensitivity = 1
-        # no epsilon vector is generated
+        # computing noise vector for slider implementation in UI (values of noisy output for each value of epsilon)
+        for eps in epsilon_vector:
+            b_per_eps = sensitivity/eps
+            noise_per_eps = np.random.laplace(0,b_per_eps,len(dataframeAccumulate))
+            noise_vector.append(noise_per_eps)
         b = sensitivity/epsilon
-        bVector = sensitivity/epsilonVector
-        bVector = pd.DataFrame(bVector, index=epsilonVector)
+        # computing bVector for MAE computation
+        bVector = sensitivity/epsilon_vector
+        bVector = pd.DataFrame(bVector, index=epsilon_vector)
         mean_absolute_error = bVector
         noise = np.random.laplace(0,b,len(dataframeAccumulate))
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe["noisy_output"] = privateAggregateDataframe["query_output"] + noise
         # privateAggregateDataframe.drop(columns = ["query_output"], inplace = True)
+        for noise in noise_vector:
+            noisy_value_vector = privateAggregateDataframe["query_output"] + noise
+            noisy_query_output.append(noisy_value_vector)
+        noisy_query_output = pd.DataFrame(noisy_query_output)        
+        noisy_query_output.index = epsilon_vector
+        noisy_query_output = noisy_query_output.rename(columns = dataframeAccumulate[dpConfig["dp_aggregate_attribute"]])
+    
     elif dpConfig["dp_query"] == "mean":
-        # for the mean query we need to compute the noisy sum and the noisy count indpendently and then divide the noisy sum by the noisy count to find the noisy mean
+        # for the mean query we need to compute the noisy sum and the noisy count independently and then divide the noisy sum by the noisy count to find the noisy mean
         sensitivity_count = 1
         sensitivity_sum = dpConfig["dp_max_value_output_attribute"]
         b_count = sensitivity_count/(epsilon/2)
         b_sum = sensitivity_sum/(epsilon/2)
-        bVector_count = sensitivity_count/epsilonVector
-        bVector_sum = sensitivity_sum/epsilonVector
+        bVector_count = sensitivity_count/epsilon_vector
+        bVector_sum = sensitivity_sum/epsilon_vector
         noise_count = np.random.laplace(0, b_count, len(dataframeAccumulate))
         noise_sum = np.random.laplace(0, b_sum, len(dataframeAccumulate))
         sum = dataframeAccumulate["sum"]
@@ -147,18 +161,22 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
         noisy_sum = sum + noise_sum
         noisy_mean = noisy_sum/noisy_count
         mae_vector_category = pd.DataFrame()
+        noisy_query_output_category = pd.DataFrame()
         for category in dataframeAccumulate[dpConfig["dp_aggregate_attribute"]]:
             sum = dataframeAccumulate.loc[dataframeAccumulate[dpConfig["dp_aggregate_attribute"]] == category, 'sum'].values[0]
             count = dataframeAccumulate.loc[dataframeAccumulate[dpConfig["dp_aggregate_attribute"]] == category, 'count'].values[0]
-            mae_vector = utils.monte_carlo_sim_mae(10e5, epsilonVector, bVector_sum, bVector_count, sum, count)
+            mae_vector, noisy_query_output = utils.monte_carlo_sim_mae(10e5, epsilon_vector, bVector_sum, bVector_count, sum, count)
             mae_vector = pd.DataFrame(mae_vector)
             mae_vector_category = pd.concat([mae_vector_category, mae_vector], axis = 1)
+            noisy_query_output = pd.DataFrame(noisy_query_output)
+            noisy_query_output.rename(columns = {0:category}, inplace = True)
+            noisy_query_output_category = pd.concat([noisy_query_output_category, noisy_query_output], axis = 1)
+        noisy_query_output = noisy_query_output_category
+        noisy_query_output.index = epsilon_vector
         mean_absolute_error = mae_vector_category.mean(axis = 1)
-        mean_absolute_error.index=epsilonVector
+        mean_absolute_error.index=epsilon_vector
         privateAggregateDataframe = dataframeAccumulate.copy()
         privateAggregateDataframe["query_output"] = privateAggregateDataframe["sum"] / privateAggregateDataframe["count"]
         privateAggregateDataframe["noisy_output"] = noisy_mean
         privateAggregateDataframe.drop(columns = ["count", "sum"], inplace = True)
-        # bVector = pd.concat([bVector_count, bVector_sum], axis = 1)
-        # bVector = bVector.sum(axis = 1)
-    return privateAggregateDataframe, mean_absolute_error
+    return privateAggregateDataframe, mean_absolute_error, noisy_query_output

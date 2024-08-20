@@ -199,8 +199,14 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
                 + str(dataframeChunk.shape)
             )
 
+
         # creating H3 index
         dataframeChunk = stmod.spatialGeneralization(
+            dataframeChunk, spatioTemporalConfigDict
+        )
+
+        # filtering hours by start and end hours
+        dataframeChunk = stmod.temporalEventFiltering(
             dataframeChunk, spatioTemporalConfigDict
         )
 
@@ -212,10 +218,6 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
         # creating HATs from H3 and timeslots
         dataframeChunk = stmod.HATcreation(dataframeChunk)
 
-        # filtering time slots by start and end time
-        dataframeChunk = stmod.temporalEventFiltering(
-            dataframeChunk, spatioTemporalConfigDict
-        )
         
         # update the max and min dates
         startDay.append(dataframeChunk['Date'].min())

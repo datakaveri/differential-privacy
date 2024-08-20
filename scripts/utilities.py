@@ -202,6 +202,39 @@ def output_handler_medical_dp_data(data, config):
     logging.info('%s query output saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return data
 
+    # function to format output
+def output_handler_medical_noise_vector(dataframe_list):
+    combined_df = pd.concat(dataframe_list, axis = 0)
+    combined_df =  combined_df.groupby(["epsilon","PIN Code"]).agg({"Noisy Positivity Ratio": list, "Positivity Ratio": list}).reset_index()
+    data_dict = combined_df.to_dict(orient="records")
+
+    # Group the data by 'epsilon' and create dictionaries with the desired structure
+    grouped_data = {}
+    for entry in data_dict:
+        epsilon_value = entry['epsilon']
+        if epsilon_value not in grouped_data:
+            grouped_data[epsilon_value] = []
+        grouped_data[epsilon_value].append({
+            'PIN Code': entry['PIN Code'],
+            'Noisy Positivity Ratio': entry['Noisy Positivity Ratio'],
+            'Positivity Ratio': entry['Positivity Ratio']
+        })
+
+    # Convert grouped data to a list of dictionaries
+    result_list = [{'epsilon': key, 'data': value} for key, value in grouped_data.items()]
+
+    # Convert list of dictionaries to JSON format
+    json_data = json.dumps(result_list, indent=4)
+
+    # Writing JSON data to a file
+    with open('nestedEpsTestOutput.json', 'w') as json_file:
+        json_file.write(json_data)
+        print("Output File Generated")
+    # json_data = json.dumps(data_dict, indent = 3)
+    # with open('testOutput.json', 'w') as f:
+    #     f.write(json_data)
+    return
+
 def output_handler_spatioTemp_dp_data(data, config):
     dpConfig = config['differential_privacy']
     data = data[['HAT', 'query_output','noisy_output']]
@@ -228,17 +261,20 @@ def oop_handler(config, dataset):
 
 def monte_carlo_sim_mae(num_iterations, epsilon_vector, bVector_sum, bVector_count, sum, count ):
     mae_vector = []
+    noisy_query_output = []
     for i in range(len(epsilon_vector)):
         b_sum = bVector_sum[i]
         b_count = bVector_count[i]
         noisy_vector_sum = np.random.laplace(0,b_sum,int(num_iterations)) + sum
         noisy_vector_count = np.random.laplace(0,b_count,int(num_iterations)) + count
         noisy_mean_vector = noisy_vector_sum/noisy_vector_count
-        abs_error_vector = abs(noisy_mean_vector - (sum/count))
+        noisy_query_output.append(noisy_mean_vector[-1])
+        error_vector = noisy_mean_vector - (sum/count)
+        abs_error_vector = abs(error_vector)
         abs_error_vector_sum = abs_error_vector.sum()
         mean_absolute_error = abs_error_vector_sum/num_iterations
         mae_vector.append(mean_absolute_error)
-    return mae_vector
+    return mae_vector, noisy_query_output
 
 #################################################################
 # DEPRECATED

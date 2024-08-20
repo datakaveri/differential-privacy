@@ -17,7 +17,7 @@ fileList = [file for file in os.popen('ls data/*.json').read().split('\n') if fi
 if dataset == "medical":
 
     if "dp" in operations:
-        data, mean_absolute_error = medpipe.medicalPipelineDP(config, operations, fileList)
+        data, mean_absolute_error, noisy_query_output_for_epsilon_vector = medpipe.medicalPipelineDP(config, operations, fileList)
         data = utils.post_processing(data, config)
         formatted_error = utils.output_handler_medical_mae(mean_absolute_error, config)
         formatted_data = utils.output_handler_medical_dp_data(data, config)

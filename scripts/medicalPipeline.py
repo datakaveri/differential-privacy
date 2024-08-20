@@ -35,8 +35,8 @@ def medicalPipelineDP(config, operations, fileList):
         config, fileList
     )
     logging.info("Performing Differential Privacy")
-    privateAggregateDataframe, bVector = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, config)
-    return privateAggregateDataframe, bVector
+    privateAggregateDataframe, bVector, noisy_query_output_for_epsilon_vector = medmod.medicalDifferentialPrivacy(dataframeAccumulateDP, config)
+    return privateAggregateDataframe, bVector, noisy_query_output_for_epsilon_vector
 
         # utils.plot_normalised_mae(mean_normalised_mae, config)
 
