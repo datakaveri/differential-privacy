@@ -2,7 +2,7 @@
 import scripts.medicalPipeline as medpipe
 import scripts.spatioTemporalPipeline as stpipe
 import scripts.utilities as utils
-import json, os
+import json, os, requests
 
 def main_process(config):
     # checking the dataset order of operations selected
@@ -24,12 +24,26 @@ def main_process(config):
                 formatted_noise_vector = utils.output_handler_medical_noise_vector(noisy_query_output_for_epsilon_vector)
                 concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error, noise_vector = formatted_noise_vector)
             if "k_anonymize" in operations:
+                '''
+                
                 # if "suppress" in operations or "pseudonymize" in operations:
                 data = medpipe.medicalPipelineSuppressPseudonymize(config, operations, fileList)
                 k_anonymized_dataset, user_counts = medpipe.medicalPipelineKAnon(config, operations, fileList, data)  
                 formatted_data = utils.output_handler_k_anon(k_anonymized_dataset, config)
                 formatted_user_counts = utils.output_handler_k_anon(user_counts, config)
                 concat_output = utils.output_concatenator(anonymised_output = formatted_data, user_counts = formatted_user_counts)
+                '''
+                k_anon_params = {
+                    "k": config['k_anonymize']['k'],
+                    "suppress_columns": ','.join(config['suppress']),
+                    "pseudonymize_columns": ','.join(config['pseudonymize']),
+                    "insensitive_columns": ','.join(config['insensitive_columns']),
+                    "allow_record_suppression": config['allow_record_suppression']
+                }
+                url = 'http://192.168.1.37:8070/api/arx/process'
+                response = requests.get(url, params=k_anon_params)
+                concat_output = json.loads(response.text)
+                
         except Exception as e:
             print("Error: ", e)
     if dataset == "spatioTemporal":

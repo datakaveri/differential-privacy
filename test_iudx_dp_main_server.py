@@ -4,7 +4,7 @@ import pandas as pd
 
 
 # necessary file reads
-config_file_name = "config/pipelineConfig.json"
+config_file_name = "config/k_anon_config.json"
 
 config = utils.read_config(config_file_name) 
 url = 'http://127.0.0.1:55555/process_dp'
