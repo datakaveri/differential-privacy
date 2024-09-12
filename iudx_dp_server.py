@@ -36,15 +36,22 @@ def test_server():
 
 @app.route("/process_dp", methods = ["POST"])
 def process_dp():
-    try:
-        config = json.loads(request.get_data().decode())
-        data = main_process(config)
-        response = json.loads(data)
-        response = send_response(response)
-    except Exception as e:
-        print(e)
-        response = {}
-    return response
+    # try:
+    #     config = json.loads(request.get_data().decode())
+    #     data = main_process(config)
+    #     response = json.loads(data)
+    #     response = send_response(response)
+    # except Exception as e:
+    #     print(e)
+    #     response = {}
+    # return response
+    config = json.loads(request.get_data().decode())
+    data = main_process(config)
+    # response = requests.post(dp_server_url, data=json.dumps(json_data))
+    response = json.dumps(data)
+    return response, 200
+
 
 if __name__ == '__main__':
-    app.run(host=main_server_ip, port=main_server_port, debug=False)
+    # app.run(host=main_server_ip, port=main_server_port, debug=False)
+    app.run(debug=True)

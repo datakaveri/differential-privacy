@@ -1,0 +1,28 @@
+version: "3"
+services:
+    differential-privacy:
+        container_name: iudx-differential-privacy-c
+        image: iudx-differential-privacy-i
+        build: .
+        ports:
+            - "6000:6000"
+        volumes:
+            - .:/app
+    middle_layer:
+        container_name: iudx-differential-privacy-middle-layer-c
+        image: iudx-differential-privacy-middle-layer-c
+        build:
+            context: ./server
+            dockerfile: Dockerfile
+        ports:
+            - "5000:5000"
+    arx:
+        container_name: iudx-differential-privacy-arx-c
+        image: iudx-differential-privacy-arx-i
+        build:
+            context: ./arx
+            dockerfile: Dockerfile
+        ports:
+            - "8070:8070"
+        volumes:
+            - .:/app

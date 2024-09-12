@@ -148,6 +148,7 @@ def output_handler_k_anon(data, config):
 def output_handler_spatioTemp_mae(mean_absolute_error, config):
     dpConfig = config["differential_privacy"]
     if dpConfig['dp_query'] == 'mean':
+        print(mean_absolute_error)
         averaged_mean_absolute_error = np.mean(mean_absolute_error, axis=0) # averaged over all the HATs  
         averaged_mean_absolute_error = averaged_mean_absolute_error.to_json(orient='index')
         mean_absolute_error = mean_absolute_error.set_index('HAT')

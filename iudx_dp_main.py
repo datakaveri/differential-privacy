@@ -10,7 +10,11 @@ def main_process(config):
     operations = config["operations"]
     config = config[dataset]
     # checking the dataset order of operations selected
-    fileList = [file for file in os.popen('ls data/*.json').read().split('\n') if file]
+    fileList = []
+    if dataset == "spatioTemporal":
+        fileList = [file for file in os.popen('ls data/spatioTemporalChunks/*.json').read().split('\n') if file]
+    if dataset == "medical":
+        fileList = [file for file in os.popen('ls data/syntheticMedicalChunks/*.json').read().split('\n') if file]
     print(dataset, operations)
 
     # selecting appropriate pipeline
@@ -40,14 +44,14 @@ def main_process(config):
                     "insensitive_columns": ','.join(config['insensitive_columns']),
                     "allow_record_suppression": config['allow_record_suppression']
                 }
-                url = 'http://192.168.1.37:8070/api/arx/process'
+                url = 'http://localhost:8070/api/arx/process'
                 response = requests.get(url, params=k_anon_params)
                 concat_output = json.loads(response.text)
                 
         except Exception as e:
             print("Error: ", e)
     if dataset == "spatioTemporal":
-        try:
+        # try:
             if "dp" in operations:
                 if config["differential_privacy"]["dp_query"] == 'mean':
                     data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
@@ -63,7 +67,7 @@ def main_process(config):
                     formatted_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)
                     formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
                     concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error)
-        except Exception as e:
-            print("Error: ", e)
+        # except Exception as e:
+        #     print("Error: ", e)
     return concat_output
 
