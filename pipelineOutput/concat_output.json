@@ -2,19 +2,19 @@
     "anonymised_output": {
         "10_0 8742d98a2ffffff": {
             "mean of speed": 21.546961326,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 34.678
         },
         "10_0 8742d98b0ffffff": {
             "mean of speed": 20.2552631579,
-            "noisy mean of speed": 19.448
+            "noisy mean of speed": 0.0
         },
         "10_0 8742d98b1ffffff": {
             "mean of speed": 25.2647058824,
-            "noisy mean of speed": 26.833
+            "noisy mean of speed": 0.0
         },
         "10_0 8742d98b2ffffff": {
             "mean of speed": 16.4523809524,
-            "noisy mean of speed": 22.809
+            "noisy mean of speed": 22.469
         },
         "10_0 8742d98b4ffffff": {
             "mean of speed": 13.7315668203,
@@ -22,259 +22,259 @@
         },
         "10_0 8742d98b5ffffff": {
             "mean of speed": 20.880733945,
-            "noisy mean of speed": 39.401
+            "noisy mean of speed": 0.0
         },
         "10_0 8742d98b6ffffff": {
             "mean of speed": 22.664921466,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 31.625
         },
         "10_0 8742d998affffff": {
             "mean of speed": 10.7543103448,
-            "noisy mean of speed": 8.42
+            "noisy mean of speed": 46.962
         },
         "10_0 8742d9998ffffff": {
             "mean of speed": 17.9684210526,
-            "noisy mean of speed": 18.015
+            "noisy mean of speed": 33.516
         },
         "10_0 8742d9999ffffff": {
             "mean of speed": 18.2949685535,
-            "noisy mean of speed": 32.911
+            "noisy mean of speed": 0.0
         },
         "10_0 8742d999affffff": {
             "mean of speed": 16.9325123153,
-            "noisy mean of speed": 25.848
+            "noisy mean of speed": 14.035
         },
         "10_0 8742d9d44ffffff": {
             "mean of speed": 17.2196969697,
-            "noisy mean of speed": 13.181
+            "noisy mean of speed": 0.0
         },
         "10_0 8742d9d45ffffff": {
             "mean of speed": 22.3411764706,
-            "noisy mean of speed": 47.584
+            "noisy mean of speed": 40.121
         },
         "10_0 8742d9d4cffffff": {
             "mean of speed": 12.8404669261,
-            "noisy mean of speed": 35.004
+            "noisy mean of speed": 11.005
         },
         "10_0 8742d9d4dffffff": {
             "mean of speed": 22.6779661017,
-            "noisy mean of speed": 8.432
+            "noisy mean of speed": 17.594
         },
         "10_0 8742d9d68ffffff": {
             "mean of speed": 20.4716894977,
-            "noisy mean of speed": 33.452
+            "noisy mean of speed": 54.258
         },
         "10_0 8742d9d69ffffff": {
             "mean of speed": 20.9,
-            "noisy mean of speed": 75.4
+            "noisy mean of speed": 0.0
         },
         "10_0 8742d9d6affffff": {
             "mean of speed": 21.8685714286,
-            "noisy mean of speed": 29.444
+            "noisy mean of speed": 10.519
         },
         "10_0 8742d9d6bffffff": {
             "mean of speed": 17.7549668874,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 26.327
         },
         "10_0 8742d9d6effffff": {
             "mean of speed": 22.5919753086,
-            "noisy mean of speed": 18.195
+            "noisy mean of speed": 3.735
         },
         "11_0 8742d98a0ffffff": {
             "mean of speed": 14.801242236,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 17.421
         },
         "11_0 8742d98a2ffffff": {
             "mean of speed": 19.9504451039,
-            "noisy mean of speed": 13.917
+            "noisy mean of speed": 22.452
         },
         "11_0 8742d98a6ffffff": {
             "mean of speed": 22.2057142857,
-            "noisy mean of speed": 10.477
+            "noisy mean of speed": 0.0
         },
         "11_0 8742d98b0ffffff": {
             "mean of speed": 18.9111428571,
-            "noisy mean of speed": 27.927
+            "noisy mean of speed": 29.262
         },
         "11_0 8742d98b1ffffff": {
             "mean of speed": 23.5391304348,
-            "noisy mean of speed": 6.648
+            "noisy mean of speed": 20.657
         },
         "11_0 8742d98b2ffffff": {
             "mean of speed": 15.1228956229,
-            "noisy mean of speed": 15.418
+            "noisy mean of speed": 0.0
         },
         "11_0 8742d98b4ffffff": {
             "mean of speed": 12.4499121265,
-            "noisy mean of speed": 17.925
+            "noisy mean of speed": 0.0
         },
         "11_0 8742d98b5ffffff": {
             "mean of speed": 19.2578635015,
-            "noisy mean of speed": 36.066
+            "noisy mean of speed": 23.95
         },
         "11_0 8742d98b6ffffff": {
             "mean of speed": 17.7555970149,
-            "noisy mean of speed": 20.437
+            "noisy mean of speed": 0.0
         },
         "11_0 8742d998affffff": {
             "mean of speed": 8.1830574489,
-            "noisy mean of speed": 6.232
+            "noisy mean of speed": 10.408
         },
         "11_0 8742d9991ffffff": {
             "mean of speed": 17.3388429752,
-            "noisy mean of speed": 62.419
+            "noisy mean of speed": 38.546
         },
         "11_0 8742d9993ffffff": {
             "mean of speed": 18.5804347826,
-            "noisy mean of speed": 29.994
+            "noisy mean of speed": 15.52
         },
         "11_0 8742d9998ffffff": {
             "mean of speed": 16.9850249584,
-            "noisy mean of speed": 21.451
+            "noisy mean of speed": 13.045
         },
         "11_0 8742d9999ffffff": {
             "mean of speed": 17.6345724907,
-            "noisy mean of speed": 17.894
+            "noisy mean of speed": 42.525
         },
         "11_0 8742d999affffff": {
             "mean of speed": 17.8487084871,
-            "noisy mean of speed": 18.72
+            "noisy mean of speed": 22.457
         },
         "11_0 8742d999bffffff": {
             "mean of speed": 18.4867617108,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 13.723
         },
         "11_0 8742d9c64ffffff": {
             "mean of speed": 15.74375,
-            "noisy mean of speed": 19.119
+            "noisy mean of speed": 36.515
         },
         "11_0 8742d9d44ffffff": {
             "mean of speed": 16.6785575049,
-            "noisy mean of speed": 18.431
+            "noisy mean of speed": 6.383
         },
         "11_0 8742d9d45ffffff": {
             "mean of speed": 13.8225806452,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 29.195
         },
         "11_0 8742d9d48ffffff": {
             "mean of speed": 17.7151515152,
-            "noisy mean of speed": 22.534
+            "noisy mean of speed": 15.766
         },
         "11_0 8742d9d49ffffff": {
             "mean of speed": 12.5873605948,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 12.283
         },
         "11_0 8742d9d4affffff": {
             "mean of speed": 14.8048780488,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 25.631
         },
         "11_0 8742d9d4bffffff": {
             "mean of speed": 20.4680851064,
-            "noisy mean of speed": 25.333
+            "noisy mean of speed": 6.483
         },
         "11_0 8742d9d4cffffff": {
             "mean of speed": 13.5894039735,
-            "noisy mean of speed": 10.983
+            "noisy mean of speed": 0.0
         },
         "11_0 8742d9d4dffffff": {
             "mean of speed": 17.5528604119,
-            "noisy mean of speed": 16.144
+            "noisy mean of speed": 0.0
         },
         "11_0 8742d9d63ffffff": {
             "mean of speed": 25.9264,
-            "noisy mean of speed": 2.621
+            "noisy mean of speed": 21.479
         },
         "11_0 8742d9d68ffffff": {
             "mean of speed": 18.9811710677,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 15.208
         },
         "11_0 8742d9d69ffffff": {
             "mean of speed": 15.7652941176,
-            "noisy mean of speed": 1.178
+            "noisy mean of speed": 0.085
         },
         "11_0 8742d9d6affffff": {
             "mean of speed": 21.6180257511,
-            "noisy mean of speed": 17.203
+            "noisy mean of speed": 13.824
         },
         "11_0 8742d9d6bffffff": {
             "mean of speed": 18.1758241758,
-            "noisy mean of speed": 35.544
+            "noisy mean of speed": 19.918
         },
         "11_0 8742d9d6cffffff": {
             "mean of speed": 16.5692488263,
-            "noisy mean of speed": 10.607
+            "noisy mean of speed": 12.245
         },
         "11_0 8742d9d6dffffff": {
             "mean of speed": 18.6951612903,
-            "noisy mean of speed": 19.033
+            "noisy mean of speed": 26.664
         },
         "11_0 8742d9d6effffff": {
             "mean of speed": 18.9574394464,
-            "noisy mean of speed": 16.646
+            "noisy mean of speed": 10.879
         },
         "12_0 8742d98a0ffffff": {
             "mean of speed": 16.8522727273,
-            "noisy mean of speed": 22.587
+            "noisy mean of speed": 3.202
         },
         "12_0 8742d98a2ffffff": {
             "mean of speed": 21.5050505051,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 30.132
         },
         "12_0 8742d98a6ffffff": {
             "mean of speed": 22.3398550725,
-            "noisy mean of speed": 49.628
+            "noisy mean of speed": 0.0
         },
         "12_0 8742d98b0ffffff": {
             "mean of speed": 19.3691176471,
-            "noisy mean of speed": 31.139
+            "noisy mean of speed": 16.32
         },
         "12_0 8742d98b2ffffff": {
             "mean of speed": 16.4925349922,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 13.034
         },
         "12_0 8742d98b4ffffff": {
             "mean of speed": 11.0530872483,
-            "noisy mean of speed": 11.747
+            "noisy mean of speed": 11.529
         },
         "12_0 8742d98b5ffffff": {
             "mean of speed": 18.6312244898,
-            "noisy mean of speed": 22.164
+            "noisy mean of speed": 0.0
         },
         "12_0 8742d98b6ffffff": {
             "mean of speed": 17.063060686,
-            "noisy mean of speed": 10.998
+            "noisy mean of speed": 50.711
         },
         "12_0 8742d998affffff": {
             "mean of speed": 7.4323770492,
-            "noisy mean of speed": 22.344
+            "noisy mean of speed": 0.0
         },
         "12_0 8742d9991ffffff": {
             "mean of speed": 13.8232931727,
-            "noisy mean of speed": 16.765
+            "noisy mean of speed": 12.612
         },
         "12_0 8742d9993ffffff": {
             "mean of speed": 17.2429149798,
-            "noisy mean of speed": 35.456
+            "noisy mean of speed": 64.598
         },
         "12_0 8742d9998ffffff": {
             "mean of speed": 16.2266666667,
-            "noisy mean of speed": 14.878
+            "noisy mean of speed": 93.317
         },
         "12_0 8742d9999ffffff": {
             "mean of speed": 17.3255395683,
-            "noisy mean of speed": 3.056
+            "noisy mean of speed": 22.48
         },
         "12_0 8742d999affffff": {
             "mean of speed": 15.7432343234,
-            "noisy mean of speed": 7.586
+            "noisy mean of speed": 23.069
         },
         "12_0 8742d999bffffff": {
             "mean of speed": 18.8969957082,
-            "noisy mean of speed": 3.741
+            "noisy mean of speed": 1.632
         },
         "12_0 8742d9c64ffffff": {
             "mean of speed": 15.5702702703,
-            "noisy mean of speed": 6.15
+            "noisy mean of speed": 28.341
         },
         "12_0 8742d9d44ffffff": {
             "mean of speed": 13.5532879819,
@@ -282,7 +282,7 @@
         },
         "12_0 8742d9d45ffffff": {
             "mean of speed": 13.6723484848,
-            "noisy mean of speed": 6.451
+            "noisy mean of speed": 19.386
         },
         "12_0 8742d9d48ffffff": {
             "mean of speed": 12.6539130435,
@@ -290,111 +290,111 @@
         },
         "12_0 8742d9d49ffffff": {
             "mean of speed": 15.9517060367,
-            "noisy mean of speed": 50.991
+            "noisy mean of speed": 47.777
         },
         "12_0 8742d9d4cffffff": {
             "mean of speed": 15.2103139013,
-            "noisy mean of speed": 25.535
+            "noisy mean of speed": 39.47
         },
         "12_0 8742d9d4dffffff": {
             "mean of speed": 17.8925233645,
-            "noisy mean of speed": 100.411
+            "noisy mean of speed": 2.173
         },
         "12_0 8742d9d68ffffff": {
             "mean of speed": 18.7088963964,
-            "noisy mean of speed": 24.83
+            "noisy mean of speed": 12.469
         },
         "12_0 8742d9d69ffffff": {
             "mean of speed": 15.8061728395,
-            "noisy mean of speed": 27.468
+            "noisy mean of speed": 20.383
         },
         "12_0 8742d9d6affffff": {
             "mean of speed": 19.38,
-            "noisy mean of speed": 17.875
+            "noisy mean of speed": 25.635
         },
         "12_0 8742d9d6bffffff": {
             "mean of speed": 18.1316582915,
-            "noisy mean of speed": 19.336
+            "noisy mean of speed": 33.88
         },
         "12_0 8742d9d6cffffff": {
             "mean of speed": 17.2407407407,
-            "noisy mean of speed": 39.222
+            "noisy mean of speed": 0.0
         },
         "12_0 8742d9d6dffffff": {
             "mean of speed": 16.0418154762,
-            "noisy mean of speed": 10.363
+            "noisy mean of speed": 43.578
         },
         "12_0 8742d9d6effffff": {
             "mean of speed": 18.4644859813,
-            "noisy mean of speed": 48.232
+            "noisy mean of speed": 10.606
         },
         "13_0 8742d98a0ffffff": {
             "mean of speed": 14.0,
-            "noisy mean of speed": 15.899
+            "noisy mean of speed": 0.0
         },
         "13_0 8742d98a2ffffff": {
             "mean of speed": 16.3475177305,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 50.376
         },
         "13_0 8742d98a6ffffff": {
             "mean of speed": 10.2382428941,
-            "noisy mean of speed": 36.592
+            "noisy mean of speed": 13.43
         },
         "13_0 8742d98b0ffffff": {
             "mean of speed": 17.8979266348,
-            "noisy mean of speed": 17.199
+            "noisy mean of speed": 18.133
         },
         "13_0 8742d98b1ffffff": {
             "mean of speed": 24.3988439306,
-            "noisy mean of speed": 44.77
+            "noisy mean of speed": 36.919
         },
         "13_0 8742d98b2ffffff": {
             "mean of speed": 15.740831758,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 87.733
         },
         "13_0 8742d98b4ffffff": {
             "mean of speed": 11.7344594595,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 2.272
         },
         "13_0 8742d98b5ffffff": {
             "mean of speed": 18.8734210526,
-            "noisy mean of speed": 35.825
+            "noisy mean of speed": 37.805
         },
         "13_0 8742d98b6ffffff": {
             "mean of speed": 18.0078740157,
-            "noisy mean of speed": 29.851
+            "noisy mean of speed": 0.0
         },
         "13_0 8742d998affffff": {
             "mean of speed": 8.2780607248,
-            "noisy mean of speed": 39.292
+            "noisy mean of speed": 56.172
         },
         "13_0 8742d9991ffffff": {
             "mean of speed": 23.1291390728,
-            "noisy mean of speed": 31.713
+            "noisy mean of speed": 48.921
         },
         "13_0 8742d9993ffffff": {
             "mean of speed": 19.7581521739,
-            "noisy mean of speed": 18.517
+            "noisy mean of speed": 25.332
         },
         "13_0 8742d9998ffffff": {
             "mean of speed": 19.4011627907,
-            "noisy mean of speed": 20.103
+            "noisy mean of speed": 22.573
         },
         "13_0 8742d9999ffffff": {
             "mean of speed": 19.2345924453,
-            "noisy mean of speed": 22.926
+            "noisy mean of speed": 1.249
         },
         "13_0 8742d999affffff": {
             "mean of speed": 17.8809012876,
-            "noisy mean of speed": 26.143
+            "noisy mean of speed": 45.573
         },
         "13_0 8742d999bffffff": {
             "mean of speed": 17.8832285115,
-            "noisy mean of speed": 16.585
+            "noisy mean of speed": 0.0
         },
         "13_0 8742d9c64ffffff": {
             "mean of speed": 18.262745098,
-            "noisy mean of speed": 14.055
+            "noisy mean of speed": 23.079
         },
         "13_0 8742d9d44ffffff": {
             "mean of speed": 7.5889366273,
@@ -402,7 +402,7 @@
         },
         "13_0 8742d9d45ffffff": {
             "mean of speed": 13.2256818182,
-            "noisy mean of speed": 15.186
+            "noisy mean of speed": 56.34
         },
         "13_0 8742d9d48ffffff": {
             "mean of speed": 9.3289473684,
@@ -410,51 +410,51 @@
         },
         "13_0 8742d9d49ffffff": {
             "mean of speed": 10.9091338583,
-            "noisy mean of speed": 12.048
+            "noisy mean of speed": 60.899
         },
         "13_0 8742d9d4bffffff": {
             "mean of speed": 20.6228956229,
-            "noisy mean of speed": 50.998
+            "noisy mean of speed": 27.012
         },
         "13_0 8742d9d4cffffff": {
             "mean of speed": 15.9823412698,
-            "noisy mean of speed": 16.497
+            "noisy mean of speed": 0.0
         },
         "13_0 8742d9d4dffffff": {
             "mean of speed": 23.5964912281,
-            "noisy mean of speed": 12.339
+            "noisy mean of speed": 37.864
         },
         "13_0 8742d9d68ffffff": {
             "mean of speed": 18.1538596491,
-            "noisy mean of speed": 18.843
+            "noisy mean of speed": 12.188
         },
         "13_0 8742d9d69ffffff": {
             "mean of speed": 15.7357798165,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 12.124
         },
         "13_0 8742d9d6affffff": {
             "mean of speed": 21.8055137845,
-            "noisy mean of speed": 24.455
+            "noisy mean of speed": 20.052
         },
         "13_0 8742d9d6bffffff": {
             "mean of speed": 17.0851370851,
-            "noisy mean of speed": 24.182
+            "noisy mean of speed": 2.949
         },
         "13_0 8742d9d6cffffff": {
             "mean of speed": 18.0229885057,
-            "noisy mean of speed": 75.141
+            "noisy mean of speed": 44.481
         },
         "13_0 8742d9d6dffffff": {
             "mean of speed": 19.2296072508,
-            "noisy mean of speed": 10.595
+            "noisy mean of speed": 12.494
         },
         "13_0 8742d9d6effffff": {
             "mean of speed": 15.441943734,
-            "noisy mean of speed": 30.179
+            "noisy mean of speed": 36.368
         },
         "14_0 8742d98a0ffffff": {
             "mean of speed": 6.5025,
-            "noisy mean of speed": 78.716
+            "noisy mean of speed": 0.0
         },
         "14_0 8742d98a6ffffff": {
             "mean of speed": 21.2471910112,
@@ -462,287 +462,287 @@
         },
         "14_0 8742d98b0ffffff": {
             "mean of speed": 19.0286195286,
-            "noisy mean of speed": 14.549
+            "noisy mean of speed": 35.761
         },
         "14_0 8742d98b1ffffff": {
             "mean of speed": 26.2042253521,
-            "noisy mean of speed": 30.954
+            "noisy mean of speed": 76.036
         },
         "14_0 8742d98b2ffffff": {
             "mean of speed": 13.6787401575,
-            "noisy mean of speed": 85.337
+            "noisy mean of speed": 54.032
         },
         "14_0 8742d98b4ffffff": {
             "mean of speed": 10.499680919,
-            "noisy mean of speed": 17.302
+            "noisy mean of speed": 13.132
         },
         "14_0 8742d98b5ffffff": {
             "mean of speed": 19.5535248042,
-            "noisy mean of speed": 20.266
+            "noisy mean of speed": 52.151
         },
         "14_0 8742d98b6ffffff": {
             "mean of speed": 16.8703703704,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 25.516
         },
         "14_0 8742d998affffff": {
             "mean of speed": 11.5393258427,
-            "noisy mean of speed": 18.199
+            "noisy mean of speed": 0.0
         },
         "14_0 8742d9991ffffff": {
             "mean of speed": 17.1534772182,
-            "noisy mean of speed": 2.562
+            "noisy mean of speed": 14.584
         },
         "14_0 8742d9993ffffff": {
             "mean of speed": 18.9156626506,
-            "noisy mean of speed": 13.766
+            "noisy mean of speed": 0.0
         },
         "14_0 8742d9998ffffff": {
             "mean of speed": 19.5159010601,
-            "noisy mean of speed": 20.271
+            "noisy mean of speed": 25.457
         },
         "14_0 8742d9999ffffff": {
             "mean of speed": 18.3675564682,
-            "noisy mean of speed": 11.501
+            "noisy mean of speed": 7.885
         },
         "14_0 8742d999affffff": {
             "mean of speed": 16.0711159737,
-            "noisy mean of speed": 7.597
+            "noisy mean of speed": 21.759
         },
         "14_0 8742d999bffffff": {
             "mean of speed": 19.8668122271,
-            "noisy mean of speed": 19.875
+            "noisy mean of speed": 22.654
         },
         "14_0 8742d9c64ffffff": {
             "mean of speed": 17.7016806723,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 24.169
         },
         "14_0 8742d9d44ffffff": {
             "mean of speed": 16.1664948454,
-            "noisy mean of speed": 50.689
+            "noisy mean of speed": 0.0
         },
         "14_0 8742d9d45ffffff": {
             "mean of speed": 17.1831831832,
-            "noisy mean of speed": 15.973
+            "noisy mean of speed": 0.0
         },
         "14_0 8742d9d48ffffff": {
             "mean of speed": 17.8805194805,
-            "noisy mean of speed": 17.577
+            "noisy mean of speed": 34.812
         },
         "14_0 8742d9d49ffffff": {
             "mean of speed": 13.9054054054,
-            "noisy mean of speed": 3.373
+            "noisy mean of speed": 45.444
         },
         "14_0 8742d9d4dffffff": {
             "mean of speed": 19.60433213,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 19.851
         },
         "14_0 8742d9d68ffffff": {
             "mean of speed": 19.3018922853,
-            "noisy mean of speed": 36.954
+            "noisy mean of speed": 3.907
         },
         "14_0 8742d9d69ffffff": {
             "mean of speed": 18.1717877095,
-            "noisy mean of speed": 33.938
+            "noisy mean of speed": 32.343
         },
         "14_0 8742d9d6affffff": {
             "mean of speed": 20.9380952381,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 2.496
         },
         "14_0 8742d9d6bffffff": {
             "mean of speed": 18.3217550274,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 31.43
         },
         "14_0 8742d9d6cffffff": {
             "mean of speed": 18.7214912281,
-            "noisy mean of speed": 29.931
+            "noisy mean of speed": 0.0
         },
         "14_0 8742d9d6dffffff": {
             "mean of speed": 20.8819444444,
-            "noisy mean of speed": 16.06
+            "noisy mean of speed": 11.392
         },
         "14_0 8742d9d6effffff": {
             "mean of speed": 18.3399176955,
-            "noisy mean of speed": 3.323
+            "noisy mean of speed": 9.771
         },
         "15_0 8742d98a6ffffff": {
             "mean of speed": 20.2649635036,
-            "noisy mean of speed": 10.061
+            "noisy mean of speed": 20.602
         },
         "15_0 8742d98b0ffffff": {
             "mean of speed": 17.9876441516,
-            "noisy mean of speed": 23.878
+            "noisy mean of speed": 16.58
         },
         "15_0 8742d98b1ffffff": {
             "mean of speed": 23.5688622754,
-            "noisy mean of speed": 41.044
+            "noisy mean of speed": 36.385
         },
         "15_0 8742d98b2ffffff": {
             "mean of speed": 18.7040871935,
-            "noisy mean of speed": 9.133
+            "noisy mean of speed": 31.414
         },
         "15_0 8742d98b4ffffff": {
             "mean of speed": 12.0601641414,
-            "noisy mean of speed": 10.443
+            "noisy mean of speed": 1.332
         },
         "15_0 8742d98b5ffffff": {
             "mean of speed": 18.5891246684,
-            "noisy mean of speed": 14.31
+            "noisy mean of speed": 35.432
         },
         "15_0 8742d98b6ffffff": {
             "mean of speed": 17.9607142857,
-            "noisy mean of speed": 22.556
+            "noisy mean of speed": 3.816
         },
         "15_0 8742d998affffff": {
             "mean of speed": 9.7885532591,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 31.532
         },
         "15_0 8742d9991ffffff": {
             "mean of speed": 18.1525423729,
-            "noisy mean of speed": 5.096
+            "noisy mean of speed": 5.372
         },
         "15_0 8742d9993ffffff": {
             "mean of speed": 19.6324786325,
-            "noisy mean of speed": 3.381
+            "noisy mean of speed": 11.62
         },
         "15_0 8742d9998ffffff": {
             "mean of speed": 18.3684210526,
-            "noisy mean of speed": 28.169
+            "noisy mean of speed": 6.515
         },
         "15_0 8742d9999ffffff": {
             "mean of speed": 19.9665178571,
-            "noisy mean of speed": 19.359
+            "noisy mean of speed": 0.0
         },
         "15_0 8742d999affffff": {
             "mean of speed": 15.6670974155,
-            "noisy mean of speed": 15.928
+            "noisy mean of speed": 42.833
         },
         "15_0 8742d999bffffff": {
             "mean of speed": 17.369519833,
-            "noisy mean of speed": 17.347
+            "noisy mean of speed": 0.0
         },
         "15_0 8742d9c64ffffff": {
             "mean of speed": 16.6528497409,
-            "noisy mean of speed": 10.171
+            "noisy mean of speed": 30.388
         },
         "15_0 8742d9d44ffffff": {
             "mean of speed": 19.0454545455,
-            "noisy mean of speed": 28.517
+            "noisy mean of speed": 98.101
         },
         "15_0 8742d9d45ffffff": {
             "mean of speed": 13.9910071942,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 5.234
         },
         "15_0 8742d9d48ffffff": {
             "mean of speed": 15.8595185996,
-            "noisy mean of speed": 28.677
+            "noisy mean of speed": 45.681
         },
         "15_0 8742d9d49ffffff": {
             "mean of speed": 14.4781385281,
-            "noisy mean of speed": 71.067
+            "noisy mean of speed": 76.594
         },
         "15_0 8742d9d4bffffff": {
             "mean of speed": 14.0422360248,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 18.45
         },
         "15_0 8742d9d4cffffff": {
             "mean of speed": 15.945540797,
-            "noisy mean of speed": 38.871
+            "noisy mean of speed": 19.9
         },
         "15_0 8742d9d4dffffff": {
             "mean of speed": 20.0618955513,
-            "noisy mean of speed": 86.126
+            "noisy mean of speed": 15.016
         },
         "15_0 8742d9d68ffffff": {
             "mean of speed": 19.0967647059,
-            "noisy mean of speed": 1.152
+            "noisy mean of speed": 0.0
         },
         "15_0 8742d9d69ffffff": {
             "mean of speed": 20.351228978,
-            "noisy mean of speed": 6.836
+            "noisy mean of speed": 22.86
         },
         "15_0 8742d9d6affffff": {
             "mean of speed": 21.1817073171,
-            "noisy mean of speed": 13.846
+            "noisy mean of speed": 27.726
         },
         "15_0 8742d9d6bffffff": {
             "mean of speed": 19.2635701275,
-            "noisy mean of speed": 42.936
+            "noisy mean of speed": 50.632
         },
         "15_0 8742d9d6cffffff": {
             "mean of speed": 21.1656920078,
-            "noisy mean of speed": 14.369
+            "noisy mean of speed": 9.859
         },
         "15_0 8742d9d6dffffff": {
             "mean of speed": 18.60605613,
-            "noisy mean of speed": 13.35
+            "noisy mean of speed": 0.0
         },
         "16_0 8742d98a0ffffff": {
             "mean of speed": 13.0553505535,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 16.212
         },
         "16_0 8742d98a2ffffff": {
             "mean of speed": 18.8233944954,
-            "noisy mean of speed": 24.934
+            "noisy mean of speed": 14.226
         },
         "16_0 8742d98a6ffffff": {
             "mean of speed": 19.4885714286,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 48.723
         },
         "16_0 8742d98b0ffffff": {
             "mean of speed": 17.7100775194,
-            "noisy mean of speed": 40.073
+            "noisy mean of speed": 28.809
         },
         "16_0 8742d98b1ffffff": {
             "mean of speed": 25.1069518717,
-            "noisy mean of speed": 43.801
+            "noisy mean of speed": 0.0
         },
         "16_0 8742d98b2ffffff": {
             "mean of speed": 15.8790322581,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 34.307
         },
         "16_0 8742d98b4ffffff": {
             "mean of speed": 11.5320296696,
-            "noisy mean of speed": 19.153
+            "noisy mean of speed": 14.987
         },
         "16_0 8742d98b5ffffff": {
             "mean of speed": 17.0802816901,
-            "noisy mean of speed": 22.509
+            "noisy mean of speed": 0.0
         },
         "16_0 8742d98b6ffffff": {
             "mean of speed": 16.2909930716,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 30.824
         },
         "16_0 8742d998affffff": {
             "mean of speed": 8.2282722513,
-            "noisy mean of speed": 50.163
+            "noisy mean of speed": 4.075
         },
         "16_0 8742d9991ffffff": {
             "mean of speed": 17.6211180124,
-            "noisy mean of speed": 8.574
+            "noisy mean of speed": 2.225
         },
         "16_0 8742d9993ffffff": {
             "mean of speed": 19.4907161804,
-            "noisy mean of speed": 25.248
+            "noisy mean of speed": 7.844
         },
         "16_0 8742d9998ffffff": {
             "mean of speed": 17.4391408115,
-            "noisy mean of speed": 25.286
+            "noisy mean of speed": 0.0
         },
         "16_0 8742d9999ffffff": {
             "mean of speed": 18.0105708245,
-            "noisy mean of speed": 11.942
+            "noisy mean of speed": 26.415
         },
         "16_0 8742d999affffff": {
             "mean of speed": 15.8059895833,
-            "noisy mean of speed": 19.065
+            "noisy mean of speed": 23.335
         },
         "16_0 8742d999bffffff": {
             "mean of speed": 17.8230452675,
-            "noisy mean of speed": 35.211
+            "noisy mean of speed": 4.229
         },
         "16_0 8742d9c64ffffff": {
             "mean of speed": 15.9279279279,
-            "noisy mean of speed": 0.693
+            "noisy mean of speed": 24.184
         },
         "16_0 8742d9d44ffffff": {
             "mean of speed": 8.4909688013,
@@ -750,203 +750,203 @@
         },
         "16_0 8742d9d45ffffff": {
             "mean of speed": 13.4346793349,
-            "noisy mean of speed": 54.773
+            "noisy mean of speed": 0.0
         },
         "16_0 8742d9d48ffffff": {
             "mean of speed": 18.2529761905,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 46.586
         },
         "16_0 8742d9d49ffffff": {
             "mean of speed": 10.6295681063,
-            "noisy mean of speed": 74.338
+            "noisy mean of speed": 5.981
         },
         "16_0 8742d9d4bffffff": {
             "mean of speed": 18.1704545455,
-            "noisy mean of speed": 15.593
+            "noisy mean of speed": 58.092
         },
         "16_0 8742d9d4dffffff": {
             "mean of speed": 13.3089579525,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 50.24
         },
         "16_0 8742d9d68ffffff": {
             "mean of speed": 18.345276873,
-            "noisy mean of speed": 6.759
+            "noisy mean of speed": 5.977
         },
         "16_0 8742d9d69ffffff": {
             "mean of speed": 15.9376344086,
-            "noisy mean of speed": 4.708
+            "noisy mean of speed": 16.752
         },
         "16_0 8742d9d6affffff": {
             "mean of speed": 16.8515463918,
-            "noisy mean of speed": 31.543
+            "noisy mean of speed": 16.337
         },
         "16_0 8742d9d6bffffff": {
             "mean of speed": 12.3888888889,
-            "noisy mean of speed": 67.86
+            "noisy mean of speed": 0.0
         },
         "16_0 8742d9d6cffffff": {
             "mean of speed": 18.8472553699,
-            "noisy mean of speed": 20.757
+            "noisy mean of speed": 4.217
         },
         "16_0 8742d9d6dffffff": {
             "mean of speed": 18.8327402135,
-            "noisy mean of speed": 1.917
+            "noisy mean of speed": 26.131
         },
         "16_0 8742d9d6effffff": {
             "mean of speed": 19.2666666667,
-            "noisy mean of speed": 66.007
+            "noisy mean of speed": 19.853
         },
         "17_0 8742d98a0ffffff": {
             "mean of speed": 13.4599018003,
-            "noisy mean of speed": 25.362
+            "noisy mean of speed": 14.235
         },
         "17_0 8742d98a2ffffff": {
             "mean of speed": 19.4932349323,
-            "noisy mean of speed": 30.777
+            "noisy mean of speed": 5.721
         },
         "17_0 8742d98a6ffffff": {
             "mean of speed": 16.7039170507,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 5.187
         },
         "17_0 8742d98b0ffffff": {
             "mean of speed": 18.2926997245,
-            "noisy mean of speed": 21.292
+            "noisy mean of speed": 20.638
         },
         "17_0 8742d98b1ffffff": {
             "mean of speed": 23.190821256,
-            "noisy mean of speed": 38.292
+            "noisy mean of speed": 44.075
         },
         "17_0 8742d98b2ffffff": {
             "mean of speed": 12.4995523223,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 20.658
         },
         "17_0 8742d98b4ffffff": {
             "mean of speed": 10.4541336712,
-            "noisy mean of speed": 13.621
+            "noisy mean of speed": 15.574
         },
         "17_0 8742d98b5ffffff": {
             "mean of speed": 17.1168699187,
-            "noisy mean of speed": 25.757
+            "noisy mean of speed": 28.43
         },
         "17_0 8742d98b6ffffff": {
             "mean of speed": 18.06785404,
-            "noisy mean of speed": 18.99
+            "noisy mean of speed": 3.131
         },
         "17_0 8742d998affffff": {
             "mean of speed": 7.651782364,
-            "noisy mean of speed": 6.05
+            "noisy mean of speed": 0.0
         },
         "17_0 8742d9991ffffff": {
             "mean of speed": 16.558524173,
-            "noisy mean of speed": 44.323
+            "noisy mean of speed": 0.0
         },
         "17_0 8742d9993ffffff": {
             "mean of speed": 16.72823219,
-            "noisy mean of speed": 8.308
+            "noisy mean of speed": 9.245
         },
         "17_0 8742d9998ffffff": {
             "mean of speed": 15.6502649508,
-            "noisy mean of speed": 33.007
+            "noisy mean of speed": 26.764
         },
         "17_0 8742d9999ffffff": {
             "mean of speed": 15.1979224377,
-            "noisy mean of speed": 21.094
+            "noisy mean of speed": 37.431
         },
         "17_0 8742d999affffff": {
             "mean of speed": 14.8523255814,
-            "noisy mean of speed": 11.249
+            "noisy mean of speed": 10.773
         },
         "17_0 8742d999bffffff": {
             "mean of speed": 19.2468427095,
-            "noisy mean of speed": 20.462
+            "noisy mean of speed": 4.526
         },
         "17_0 8742d9c64ffffff": {
             "mean of speed": 11.8823529412,
-            "noisy mean of speed": 2.602
+            "noisy mean of speed": 0.0
         },
         "17_0 8742d9d44ffffff": {
             "mean of speed": 17.7294797688,
-            "noisy mean of speed": 20.693
+            "noisy mean of speed": 32.428
         },
         "17_0 8742d9d45ffffff": {
             "mean of speed": 11.4633068081,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 21.81
         },
         "17_0 8742d9d48ffffff": {
             "mean of speed": 14.1339285714,
-            "noisy mean of speed": 27.473
+            "noisy mean of speed": 16.317
         },
         "17_0 8742d9d49ffffff": {
             "mean of speed": 10.5105398458,
-            "noisy mean of speed": 35.053
+            "noisy mean of speed": 15.469
         },
         "17_0 8742d9d4bffffff": {
             "mean of speed": 15.5595238095,
-            "noisy mean of speed": 18.058
+            "noisy mean of speed": 9.813
         },
         "17_0 8742d9d4cffffff": {
             "mean of speed": 12.4662756598,
-            "noisy mean of speed": 22.921
+            "noisy mean of speed": 61.07
         },
         "17_0 8742d9d4dffffff": {
             "mean of speed": 15.2271356784,
-            "noisy mean of speed": 9.86
+            "noisy mean of speed": 14.069
         },
         "17_0 8742d9d63ffffff": {
             "mean of speed": 24.0411444142,
-            "noisy mean of speed": 22.528
+            "noisy mean of speed": 72.571
         },
         "17_0 8742d9d68ffffff": {
             "mean of speed": 17.1720359771,
-            "noisy mean of speed": 28.164
+            "noisy mean of speed": 23.255
         },
         "17_0 8742d9d69ffffff": {
             "mean of speed": 16.6599273608,
-            "noisy mean of speed": 19.972
+            "noisy mean of speed": 11.9
         },
         "17_0 8742d9d6affffff": {
             "mean of speed": 19.0144752714,
-            "noisy mean of speed": 32.33
+            "noisy mean of speed": 8.998
         },
         "17_0 8742d9d6bffffff": {
             "mean of speed": 20.0240740741,
-            "noisy mean of speed": 17.357
+            "noisy mean of speed": 13.447
         },
         "17_0 8742d9d6cffffff": {
             "mean of speed": 19.4041533546,
-            "noisy mean of speed": 67.789
+            "noisy mean of speed": 29.724
         },
         "17_0 8742d9d6dffffff": {
             "mean of speed": 17.4507042254,
-            "noisy mean of speed": 44.389
+            "noisy mean of speed": 26.108
         },
         "17_0 8742d9d6effffff": {
             "mean of speed": 11.9884848485,
-            "noisy mean of speed": 5.557
+            "noisy mean of speed": 86.028
         },
         "18_0 8742d98a0ffffff": {
             "mean of speed": 12.7407407407,
-            "noisy mean of speed": 14.535
+            "noisy mean of speed": 11.409
         },
         "18_0 8742d98a1ffffff": {
             "mean of speed": 9.4258675079,
-            "noisy mean of speed": 23.472
+            "noisy mean of speed": 0.0
         },
         "18_0 8742d98a2ffffff": {
             "mean of speed": 20.0708392603,
-            "noisy mean of speed": 43.627
+            "noisy mean of speed": 42.562
         },
         "18_0 8742d98a6ffffff": {
             "mean of speed": 15.8,
-            "noisy mean of speed": 11.885
+            "noisy mean of speed": 10.299
         },
         "18_0 8742d98b0ffffff": {
             "mean of speed": 15.9780380673,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 22.473
         },
         "18_0 8742d98b1ffffff": {
             "mean of speed": 23.9442379182,
-            "noisy mean of speed": 2.439
+            "noisy mean of speed": 35.51
         },
         "18_0 8742d98b2ffffff": {
             "mean of speed": 10.4832196453,
@@ -954,19 +954,19 @@
         },
         "18_0 8742d98b4ffffff": {
             "mean of speed": 10.8793240557,
-            "noisy mean of speed": 6.849
+            "noisy mean of speed": 11.709
         },
         "18_0 8742d98b5ffffff": {
             "mean of speed": 16.5866983373,
-            "noisy mean of speed": 31.076
+            "noisy mean of speed": 15.8
         },
         "18_0 8742d98b6ffffff": {
             "mean of speed": 16.0860617399,
-            "noisy mean of speed": 34.747
+            "noisy mean of speed": 16.969
         },
         "18_0 8742d998affffff": {
             "mean of speed": 9.4746081505,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 23.99
         },
         "18_0 8742d9991ffffff": {
             "mean of speed": 16.1077981651,
@@ -974,191 +974,191 @@
         },
         "18_0 8742d9993ffffff": {
             "mean of speed": 16.3748668797,
-            "noisy mean of speed": 22.608
+            "noisy mean of speed": 25.671
         },
         "18_0 8742d9998ffffff": {
             "mean of speed": 14.9749328559,
-            "noisy mean of speed": 13.348
+            "noisy mean of speed": 35.681
         },
         "18_0 8742d9999ffffff": {
             "mean of speed": 15.6980122324,
-            "noisy mean of speed": 21.739
+            "noisy mean of speed": 48.952
         },
         "18_0 8742d999affffff": {
             "mean of speed": 15.0187025132,
-            "noisy mean of speed": 10.822
+            "noisy mean of speed": 4.006
         },
         "18_0 8742d999bffffff": {
             "mean of speed": 17.7486111111,
-            "noisy mean of speed": 13.361
+            "noisy mean of speed": 15.118
         },
         "18_0 8742d999effffff": {
             "mean of speed": 16.9049079755,
-            "noisy mean of speed": 16.056
+            "noisy mean of speed": 0.0
         },
         "18_0 8742d9c64ffffff": {
             "mean of speed": 14.5467980296,
-            "noisy mean of speed": 7.125
+            "noisy mean of speed": 45.698
         },
         "18_0 8742d9d44ffffff": {
             "mean of speed": 17.5895683453,
-            "noisy mean of speed": 38.068
+            "noisy mean of speed": 22.535
         },
         "18_0 8742d9d45ffffff": {
             "mean of speed": 14.6240963855,
-            "noisy mean of speed": 37.385
+            "noisy mean of speed": 0.936
         },
         "18_0 8742d9d48ffffff": {
             "mean of speed": 16.3939914163,
-            "noisy mean of speed": 25.812
+            "noisy mean of speed": 25.044
         },
         "18_0 8742d9d49ffffff": {
             "mean of speed": 9.40416,
-            "noisy mean of speed": 43.677
+            "noisy mean of speed": 0.0
         },
         "18_0 8742d9d4affffff": {
             "mean of speed": 13.8838304553,
-            "noisy mean of speed": 29.508
+            "noisy mean of speed": 0.0
         },
         "18_0 8742d9d4bffffff": {
             "mean of speed": 16.899744898,
-            "noisy mean of speed": 15.929
+            "noisy mean of speed": 0.0
         },
         "18_0 8742d9d4cffffff": {
             "mean of speed": 14.4135338346,
-            "noisy mean of speed": 69.01
+            "noisy mean of speed": 30.202
         },
         "18_0 8742d9d4dffffff": {
             "mean of speed": 17.9130434783,
-            "noisy mean of speed": 27.617
+            "noisy mean of speed": 0.0
         },
         "18_0 8742d9d4effffff": {
             "mean of speed": 15.3052208835,
-            "noisy mean of speed": 15.872
+            "noisy mean of speed": 14.182
         },
         "18_0 8742d9d63ffffff": {
             "mean of speed": 22.6428571429,
-            "noisy mean of speed": 3.911
+            "noisy mean of speed": 84.828
         },
         "18_0 8742d9d68ffffff": {
             "mean of speed": 16.9232459848,
-            "noisy mean of speed": 25.832
+            "noisy mean of speed": 20.776
         },
         "18_0 8742d9d69ffffff": {
             "mean of speed": 15.7242402315,
-            "noisy mean of speed": 10.3
+            "noisy mean of speed": 13.168
         },
         "18_0 8742d9d6affffff": {
             "mean of speed": 18.109,
-            "noisy mean of speed": 7.036
+            "noisy mean of speed": 36.812
         },
         "18_0 8742d9d6bffffff": {
             "mean of speed": 17.9546699875,
-            "noisy mean of speed": 27.774
+            "noisy mean of speed": 21.765
         },
         "18_0 8742d9d6cffffff": {
             "mean of speed": 18.1690140845,
-            "noisy mean of speed": 17.349
+            "noisy mean of speed": 0.0
         },
         "18_0 8742d9d6dffffff": {
             "mean of speed": 16.8486204325,
-            "noisy mean of speed": 7.225
+            "noisy mean of speed": 8.661
         },
         "18_0 8742d9d6effffff": {
             "mean of speed": 13.8838297872,
-            "noisy mean of speed": 27.405
+            "noisy mean of speed": 14.855
         },
         "19_0 8742d98a0ffffff": {
             "mean of speed": 18.9444444444,
-            "noisy mean of speed": 22.791
+            "noisy mean of speed": 26.776
         },
         "19_0 8742d98a1ffffff": {
             "mean of speed": 15.8595890411,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 70.745
         },
         "19_0 8742d98a2ffffff": {
             "mean of speed": 21.1525157233,
-            "noisy mean of speed": 27.507
+            "noisy mean of speed": 0.0
         },
         "19_0 8742d98a6ffffff": {
             "mean of speed": 15.8140442133,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 0.595
         },
         "19_0 8742d98b0ffffff": {
             "mean of speed": 16.298336414,
-            "noisy mean of speed": 17.818
+            "noisy mean of speed": 16.815
         },
         "19_0 8742d98b1ffffff": {
             "mean of speed": 25.0922580645,
-            "noisy mean of speed": 12.331
+            "noisy mean of speed": 24.129
         },
         "19_0 8742d98b2ffffff": {
             "mean of speed": 13.9434235977,
-            "noisy mean of speed": 56.68
+            "noisy mean of speed": 12.738
         },
         "19_0 8742d98b4ffffff": {
             "mean of speed": 10.6855536332,
-            "noisy mean of speed": 6.293
+            "noisy mean of speed": 22.371
         },
         "19_0 8742d98b5ffffff": {
             "mean of speed": 17.4019011407,
-            "noisy mean of speed": 17.711
+            "noisy mean of speed": 20.076
         },
         "19_0 8742d98b6ffffff": {
             "mean of speed": 19.0167597765,
-            "noisy mean of speed": 25.67
+            "noisy mean of speed": 32.758
         },
         "19_0 8742d998affffff": {
             "mean of speed": 8.3401234568,
-            "noisy mean of speed": 13.296
+            "noisy mean of speed": 34.922
         },
         "19_0 8742d9991ffffff": {
             "mean of speed": 14.7564612326,
-            "noisy mean of speed": 24.46
+            "noisy mean of speed": 6.199
         },
         "19_0 8742d9993ffffff": {
             "mean of speed": 17.8218562874,
-            "noisy mean of speed": 17.053
+            "noisy mean of speed": 0.0
         },
         "19_0 8742d9998ffffff": {
             "mean of speed": 15.5629310345,
-            "noisy mean of speed": 12.482
+            "noisy mean of speed": 13.75
         },
         "19_0 8742d9999ffffff": {
             "mean of speed": 16.3463414634,
-            "noisy mean of speed": 19.284
+            "noisy mean of speed": 12.466
         },
         "19_0 8742d999affffff": {
             "mean of speed": 12.0341575618,
-            "noisy mean of speed": 12.23
+            "noisy mean of speed": 10.271
         },
         "19_0 8742d999bffffff": {
             "mean of speed": 17.9355231144,
-            "noisy mean of speed": 16.831
+            "noisy mean of speed": 2.415
         },
         "19_0 8742d999cffffff": {
             "mean of speed": 12.4908350305,
-            "noisy mean of speed": 35.93
+            "noisy mean of speed": 26.45
         },
         "19_0 8742d9c64ffffff": {
             "mean of speed": 13.6136363636,
-            "noisy mean of speed": 38.95
+            "noisy mean of speed": 11.184
         },
         "19_0 8742d9d44ffffff": {
             "mean of speed": 16.0459610028,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 33.971
         },
         "19_0 8742d9d45ffffff": {
             "mean of speed": 12.9401098901,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 11.749
         },
         "19_0 8742d9d48ffffff": {
             "mean of speed": 14.7780678851,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 0.638
         },
         "19_0 8742d9d49ffffff": {
             "mean of speed": 12.9652509653,
-            "noisy mean of speed": 22.205
+            "noisy mean of speed": 46.18
         },
         "19_0 8742d9d4bffffff": {
             "mean of speed": 20.2214521452,
@@ -1170,71 +1170,71 @@
         },
         "19_0 8742d9d4dffffff": {
             "mean of speed": 17.118852459,
-            "noisy mean of speed": 8.23
+            "noisy mean of speed": 21.326
         },
         "19_0 8742d9d68ffffff": {
             "mean of speed": 19.3576642336,
-            "noisy mean of speed": 30.079
+            "noisy mean of speed": 3.057
         },
         "19_0 8742d9d69ffffff": {
             "mean of speed": 17.5391032325,
-            "noisy mean of speed": 21.228
+            "noisy mean of speed": 21.347
         },
         "19_0 8742d9d6affffff": {
             "mean of speed": 19.1301204819,
-            "noisy mean of speed": 16.728
+            "noisy mean of speed": 21.612
         },
         "19_0 8742d9d6bffffff": {
             "mean of speed": 19.2232696897,
-            "noisy mean of speed": 22.951
+            "noisy mean of speed": 25.959
         },
         "19_0 8742d9d6cffffff": {
             "mean of speed": 18.9950617284,
-            "noisy mean of speed": 25.055
+            "noisy mean of speed": 53.378
         },
         "19_0 8742d9d6dffffff": {
             "mean of speed": 14.7248868778,
-            "noisy mean of speed": 7.555
+            "noisy mean of speed": 25.361
         },
         "19_0 8742d9d6effffff": {
             "mean of speed": 12.2306427504,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 161.309
         },
         "9_0 8742d98a0ffffff": {
             "mean of speed": 18.3310810811,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 11.147
         },
         "9_0 8742d98a2ffffff": {
             "mean of speed": 21.6080586081,
-            "noisy mean of speed": 21.736
+            "noisy mean of speed": 0.0
         },
         "9_0 8742d98a6ffffff": {
             "mean of speed": 20.9512195122,
-            "noisy mean of speed": 20.466
+            "noisy mean of speed": 46.715
         },
         "9_0 8742d98b0ffffff": {
             "mean of speed": 19.2682186235,
-            "noisy mean of speed": 37.297
+            "noisy mean of speed": 11.255
         },
         "9_0 8742d98b1ffffff": {
             "mean of speed": 25.2647058824,
-            "noisy mean of speed": 51.414
+            "noisy mean of speed": 52.145
         },
         "9_0 8742d98b2ffffff": {
             "mean of speed": 12.0301724138,
-            "noisy mean of speed": 11.088
+            "noisy mean of speed": 0.0
         },
         "9_0 8742d98b4ffffff": {
             "mean of speed": 11.246742671,
-            "noisy mean of speed": 20.51
+            "noisy mean of speed": 10.104
         },
         "9_0 8742d98b5ffffff": {
             "mean of speed": 19.0099009901,
-            "noisy mean of speed": 15.1
+            "noisy mean of speed": 0.0
         },
         "9_0 8742d98b6ffffff": {
             "mean of speed": 22.7282913165,
-            "noisy mean of speed": 17.316
+            "noisy mean of speed": 21.914
         },
         "9_0 8742d998affffff": {
             "mean of speed": 9.3319415449,
@@ -1242,27 +1242,27 @@
         },
         "9_0 8742d9991ffffff": {
             "mean of speed": 15.4174950298,
-            "noisy mean of speed": 50.995
+            "noisy mean of speed": 0.0
         },
         "9_0 8742d9993ffffff": {
             "mean of speed": 18.0750988142,
-            "noisy mean of speed": 27.765
+            "noisy mean of speed": 22.258
         },
         "9_0 8742d9998ffffff": {
             "mean of speed": 18.0063424947,
-            "noisy mean of speed": 18.159
+            "noisy mean of speed": 16.325
         },
         "9_0 8742d9999ffffff": {
             "mean of speed": 21.3655462185,
-            "noisy mean of speed": 28.253
+            "noisy mean of speed": 33.112
         },
         "9_0 8742d999affffff": {
             "mean of speed": 8.886214442,
-            "noisy mean of speed": 9.076
+            "noisy mean of speed": 7.561
         },
         "9_0 8742d999bffffff": {
             "mean of speed": 17.9387755102,
-            "noisy mean of speed": 17.315
+            "noisy mean of speed": 28.179
         },
         "9_0 8742d999cffffff": {
             "mean of speed": 11.9363636364,
@@ -1270,67 +1270,67 @@
         },
         "9_0 8742d9c64ffffff": {
             "mean of speed": 19.8402777778,
-            "noisy mean of speed": 2.076
+            "noisy mean of speed": 38.633
         },
         "9_0 8742d9d44ffffff": {
             "mean of speed": 23.2727272727,
-            "noisy mean of speed": 83.843
+            "noisy mean of speed": 30.543
         },
         "9_0 8742d9d45ffffff": {
             "mean of speed": 22.6298076923,
-            "noisy mean of speed": 95.169
+            "noisy mean of speed": 43.538
         },
         "9_0 8742d9d48ffffff": {
             "mean of speed": 19.1748878924,
-            "noisy mean of speed": 42.609
+            "noisy mean of speed": 21.554
         },
         "9_0 8742d9d49ffffff": {
             "mean of speed": 13.1980830671,
-            "noisy mean of speed": 18.295
+            "noisy mean of speed": 7.692
         },
         "9_0 8742d9d4affffff": {
             "mean of speed": 14.8114285714,
-            "noisy mean of speed": 28.674
+            "noisy mean of speed": 32.702
         },
         "9_0 8742d9d4bffffff": {
             "mean of speed": 26.7072072072,
-            "noisy mean of speed": 39.669
+            "noisy mean of speed": 0.0
         },
         "9_0 8742d9d4cffffff": {
             "mean of speed": 13.219330855,
-            "noisy mean of speed": 10.566
+            "noisy mean of speed": 35.507
         },
         "9_0 8742d9d4dffffff": {
             "mean of speed": 20.5056547619,
-            "noisy mean of speed": 49.822
+            "noisy mean of speed": 44.456
         },
         "9_0 8742d9d68ffffff": {
             "mean of speed": 21.127654321,
-            "noisy mean of speed": 100.18
+            "noisy mean of speed": 35.412
         },
         "9_0 8742d9d69ffffff": {
             "mean of speed": 19.2364556962,
-            "noisy mean of speed": 19.738
+            "noisy mean of speed": 19.001
         },
         "9_0 8742d9d6affffff": {
             "mean of speed": 21.6483870968,
-            "noisy mean of speed": 15.545
+            "noisy mean of speed": 53.584
         },
         "9_0 8742d9d6bffffff": {
             "mean of speed": 19.3496332518,
-            "noisy mean of speed": 16.667
+            "noisy mean of speed": 38.982
         },
         "9_0 8742d9d6cffffff": {
             "mean of speed": 22.1643835616,
-            "noisy mean of speed": 0.0
+            "noisy mean of speed": 24.444
         },
         "9_0 8742d9d6dffffff": {
             "mean of speed": 18.1890804598,
-            "noisy mean of speed": 2.547
+            "noisy mean of speed": 26.228
         },
         "9_0 8742d9d6effffff": {
             "mean of speed": 21.3566176471,
-            "noisy mean of speed": 23.649
+            "noisy mean of speed": 22.36
         }
     },
     "epsilon_vs_error_per_hat": {

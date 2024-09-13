@@ -16,13 +16,14 @@ services:
             dockerfile: Dockerfile
         ports:
             - "5000:5000"
-    arx:
-        container_name: iudx-differential-privacy-arx-c
-        image: iudx-differential-privacy-arx-i
-        build:
-            context: ./arx
-            dockerfile: Dockerfile
-        ports:
-            - "8070:8070"
-        volumes:
-            - .:/app
+        network_mode: "host"
+    # arx:
+    #     container_name: iudx-differential-privacy-arx-c
+    #     image: iudx-differential-privacy-arx-i
+    #     build:
+    #         context: ./arx
+    #         dockerfile: Dockerfile
+    #     ports:
+    #         - "8070:8070"
+    #     volumes:
+    #         - .:/app

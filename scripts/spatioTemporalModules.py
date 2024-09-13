@@ -103,7 +103,7 @@ def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange
         bVector['HAT'] = dataframeAccumulate['HAT']
         
     elif dpConfig["dp_query"] == "count":
-        sensitivity = 1
+        sensitivity = 2
         bVector = np.zeros((1, len(epsilon_vector)))
         bVector = sensitivity/epsilon_vector
         bVector = pd.DataFrame(bVector, index=epsilon_vector)
