@@ -64,8 +64,8 @@ def k_anon_run():
                     "pseudonymize_columns": ','.join(config['pseudonymize']),
                     "generalized_columns": ','.join(config['generalize']),
                     "insensitive_columns": ','.join(config['insensitive_columns']),
-                    "widths":config['medical']['width'],
-                    "num_levels":config['medical']['levels'],
+                    "widths":config['width'],
+                    "num_levels":config['levels'],
                     "allow_record_suppression": config['allow_record_suppression']
                 }
         
