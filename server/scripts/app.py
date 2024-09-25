@@ -56,14 +56,19 @@ def k_anon_run():
         json_data = request.get_json()
         dataset = json_data["data_type"]
         config = json_data[dataset]
+        
+        # ? k Anon parameters modified
         k_anon_params = {
                     "k": config['k_anonymize']['k'],
                     "suppress_columns": ','.join(config['suppress']),
                     "pseudonymize_columns": ','.join(config['pseudonymize']),
                     "generalized_columns": ','.join(config['generalize']),
                     "insensitive_columns": ','.join(config['insensitive_columns']),
+                    "widths":config['medical']['width'],
+                    "num_levels":config['medical']['levels'],
                     "allow_record_suppression": config['allow_record_suppression']
                 }
+        
         k_anon_server_url = server_config.get('K_ANON_SERVER', 'url')+"api/arx/process"
         # print(json_data)
         headers = {
