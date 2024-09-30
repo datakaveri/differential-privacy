@@ -59,7 +59,7 @@ def k_anon_run():
         
         # ? k Anon parameters modified
         k_anon_params = {
-                    "datasetType": json_data["data_type"],
+                    "datasetType": dataset,
                     "k": config['k_anonymize']['k'],
                     "suppress_columns": ','.join(config['suppress']),
                     "pseudonymize_columns": ','.join(config['pseudonymize']),
