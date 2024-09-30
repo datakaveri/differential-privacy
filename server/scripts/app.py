@@ -56,9 +56,10 @@ def k_anon_run():
         json_data = request.get_json()
         dataset = json_data["data_type"]
         config = json_data[dataset]
+        
         # ? k Anon parameters modified
         k_anon_params = {
-                    "datasetType": dataset,
+                    "datasetType": "medical",
                     "k": config['k_anonymize']['k'],
                     "suppress_columns": ','.join(config['suppress']),
                     "pseudonymize_columns": ','.join(config['pseudonymize']),
