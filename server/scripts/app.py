@@ -60,7 +60,7 @@ def k_anon_run():
                     "k": config['medical']['k_anonymize']['k'],
                     "suppress_columns": ','.join(config['medical']['suppress']),
                     "pseudonymize_columns": ','.join(config['medical']['pseudonymize']),
-                    "generalized_columns": ','.join(config['medical']['medical']['generalize']),
+                    "generalized_columns": ','.join(config['medical']['generalize']),
                     "insensitive_columns": ','.join(config['medical']['insensitive_columns']),
                     "widths":config['medical']['width'],
                     "num_levels":config['medical']['levels'],
