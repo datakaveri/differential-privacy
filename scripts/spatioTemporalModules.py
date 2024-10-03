@@ -87,7 +87,7 @@ def spatioTemporalEventFiltering(dataframe, configFile):
 def spatioTemporalDifferentialPrivacy(dataframeAccumulate, configFile, timeRange):
     dpConfig = configFile["differential_privacy"]
     epsilon = dpConfig["dp_epsilon"]
-    epsilon_step = dpConfig["dp_epsilon_step"]
+    # epsilon_step = dpConfig["dp_epsilon_step"]
     epsilon_vector = np.array([0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100])
     # epsilonVector = np.arange(1,30,epsilon_step).round(2)
 

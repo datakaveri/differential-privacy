@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 import scripts.utilities as utils
-
+import logging
 # function definitions
 ###########################
 # function to bin the ages
@@ -116,8 +116,8 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
     dpConfig = configFile['differential_privacy']
     # count = dataframeAccumulate['query_output'].sum()
     epsilon = dpConfig["dp_epsilon"]
-    epsilon_step = dpConfig["dp_epsilon_step"]
-    epsilon_vector = np.array([0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100])
+    # epsilon_step = dpConfig["dp_epsilon_step"]
+    epsilon_vector = np.array([0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100])
     noise_vector = []
     noisy_query_output = []
     # epsilonVector = np.logspace(-5, 0, 1000)
@@ -144,7 +144,7 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
         noisy_query_output = pd.DataFrame(noisy_query_output)        
         noisy_query_output.index = epsilon_vector
         noisy_query_output = noisy_query_output.rename(columns = dataframeAccumulate[dpConfig["dp_aggregate_attribute"]])
-    
+        logging.info("Reached end of med DP")
     elif dpConfig["dp_query"] == "mean":
         # for the mean query we need to compute the noisy sum and the noisy count independently and then divide the noisy sum by the noisy count to find the noisy mean
         sensitivity_count = 1

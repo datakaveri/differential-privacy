@@ -39,16 +39,18 @@ def process_dp():
     # try:
     #     config = json.loads(request.get_data().decode())
     #     data = main_process(config)
+    #     print(data)
     #     response = json.loads(data)
     #     response = send_response(response)
     # except Exception as e:
     #     print(e)
     #     response = {}
-    # return response
+    # return response, 200
     config = json.loads(request.get_data().decode())
     data = main_process(config)
     # response = requests.post(dp_server_url, data=json.dumps(json_data))
     response = json.dumps(data)
+    print("response:", response)
     return response, 200
 
 
