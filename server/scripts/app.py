@@ -55,7 +55,7 @@ def k_anon_run():
     if request.is_json:
         config = request.get_json()     
         # ? k Anon parameters modified
-        dataset_type = config['datatype']
+        dataset_type = config['data_type']
         k_anon_params = {
                     "datasetType":config['data_type'],
                     "k": config[dataset_type]['k_anonymize']['k'],
