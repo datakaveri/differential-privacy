@@ -57,14 +57,14 @@ def k_anon_run():
         # ? k Anon parameters modified
         k_anon_params = {
                     "datasetType":config['data_type'],
-                    "k": config['medical']['k_anonymize']['k'],
-                    "suppress_columns": ','.join(config['medical']['suppress']),
-                    "pseudonymize_columns": ','.join(config['medical']['pseudonymize']),
-                    "generalized_columns": ','.join(config['medical']['generalize']),
-                    "insensitive_columns": ','.join(config['medical']['insensitive_columns']),
-                    "widths":config['medical']['width'],
-                    "num_levels":config['medical']['levels'],
-                    "allow_record_suppression": config['medical']['allow_record_suppression']
+                    "k": config['datasetType']['k_anonymize']['k'],
+                    "suppress_columns": ','.join(config['datasetType']['suppress']),
+                    "pseudonymize_columns": ','.join(config['datasetType']['pseudonymize']),
+                    "generalized_columns": ','.join(config['datasetType']['generalize']),
+                    "insensitive_columns": ','.join(config['datasetType']['insensitive_columns']),
+                    "widths":config['datasetType']['width'],
+                    "num_levels":config['datasetType']['levels'],
+                    "allow_record_suppression": config['datasetType']['allow_record_suppression']
                 }
         
         k_anon_server_url = server_config.get('K_ANON_SERVER', 'url')+"api/arx/process"
