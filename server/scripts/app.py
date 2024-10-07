@@ -58,13 +58,13 @@ def k_anon_run():
         k_anon_params = {
                     "datasetType":config['data_type'],
                     "k": config['datasetType']['k_anonymize']['k'],
-                    "suppress_columns": ','.join(config['datasetType']['suppress']),
-                    "pseudonymize_columns": ','.join(config['datasetType']['pseudonymize']),
-                    "generalized_columns": ','.join(config['datasetType']['generalize']),
-                    "insensitive_columns": ','.join(config['datasetType']['insensitive_columns']),
-                    "widths":config['datasetType']['width'],
-                    "num_levels":config['datasetType']['levels'],
-                    "allow_record_suppression": config['datasetType']['allow_record_suppression']
+                    "suppress_columns": ','.join(config['data_type']['suppress']),
+                    "pseudonymize_columns": ','.join(config['data_type']['pseudonymize']),
+                    "generalized_columns": ','.join(config['data_type']['generalize']),
+                    "insensitive_columns": ','.join(config['data_type']['insensitive_columns']),
+                    "widths":config['data_type']['width'],
+                    "num_levels":config['data_type']['levels'],
+                    "allow_record_suppression": config['data_type']['allow_record_suppression']
                 }
         
         k_anon_server_url = server_config.get('K_ANON_SERVER', 'url')+"api/arx/process"
