@@ -21,7 +21,7 @@ def send_response(response):
     }
     ### start: to use only while testing the server ###
     with open('pipelineOutput/test_output.json','w') as f:
-        json.dump(output, f) 
+        json.dump(output, f, indent=2) 
     print('response saved successfully')
     ### end: to use only while testing the server ###
 
@@ -42,8 +42,7 @@ def process_dp():
         response = json.loads(data)
         response = send_response(response)
     except Exception as e:
-        print(e)
-        response = {}
+        response = send_response(data)
     return response
 
 if __name__ == '__main__':
