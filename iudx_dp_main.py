@@ -12,6 +12,7 @@ def main_process(config):
     # checking the dataset order of operations selected
     fileList = [file for file in os.popen('ls data/*.json').read().split('\n') if file]
     print(dataset, operations)
+    concat_output = {}
 
     # selecting appropriate pipeline
     if dataset == "medical": 
@@ -40,11 +41,21 @@ def main_process(config):
                     "insensitive_columns": ','.join(config['insensitive_columns']),
                     "allow_record_suppression": config['allow_record_suppression']
                 }
-                url = 'http://192.168.1.37:8070/api/arx/process'
-                response = requests.get(url, params=k_anon_params)
+                url = 'http://192.168.1.201:8070/api/arx/process'
+                headers = {
+                    'Content-Type': 'application/json'
+                }
+                response = requests.post(url, headers=headers, data=json.dumps(k_anon_params))
+                # response = requests.get(url, params=k_anon_params)
                 concat_output = json.loads(response.text)
-                
+            concat_output['status'] = "success"   
+            concat_output['status_code'] = "0000"             
         except Exception as e:
+            concat_output = {
+                'status': 'failed',
+                'status_code': '1111',
+                'error_message': type(e).__name__
+            }
             print("Error: ", e)
     if dataset == "spatioTemporal":
         try:
@@ -63,7 +74,14 @@ def main_process(config):
                     formatted_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)
                     formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
                     concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error)
+            concat_output['status'] = "success"
+            concat_output['status_code'] = "0000"
         except Exception as e:
-            print("Error: ", e)
+            concat_output = {
+                'status': 'failed',
+                'status_code': '1111',
+                'error_message': type(e).__name__
+            }
+            print("Error: ", e)            
     return concat_output
 
