@@ -16,16 +16,16 @@ main_server_port = server_config.get('DP_SERVER', 'port')
 
 
 def send_response(response):
-    output = {
-        "output":response
-    }
+    # output = {
+    #     "output":response
+    # }
     ### start: to use only while testing the server ###
     with open('pipelineOutput/test_output.json','w') as f:
-        json.dump(output, f) 
+        json.dump(response, f) 
     print('response saved successfully')
     ### end: to use only while testing the server ###
 
-    return output
+    return response
 
 
 @app.route("/test_server", methods = ["GET"])
