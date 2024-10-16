@@ -6,73 +6,77 @@ import json, os, requests
 import logging
 def main_process(config):
     # checking the dataset order of operations selected
-    dataset = config["data_type"]
-    operations = config["operations"]
-    config = config[dataset]
-    # checking the dataset order of operations selected
-    fileList = []
-    if dataset == "spatioTemporal":
-        fileList = [file for file in os.popen('ls data/spatioTemporalChunks/*.json').read().split('\n') if file]
-    if dataset == "medical":
-        fileList = [file for file in os.popen('ls data/syntheticMedicalChunks/*.json').read().split('\n') if file]
-    print(dataset, operations)
+    try:
+        dataset = config["data_type"]
+        operations = config["operations"]
+        config = config[dataset]
+        # checking the dataset order of operations selected
+        fileList = []
+        if dataset == "spatioTemporal":
+            fileList = [file for file in os.popen('ls data/spatioTemporalChunks/*.json').read().split('\n') if file]
+        if dataset == "medical":
+            fileList = [file for file in os.popen('ls data/syntheticMedicalChunks/*.json').read().split('\n') if file]
+        print(dataset, operations)
 
-    # selecting appropriate pipeline
-    if dataset == "medical": 
-        # try:
-        if "dp" in operations:
-            data, mean_absolute_error, noisy_query_output_for_epsilon_vector = medpipe.medicalPipelineDP(config, operations, fileList)
-            data = utils.post_processing(data, config)
-            # logging.info("Finished Post Processing")
-            formatted_error = utils.output_handler_medical_mae(mean_absolute_error, config)
-            # logging.info("Finished utput_handler_medical_mae")
-            formatted_data = utils.output_handler_medical_dp_data(data, config)
-            # logging.info("Finished output_handler_medical_dp_data")
-            formatted_noise_vector = utils.output_handler_medical_noise_vector(noisy_query_output_for_epsilon_vector)
-            # logging.info("Finished output_handler_medical_noise_vector")
-            concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error, noise_vector = formatted_noise_vector)
-            # logging.info("Finished output_concatenator")
-        if "k_anonymize" in operations:
-            '''
-            
-            # if "suppress" in operations or "pseudonymize" in operations:
-            data = medpipe.medicalPipelineSuppressPseudonymize(config, operations, fileList)
-            k_anonymized_dataset, user_counts = medpipe.medicalPipelineKAnon(config, operations, fileList, data)  
-            formatted_data = utils.output_handler_k_anon(k_anonymized_dataset, config)
-            formatted_user_counts = utils.output_handler_k_anon(user_counts, config)
-            concat_output = utils.output_concatenator(anonymised_output = formatted_data, user_counts = formatted_user_counts)
-            '''
-            k_anon_params = {
-                "k": config['k_anonymize']['k'],
-                "suppress_columns": ','.join(config['suppress']),
-                "pseudonymize_columns": ','.join(config['pseudonymize']),
-                "insensitive_columns": ','.join(config['insensitive_columns']),
-                "allow_record_suppression": config['allow_record_suppression']
-            }
-            url = 'http://localhost:8070/api/arx/process'
-            response = requests.get(url, params=k_anon_params)
-            concat_output = json.loads(response.text)
+        # selecting appropriate pipeline
+        if dataset == "medical": 
+            if "dp" in operations:
+                data, mean_absolute_error, noisy_query_output_for_epsilon_vector = medpipe.medicalPipelineDP(config, operations, fileList)
+                data = utils.post_processing(data, config)
+                # logging.info("Finished Post Processing")
+                formatted_error = utils.output_handler_medical_mae(mean_absolute_error, config)
+                # logging.info("Finished utput_handler_medical_mae")
+                formatted_data = utils.output_handler_medical_dp_data(data, config)
+                # logging.info("Finished output_handler_medical_dp_data")
+                formatted_noise_vector = utils.output_handler_medical_noise_vector(noisy_query_output_for_epsilon_vector)
+                # logging.info("Finished output_handler_medical_noise_vector")
+                concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error, noise_vector = formatted_noise_vector)
+                # logging.info("Finished output_concatenator")
+            if "k_anonymize" in operations:
+                '''
                 
-        # except Exception as e:
-        #     print("Error: ", e)
-    if dataset == "spatioTemporal":
-        # try:
-        if "dp" in operations:
-            if config["differential_privacy"]["dp_query"] == 'mean':
-                data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
-                data = utils.post_processing(data, config)
-                mean_absolute_error = utils.mean_absolute_error(bVector)
-                formatted_error, formatted_averaged_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)          
-                formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
-                concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error_per_hat = formatted_error, epsilon_vs_averaged_error = formatted_averaged_error)
-            if config["differential_privacy"]["dp_query"] == 'count':
-                data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
-                data = utils.post_processing(data, config)
-                mean_absolute_error = utils.mean_absolute_error(bVector)
-                formatted_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)
-                formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
-                concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error)
-        # except Exception as e:
-        #     print("Error: ", e)
+                # if "suppress" in operations or "pseudonymize" in operations:
+                data = medpipe.medicalPipelineSuppressPseudonymize(config, operations, fileList)
+                k_anonymized_dataset, user_counts = medpipe.medicalPipelineKAnon(config, operations, fileList, data)  
+                formatted_data = utils.output_handler_k_anon(k_anonymized_dataset, config)
+                formatted_user_counts = utils.output_handler_k_anon(user_counts, config)
+                concat_output = utils.output_concatenator(anonymised_output = formatted_data, user_counts = formatted_user_counts)
+                '''
+                k_anon_params = {
+                    "k": config['k_anonymize']['k'],
+                    "suppress_columns": ','.join(config['suppress']),
+                    "pseudonymize_columns": ','.join(config['pseudonymize']),
+                    "insensitive_columns": ','.join(config['insensitive_columns']),
+                    "allow_record_suppression": config['allow_record_suppression']
+                }
+                url = 'http://localhost:8070/api/arx/process'
+                response = requests.get(url, params=k_anon_params)
+                concat_output = json.loads(response.text)
+
+        if dataset == "spatioTemporal":
+            if "dp" in operations:
+                if config["differential_privacy"]["dp_query"] == 'mean':
+                    data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
+                    data = utils.post_processing(data, config)
+                    mean_absolute_error = utils.mean_absolute_error(bVector)
+                    formatted_error, formatted_averaged_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)          
+                    formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
+                    concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error_per_hat = formatted_error, epsilon_vs_averaged_error = formatted_averaged_error)
+                if config["differential_privacy"]["dp_query"] == 'count':
+                    data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
+                    data = utils.post_processing(data, config)
+                    mean_absolute_error = utils.mean_absolute_error(bVector)
+                    formatted_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)
+                    formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
+                    concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error)
+        concat_output['status'] = "success"
+        concat_output['status_code'] = "0000"
+    except Exception as e:
+        concat_output = {
+            'status': 'failed',
+            'status_code': '1111',
+            'error_message': type(e).__name__
+        }
+        print("Error: ", e)
     return concat_output
 
