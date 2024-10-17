@@ -16,16 +16,16 @@ main_server_port = server_config.get('DP_SERVER', 'port')
 
 
 def send_response(response):
-    output = {
-        "output":response
-    }
+    # output = {
+    #     "output":response
+    # }
     ### start: to use only while testing the server ###
     with open('pipelineOutput/test_output.json','w') as f:
-        json.dump(output, f) 
+        json.dump(response, f) 
     print('response saved successfully')
     ### end: to use only while testing the server ###
 
-    return output
+    return response
 
 
 @app.route("/test_server", methods = ["GET"])
@@ -36,21 +36,13 @@ def test_server():
 
 @app.route("/process_dp", methods = ["POST"])
 def process_dp():
-    # try:
-    #     config = json.loads(request.get_data().decode())
-    #     data = main_process(config)
-    #     print(data)
-    #     response = json.loads(data)
-    #     response = send_response(response)
-    # except Exception as e:
-    #     print(e)
-    #     response = {}
-    # return response, 200
-    config = json.loads(request.get_data().decode())
-    data = main_process(config)
-    # response = requests.post(dp_server_url, data=json.dumps(json_data))
-    response = json.dumps(data)
-    print("response:", response)
+    try:
+        config = json.loads(request.get_data().decode())
+        data = main_process(config)
+        response = json.loads(data)
+        response = send_response(response)
+    except Exception as e:
+        response = send_response(data)
     return response, 200
 
 
