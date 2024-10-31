@@ -4,12 +4,19 @@ import scripts.spatioTemporalPipeline as stpipe
 import scripts.utilities as utils
 import json, os, requests
 import logging
+from iudx_dp_validations import *
+
 def main_process(config):
     # checking the dataset order of operations selected
     try:
         dataset = config["data_type"]
         operations = config["operations"]
         config = config[dataset]
+
+        #validate config
+        validate_dp_conf_obj = ValidateDPConfig(config)
+        validate_dp_conf_obj.validate_dp_config()
+        
         # checking the dataset order of operations selected
         fileList = []
         if dataset == "spatioTemporal":
@@ -72,11 +79,19 @@ def main_process(config):
         concat_output['status'] = "success"
         concat_output['status_code'] = "0000"
     except Exception as e:
-        concat_output = {
+        if isinstance(e, CustomValueError):
+            concat_output = {
             'status': 'failed',
-            'status_code': '1111',
+            'status_code': e.code,
+            'error_message': e.message
+        }
+            print(f"Caught a CustomError: {e}")
+        else:
+            concat_output = {
+            'status': 'failed',
+            'status_code': "1111",
             'error_message': type(e).__name__
         }
-        print("Error: ", e)
+            print(f"Error: {e}")            
     return concat_output
 
