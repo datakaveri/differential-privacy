@@ -13,7 +13,7 @@ CORS(app,
 )
 
 server_config = configparser.ConfigParser()
-server_config.read('server_config.cfg')
+server_config.read('scripts/server_config.cfg')
 
 
 @app.route("/get_dataset_names", methods=['GET'])
@@ -136,4 +136,4 @@ def save_config():
     else:
         return jsonify({"error": "Request must be in JSON format"}), 400
 
-app.run(host='0.0.0.0',debug=True)
+app.run(debug=True)
