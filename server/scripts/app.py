@@ -4,7 +4,7 @@ from flask_cors import CORS
 import gzip
 import configparser
 import requests
-
+import os
 
 app = Flask(__name__)
 CORS(app, 
@@ -13,7 +13,7 @@ CORS(app,
 )
 
 server_config = configparser.ConfigParser()
-server_config.read('scripts/server_config.cfg')
+server_config.read('server_config.cfg')
 
 
 @app.route("/get_dataset_names", methods=['GET'])
@@ -34,6 +34,7 @@ def get_dataset_names():
     else:
         print('Failed to fetch dataset names. Status code:', response.status_code)
     return jsonify(filenames), 200
+
 
 @app.route('/run_dp_pipeline', methods=['POST'])
 def dp_run():
@@ -80,6 +81,33 @@ def k_anon_run():
         res = json.loads(response.text)
         return res, 200
 
+
+@app.route('/run_chunkanon_pipeline', methods=['POST', 'OPTIONS'])
+def run_chunkanon():
+    if request.method == 'OPTIONS':
+    # This is the CORS preflight request
+        return '', 200
+
+    if request.is_json:
+        config = request.get_json()
+        chunkanon_server_url = server_config.get('SKALD_SERVER', 'url') + "process_SKALD"
+
+        headers = {"Content-Type": "application/json"}
+        try:
+            response = requests.post(chunkanon_server_url, headers=headers, data=json.dumps(config))
+            res = json.loads(response.text)
+            return res, 200
+        except Exception as e:
+            return jsonify({
+                "status": "failed",
+                "status_code": "9999",
+                "error_message": str(e)
+            }), 500
+
+    else:
+        return jsonify({"error": "Request must be in JSON format"}), 400
+
+    
 @app.route('/save_config', methods=['POST'])
 def save_config():
 
@@ -108,4 +136,4 @@ def save_config():
     else:
         return jsonify({"error": "Request must be in JSON format"}), 400
 
-app.run(debug=True)
+app.run(host='0.0.0.0',debug=True)
