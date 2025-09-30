@@ -51,6 +51,7 @@ def main_process(config):
                 '''
                 k_anon_params = {
                     "k": config['k_anonymize']['k'],
+  
                     "suppress_columns": ','.join(config['suppress']),
                     "pseudonymize_columns": ','.join(config['pseudonymize']),
                     "insensitive_columns": ','.join(config['insensitive_columns']),

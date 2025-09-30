@@ -8,6 +8,9 @@ services:
             - "6000:6000"
         volumes:
             - .:/app
+        deploy:
+          restart_policy: 
+            condition: always
     middle_layer:
         container_name: iudx-differential-privacy-middle-layer-c
         image: iudx-differential-privacy-middle-layer-c
@@ -17,6 +20,9 @@ services:
         ports:
             - "5000:5000"
         network_mode: "host"
+        deploy:
+          restart_policy:
+            condition: always
     # arx:
     #     container_name: iudx-differential-privacy-arx-c
     #     image: iudx-differential-privacy-arx-i
