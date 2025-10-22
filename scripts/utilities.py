@@ -12,26 +12,12 @@ import os
 # logging.basicConfig(level = logging.INFO)
 
 # for testing
-medicalFileList = ["data/syntheticMedicalChunks/medical_data_split_file_0.json",
-                    "data/syntheticMedicalChunks/medical_data_split_file_1.json",
-                    "data/syntheticMedicalChunks/medical_data_split_file_2.json",
-                    "data/syntheticMedicalChunks/medical_data_split_file_3.json",
-                    "data/syntheticMedicalChunks/medical_data_split_file_4.json"
+FileList = ["data/syntheticChunks/data_split_file_0.json",
+                    "data/syntheticChunks/data_split_file_1.json",
+                    "data/syntheticChunks/data_split_file_2.json",
+                    "data/syntheticChunks/data_split_file_3.json",
+                    "data/syntheticChunks/data_split_file_4.json"
                     ]
-
-# for testing
-
-# spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
-#             'data/spatioTemporalChunks/split_file_1.json',
-#             'data/spatioTemporalChunks/split_file_2.json',
-#             'data/spatioTemporalChunks/split_file_3.json',
-#             'data/spatioTemporalChunks/split_file_4.json',
-#             'data/spatioTemporalChunks/split_file_5.json',
-#             'data/spatioTemporalChunks/split_file_6.json',
-#             'data/spatioTemporalChunks/split_file_7.json',
-#             'data/spatioTemporalChunks/split_file_8.json',
-#             'data/spatioTemporalChunks/split_file_9.json'
-#             ]
 
 spatioTemporalFileList = ['data/spatioTemporalChunks/split_file_0.json',
             'data/spatioTemporalChunks/split_file_1.json',
@@ -66,20 +52,6 @@ def deduplicate(dataframe):
         inplace = False, ignore_index = True)
     return dataframe
 
-# suppress
-def suppress(dataframe, config):
-    attributes_to_suppress = config['suppress']
-    dataframe.drop(columns = attributes_to_suppress, inplace = True)
-    # print(dataframe.info())
-    return dataframe
-
-# pseudonymize
-def pseudonymize(dataframe, config):
-    attribute_to_pseudonymize = config['pseudonymize']
-    dataframe['UID'] = dataframe[attribute_to_pseudonymize[0]] + dataframe[attribute_to_pseudonymize[1]]
-    dataframe['Hashed Value'] = dataframe['UID'].apply(lambda x:hashlib.sha256(x.encode()).hexdigest())
-    dataframe.drop(columns=['UID'] + attribute_to_pseudonymize, inplace=True)
-    return dataframe
 
 def mean_absolute_error(bVector):
     mean_absolute_error = bVector
@@ -98,52 +70,17 @@ def post_processing(data, config):
 
 # function to handle dataset choice
 def dataset_handler(config):
-    if config["data_type"] == "medical":
-        config = config["medical"] # for testing only
-        dataset = "medical"
-        fileList = medicalFileList
-    elif config["data_type"] == "spatioTemporal":
+    if config["data_type"] == "spatioTemporal":
         config = config["spatioTemporal"] # for testing only 
         dataset = "spatioTemporal"
         fileList = spatioTemporalFileList
+    else:
+        config = config["general"]
+        dataset = "general"
+        fileList = fileList
+
     return dataset, config, fileList
 
-def output_handler_suppression_pseudonymization(data, operations):
-    if "suppress" in operations and "pseudonymize" in operations:
-        file_name = f'pipelineOutput/output'
-        data = data.to_json(orient='records')
-        with open(f"{file_name}.json", 'w') as outfile:
-            outfile.write(data)
-        # logging.info('suppressed and pseudonymized data saved to %s', file_name)
-        return
-    if "suppress" in operations:
-        file_name = f'pipelineOutput/output'
-        data = data.to_json(orient='records')
-        with open(f"{file_name}.json", 'w') as outfile:
-            outfile.write(data)
-        # logging.info('suppressed data saved to %s', file_name)
-        return
-    if "pseudonymize" in operations:
-        file_name = f'pipelineOutput/output'
-        data = data.to_json(orient='records')
-        with open(f"{file_name}.json", 'w') as outfile:
-            outfile.write(data)
-        # logging.info('pseudonymized data saved to %s', file_name)
-        return
-
-
-def output_handler_k_anon(data, config):
-    dataset_name = data.name
-    kConfig = config["k_anonymize"]
-    data.drop(columns=[config["k_anonymize"]["generalize"]], inplace=True)
-    data[f"{kConfig['generalize']} Bin"] = data[f"{kConfig['generalize']} Bin"].astype(str)
-    data = data.to_json(orient='records')
-    # file_name = f'pipelineOutput/{dataset_name}'
-    # with open(f"{file_name}.json", 'w') as outfile:
-    #     outfile.write(data)
-    # logging.info('k-anonymized data saved to %s', file_name)
-    # logging.info('k-anonymity level: %s', kConfig["k"])
-    return data
 
 def output_handler_spatioTemp_mae(mean_absolute_error, config):
     dpConfig = config["differential_privacy"]
@@ -172,7 +109,7 @@ def output_handler_spatioTemp_mae(mean_absolute_error, config):
         # logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
         return mean_absolute_error
 
-def output_handler_medical_mae(mean_absolute_error, config):
+def output_handler_general_mae(mean_absolute_error, config):
     dpConfig = config["differential_privacy"]
     if dpConfig["dp_query"] == 'count':
         mean_absolute_error = mean_absolute_error[0]
@@ -185,7 +122,7 @@ def output_handler_medical_mae(mean_absolute_error, config):
     # logging.info('%s query error table saved to %s_%s', dpConfig['dp_query'], file_name, dpConfig['dp_query'])
     return mean_absolute_error
 
-def output_handler_medical_dp_data(data, config):
+def output_handler_general_dp_data(data, config):
     dpConfig = config['differential_privacy']
     data.rename(columns = {'query_output':f'{dpConfig["dp_query"]} of {dpConfig["dp_output_attribute"]}',
                            'noisy_output':f'noisy {dpConfig["dp_query"]} of {dpConfig["dp_output_attribute"]}'},
@@ -205,7 +142,7 @@ def output_handler_medical_dp_data(data, config):
     return data
 
     # function to format output
-def output_handler_medical_noise_vector(data):
+def output_handler_general_noise_vector(data):
     data = data.to_json(orient='index')
     return data
 
@@ -333,10 +270,10 @@ def plot_normalised_mae(mean_normalised_mae, config):
 # NOT NEEDED FOR UI INTEGRATED VERSION
 def user_input_handler(config):
     """
-    Prompt user to select dataset (medical or spatiotemporal) and processing options (suppression/pseudonymization, k-anonymization, or differential privacy) and update config accordingly.
+    Prompt user to select dataset (general or spatiotemporal) and processing options (suppression/pseudonymization, k-anonymization, or differential privacy) and update config accordingly.
     """
     print("Select dataset:")
-    print("1. Synthetic Medical Data")
+    print("1. Synthetic general Data")
     print("2. Real-World SpatioTemporal ITMS Data")
 
     dataset_choice = input("Enter choice (1 or 2): ")
@@ -348,99 +285,52 @@ def user_input_handler(config):
         dataset_choice = dataset_choice.strip()
 
     if dataset_choice == '1':
-        config = config["medical"] # for testing only
-        dataset = "medical"
-        fileList = medicalFileList
-        print("Select processing options:")
-        print("1. Suppression")
-        print("2. Pseudonymization")
-        print("3. K-anonymization")
-        print("4. Differential Privacy")
+        config = config["general"] # for testing only
+        dataset = "general"
+        fileList = FileList
+        print("Select query:")
+        print("1. Count")
+        print("2. Mean")
 
-        processing_choice = input("Enter choice (1, 2, 3 or 4): ")
+        query_choice = input("Enter choice (1 or 2): ")
 
-        processing_choice = processing_choice.strip()
-        while processing_choice not in ['1', '2', '3', '4']:
-            print("Invalid choice. Please enter '1', '2', '3' or '4':")
-            processing_choice = input("Enter choice (1, 2, 3 or 4): ")
-            processing_choice = processing_choice.strip()
-
-        if processing_choice == '1':
-            config = config["suppress"]
-            config = {"suppress": config}
-            # print(config)
-        elif processing_choice == '2':
-            config = config["pseudonymize"]
-            config = {"pseudonymize": config}
-        elif processing_choice == '3':
-            config = config["k_anonymize"]
-            config = {"k_anonymize": config}
-            # print(config)
-        elif processing_choice == '4':
-            print("Select query:")
-            print("1. Count")
-            print("2. Mean")
-
+        query_choice = query_choice.strip()
+        while query_choice not in ['1', '2']:
+            print("Invalid choice. Please enter '1' or '2':")
             query_choice = input("Enter choice (1 or 2): ")
-
             query_choice = query_choice.strip()
-            while query_choice not in ['1', '2']:
-                print("Invalid choice. Please enter '1' or '2':")
-                query_choice = input("Enter choice (1 or 2): ")
-                query_choice = query_choice.strip()
 
-            if query_choice == '1':
-                config["differential_privacy"]["dp_query"] = "count"
-                config["differential_privacy"]["dp_output_attribute"] = "Test Result"
-                config["differential_privacy"]["dp_aggregate_attribute"] = "PIN Code"
+        if query_choice == '1':
+            config["differential_privacy"]["dp_query"] = "count"
+            config["differential_privacy"]["dp_output_attribute"] = "Test Result"
+            config["differential_privacy"]["dp_aggregate_attribute"] = "PIN Code"
 
-            elif query_choice == '2':
-                config["differential_privacy"]["dp_query"] = "mean"
-                config["differential_privacy"]["dp_output_attribute"] = "Days to Negative"
-                config["differential_privacy"]["dp_aggregate_attribute"] = "Gender"
+        elif query_choice == '2':
+            config["differential_privacy"]["dp_query"] = "mean"
+            config["differential_privacy"]["dp_output_attribute"] = "Days to Negative"
+            config["differential_privacy"]["dp_aggregate_attribute"] = "Gender"
 
     elif dataset_choice == '2':
         config = config["spatioTemporal"] # for testing only 
         dataset = "spatioTemporal"
         fileList = spatioTemporalFileList
-        print("Select processing options:")
-        print("1. Suppression")
-        print("2. Pseudonymization")
-        print("3. Differential Privacy")
+        print("Select query:")
+        print("1. Count")
+        print("2. Mean")
 
-        processing_choice = input("Enter choice (1, 2 or 3): ")
+        query_choice = input("Enter choice (1 or 2): ")
 
-        processing_choice = processing_choice.strip()
-        while processing_choice not in ['1', '2', '3']:
-            print("Invalid choice. Please enter '1', '2', or '3':")
-            processing_choice = input("Enter choice (1, 2 or 3): ")
-            processing_choice = processing_choice.strip()
-
-        if processing_choice == '1':
-            config = config["suppress"]
-            config = {"suppress": config}
-        # print(config)
-        elif processing_choice == '2':
-            config = config["pseudonymize"]
-            config = {"pseudonymize": config}
-        elif processing_choice == '3':
-            print("Select query:")
-            print("1. Count")
-            print("2. Mean")
-
+        query_choice = query_choice.strip()
+        while query_choice not in ['1', '2']:
+            print("Invalid choice. Please enter '1' or '2':")
             query_choice = input("Enter choice (1 or 2): ")
-
             query_choice = query_choice.strip()
-            while query_choice not in ['1', '2']:
-                print("Invalid choice. Please enter '1' or '2':")
-                query_choice = input("Enter choice (1 or 2): ")
-                query_choice = query_choice.strip()
 
-            if query_choice == '1':
-                config["differential_privacy"]["dp_query"] = "count"
+        if query_choice == '1':
+            config["differential_privacy"]["dp_query"] = "count"
 
-            elif query_choice == '2':
-                config["differential_privacy"]["dp_query"] = "mean"
+        elif query_choice == '2':
+            config["differential_privacy"]["dp_query"] = "mean"
 
     return dataset
 

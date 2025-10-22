@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import scripts.utilities as utils
 import scripts.spatioTemporalModules as stmod
-import scripts.medicalModules as medmod
+import scripts.Modules as mod
 import logging
 
 # select logging level
@@ -59,17 +59,6 @@ def chunkHandlingCommon(configDict, operations, fileList):
 
         # dropping duplicates
         dataframeChunk = utils.deduplicate(dataframeChunk)
-
-        # supressing columns
-        if "suppress" in operations:
-            dataframeChunk = utils.suppress(dataframeChunk, configDict)
-            logging.info("Performing Attribute Suppression for chunk " + str(len(lengthList)))
-        
-        # pseudonymizing columns
-        if "pseudonymize" in operations:
-            dataframeChunk = utils.pseudonymize(dataframeChunk, configDict)
-            logging.info("Performing Attribute Pseudonymization for chunk " + str(len(lengthList)))
-
         dataframeAccumulate = pd.concat(
             [dataframeAccumulate, dataframeChunk], ignore_index=True
         )
@@ -269,18 +258,18 @@ def chunkHandlingSpatioTemporal(spatioTemporalConfigDict, fileList):
     return dfAccumulateCombined, timeRange
 
 # function to accumulate chunks with appropriate query building for DP
-def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
+def chunkAccumulatorGeneralDP(dataframeChunk, ConfigDict):
     """
     Accumulates chunks for building a DP query.
 
     Args:
         dataframeChunk (pandas.DataFrame): The chunked dataframe to be accumulated.
-        medicalConfigDict (dict): A dictionary containing the configuration for medical data processing.
+        ConfigDict (dict): A dictionary containing the configuration for  data processing.
 
     Returns:
         pandas.DataFrame: The accumulated dataframe for building the DP query.
     """
-    dpConfig = medicalConfigDict["differential_privacy"]
+    dpConfig = ConfigDict["differential_privacy"]
     logging.info("Accumulating chunks for building DP Query")
     if dpConfig["dp_query"] == "mean":
         # filtering out all the zero values from the selected output attribute
@@ -310,81 +299,23 @@ def chunkAccumulatorMedicalDP(dataframeChunk, medicalConfigDict):
         )
     return dataframeAccumulator
 
-# preprocessing to accumulate chunks for k-anon
-def chunkAccumulatorMedicalKAnon(dataframeChunk, medicalConfigDict):
-    chunkHistogram = pd.Series()
-    kConfig = medicalConfigDict["k_anonymize"]
-    bins = np.arange(kConfig["min_bin_value"], kConfig["max_bin_value"], 1)
 
-    # filling each bin with appropriate count of ages using pd.cut()
-    dataframeChunk = medmod.generalize(dataframeChunk, medicalConfigDict, bins)
-
-    # counting no. of users in each bin
-    chunkHistogram = (
-        dataframeChunk[medicalConfigDict["k_anonymize"]["generalize"]]
-        .value_counts()
-        .reindex(bins[:-1], fill_value=0)
-    )
-    return chunkHistogram
-
-# accumulating chunks with appropriate processing for KAnon
-def chunkHandlingMedicalKAnon(medicalConfigDict, fileList):
-    lengthList = []
-    dataframeAccumulate = pd.DataFrame()
-    # dataframeAccumulateNew = pd.DataFrame()
-    kAnonAccumulate = pd.Series()
-    # print(medicalConfigDict)
-    # dpConfig = medicalConfigDict["differential_privacy"]
-    # kConfig = medicalConfigDict["k_anonymize"]
-    for file in fileList:
-        lengthList.append(file)
-        logging.info("The chunk number is: "+ str(len(lengthList)))
-        with open(file, "r") as dfile:
-            dataDict = json.load(dfile)
-            dataframeChunk = pd.json_normalize(dataDict)
-            logging.info(
-                "The loaded file is: "
-                + file
-                + " with shape "
-                + str(dataframeChunk.shape)
-            )
-
-        # accumulating each raw chunk
-        dataframeAccumulate = pd.concat(
-            [dataframeAccumulate, dataframeChunk], ignore_index=True
-        )
-        # generalizing each chunk
-        kAnonChunk = chunkAccumulatorMedicalKAnon(dataframeChunk, medicalConfigDict)
-
-        # accumulating no. of users per bin for every chunk
-        kAnonAccumulate = kAnonAccumulate.add(kAnonChunk, fill_value=0)
-
-    # reassigning column names
-    kAnonAccumulate = pd.DataFrame(
-        {
-            medicalConfigDict["k_anonymize"]["generalize"]: kAnonAccumulate.index,
-            "Count": kAnonAccumulate.values,
-        }
-    )
-    return kAnonAccumulate, dataframeAccumulate
-
-def chunkHandlingMedicalDP(medicalConfigDict, fileList):
+def chunkHandlingGeneralDP(ConfigDict, fileList):
     """
-    Accumulates chunks of medical data for differential privacy query building.
+    Accumulates chunks of  data for differential privacy query building.
 
     Args:
-        medicalConfigDict (dict): A dictionary containing the configuration for medical data processing.
-        fileList (list): A list of file paths to the chunks of medical data.
+        ConfigDict (dict): A dictionary containing the configuration for  data processing.
+        fileList (list): A list of file paths to the chunks of  data.
 
     Returns:
         pandas.DataFrame: The accumulated dataframe for building the DP query.
 
-    This function takes a list of file paths to chunks of medical data and accumulates them into a single dataframe for building a differential privacy query. It iterates over each file in the fileList, loads the data from the file, normalizes it into a dataframe, and accumulates it into the dataframeAccumulate. After accumulating all the chunks, it groups the dataframeAccumulate by the specified attribute and computes the query based on the dpConfig["dp_query"] parameter. If the query is "mean", it computes the mean of the sum and count for each group and stores it in the "query_output" column. If the query is "count", it computes the sum of the count for each group and stores it in the "query_output" column. The final dataframe is returned.
+    This function takes a list of file paths to chunks of  data and accumulates them into a single dataframe for building a differential privacy query. It iterates over each file in the fileList, loads the data from the file, normalizes it into a dataframe, and accumulates it into the dataframeAccumulate. After accumulating all the chunks, it groups the dataframeAccumulate by the specified attribute and computes the query based on the dpConfig["dp_query"] parameter. If the query is "mean", it computes the mean of the sum and count for each group and stores it in the "query_output" column. If the query is "count", it computes the sum of the count for each group and stores it in the "query_output" column. The final dataframe is returned.
     """
     lengthList = []
+    dpConfig = ConfigDict["differential_privacy"]
     dataframeAccumulate = pd.DataFrame()
-    # print(medicalConfigDict)
-    dpConfig = medicalConfigDict["differential_privacy"]
     for file in fileList:
         lengthList.append(file)
         logging.info("#########################################")
@@ -400,9 +331,10 @@ def chunkHandlingMedicalDP(medicalConfigDict, fileList):
             )
 
         # accumulating chunks for dp query building
-        dataframeAccumulator = chunkAccumulatorMedicalDP(
-            dataframeChunk, medicalConfigDict
-        )
+        dataframeAccumulator = chunkAccumulatorGeneralDP(
+            dataframeChunk, ConfigDict
+        )   
+        dataframeChunk = utils.deduplicate(dataframeChunk)
 
         dataframeAccumulate = pd.concat(
             [dataframeAccumulate, dataframeAccumulator], ignore_index=True

@@ -3,97 +3,10 @@ import pandas as pd
 import numpy as np
 import scripts.utilities as utils
 import logging
-# function definitions
-###########################
-# function to bin the ages
-def generalize(dataframe, config, bins):
-    attribute_to_generalize = config["k_anonymize"]["generalize"]
-    dataframe[f"{config['k_anonymize']['generalize']} Bin"] = pd.cut(
-        dataframe[attribute_to_generalize], bins, ordered=True
-    )
-    return dataframe
 
-# function to k-anonymize
-def k_anonymize(dataframe, config):
-    """
-    A function to perform k-anonymization on a given dataframe based on the configuration provided.
 
-    Parameters:
-    - dataframe: Pandas DataFrame containing the data to be k-anonymized.
-    - config: Dictionary containing the configuration settings for k-anonymization.
 
-    Returns:
-    - The final bin size after k-anonymization is applied.
-    """
-    # start with each bin size 1
-    kConfig = config["k_anonymize"]
-    k = kConfig["k"]
-    r_count = 1
-    # The maximum of the values we are building histogram
-    mx_age = np.max(dataframe["Age"])
-    flag = 1
-    temp_flag = 1
-    if (k == dataframe["Count"].sum()):
-        return mx_age
-    elif (k > dataframe["Count"].sum() or k <= 0):
-        print("Please enter a valid value for k, the entered value is :", k)
-        return -1
-    print("****************************************************************")
-    while flag:
-        # Calculate number of bins for given r_count (bin size)
-        # if mx_age/r_count is not an integer then we put all the
-        # Count in partial bin into last but one bin
-        # e.g. r_count = 4 mx_age = 26, the number of bins - 6
-        # last bin contains counts from last 6 (4 +2, 2 is reminder) entries
-        num_bins = int(np.floor(mx_age / r_count))
-        reminder = mx_age % r_count
-        temp_flag = 1
-        # Now we will compute if each bin will satisfy k anonimity or not
-        # if it is not satisfied we increment r_count (bin size) and break and
-        # create num of bins with updated (increased) binsize
-
-        for b in range(num_bins):
-            temp = 0
-            eff_rows = r_count
-            # For the last bin the number of rows to be considered
-            # the rows in the partial bin should be taken care
-            if b == (num_bins - 1):
-                eff_rows += reminder
-            # For each bin we are computing the count (in temp)
-            for i in range(1, eff_rows + 1):
-                temp += dataframe["Count"][b * r_count + i]
-            # if i-th bin does not satisfy k-anonymity, increase the bin size
-            # and start afresh with new bin size
-            temp = int(temp)
-            if (temp < k) and (temp != 0):
-                # print("temp : ", temp)
-                r_count += 1
-                temp_flag = 0
-                break
-        # control reached here means all bins satisfied k-anonymity and we are setting
-        # flag to false and exiting
-        if (temp_flag):
-            if b * r_count + i >= mx_age:
-                for b in range(num_bins):
-                    temp = 0
-                    eff_rows = r_count
-                    if b == (num_bins - 1):
-                        eff_rows += reminder
-                    for i in range(1, eff_rows + 1):
-                        # print(dataframe["Count"][b * r_count + i])
-                        temp += dataframe["Count"][b * r_count + i]
-                    # print("Bin index : ", b, "Count : ", temp)
-                flag = 0
-            if num_bins == 1:
-                r_count = mx_age
-    return r_count
-
-def user_assignment_k_anonymize(optimal_bin_width, data, config):
-    bin_edges = np.arange(config["k_anonymize"]["min_bin_value"], config["k_anonymize"]["max_bin_value"]  + optimal_bin_width, optimal_bin_width)
-    data[f"{config['k_anonymize']['generalize']} Bin"] = pd.cut(data[config['k_anonymize']['generalize']], bins=bin_edges, include_lowest=True)
-    return data
-
-def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
+def generalDifferentialPrivacy(dataframeAccumulate, configFile):
     """
     Applies differential privacy to a medical dataframe based on the given configuration.
 
@@ -144,7 +57,7 @@ def medicalDifferentialPrivacy(dataframeAccumulate, configFile):
         noisy_query_output = pd.DataFrame(noisy_query_output)        
         noisy_query_output.index = epsilon_vector
         noisy_query_output = noisy_query_output.rename(columns = dataframeAccumulate[dpConfig["dp_aggregate_attribute"]])
-        logging.info("Reached end of med DP")
+        logging.info("Reached end of DP")
     elif dpConfig["dp_query"] == "mean":
         # for the mean query we need to compute the noisy sum and the noisy count independently and then divide the noisy sum by the noisy count to find the noisy mean
         sensitivity_count = 1
