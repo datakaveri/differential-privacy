@@ -6,6 +6,7 @@ import json, os, requests
 import logging
 from iudx_dp_validations import *
 
+
 def main_process(config):
     # checking the dataset order of operations selected
     try:
@@ -14,8 +15,9 @@ def main_process(config):
         config = config[dataset]
 
         #validate config
-        validate_dp_conf_obj = ValidateDPConfig(config)
-        validate_dp_conf_obj.validate_dp_config()
+        if "dp" in operations:
+            validate_dp_conf_obj = ValidateDPConfig(config)
+            validate_dp_conf_obj.validate_dp_config()
         
         # checking the dataset order of operations selected
         fileList = []
@@ -51,6 +53,7 @@ def main_process(config):
 
         concat_output['status'] = "success"
         concat_output['status_code'] = "0000"
+
     except Exception as e:
         if isinstance(e, CustomValueError):
             concat_output = {
