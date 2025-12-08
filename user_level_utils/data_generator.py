@@ -357,6 +357,66 @@ def generate_max_dataset(user_contributions, base_attr_name="systolic_bp", max_v
 
     return df
 
+def generate_user_contributions_heavy_user(
+    num_users: int = 200,
+    total_records: int = 10000,
+    heavy_user_fraction: float = 0.1,  # fraction of total_records for heavy user
+    min_other_user: int = 5,
+    random_seed: int = 42,
+    output_csv: str = "skewed_data.csv"
+):
+    rng = np.random.default_rng(random_seed)
+    
+    # 1. Determine per-user contributions
+    heavy_user_records = int(total_records * heavy_user_fraction)
+    remaining_records = total_records - heavy_user_records
+    other_users = num_users - 1
+    contribs = [min_other_user] * other_users
+    remaining_records -= min_other_user * other_users
+    
+    # Randomly distribute remaining records among other users
+    while remaining_records > 0:
+        idx = rng.integers(0, other_users)
+        contribs[idx] += 1
+        remaining_records -= 1
+    
+    user_contributions = [heavy_user_records] + contribs
+    
+    # 2. Create user metadata
+    user_ids = np.arange(1, num_users + 1)
+    names = [f"User{i}" for i in user_ids]
+    ages = rng.normal(40, 12, num_users).clip(18, 70).astype(int)
+    user_df = pd.DataFrame({"user_id": user_ids, "name": names, "age": ages})
+    
+    # 3. Expand user contributions
+    repeated_users = np.repeat(user_df["user_id"].values, user_contributions)
+    
+    # 4. Generate random records
+    df = _generate_random_records(
+        repeated_users,
+        income_mean_log=13.1,
+        income_sigma_log=0.8,
+        income_min=50000,
+        income_max=2000000,
+        bp_mean=120,
+        bp_std=15,
+        bp_min=100,
+        bp_max=150,
+        start_date="2023-01-01",
+        end_date="2025-09-29",
+        rng=rng
+    )
+    
+    # 5. Merge user metadata
+    df = df.merge(user_df, on="user_id", how="left")
+    df = df[["user_id", "name", "age", "annual_income", "systolic_bp", "timestamp"]]
+    
+    # 6. Save to CSV
+    df.to_csv(output_csv, index=False)
+    print(f"Synthetic dataset saved to {output_csv}")
+    
+    return df
+
 
 # ==============================================================
 # Helper: Random record generator (used by both functions)
@@ -401,12 +461,4 @@ def _generate_random_records(
 
 
 if __name__ == "__main__":
-    # Step 1: Generate base dataset
-    df, contribs = generate_synthetic_data_variable_contrib(
-        total_users=200,
-        total_records=10000,
-        min_contrib=1,
-        max_contrib=100
-    )
-    df.to_csv("synthetic_user_level_data.csv", index=False)
-    print("✅ Base dataset saved as synthetic_user_level_data.csv")
+    generate_user_contributions_heavy_user()

@@ -134,4 +134,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+user_level_utils
+pytest.ini
+skewed_data.csv
+.pytest_cache
 

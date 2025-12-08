@@ -11,10 +11,12 @@ class UnclippedDPMechanism:
     def compute_unclipped_sensitivity(self, T_epsilon_unclipped, dataset):
         total_contributions = sum(user.num_records() for user in dataset.users)
         sensitivity = T_epsilon_unclipped / total_contributions
+        #print(f"unclipped sensitivity: ", sensitivity)
         return sensitivity
     
     def compute_unclipped_b(self, sensitivity):
         self.b = sensitivity/self.epsilon
+        #print(f"unclipped b: ", self.b)
         return self.b
     
     def add_laplace_noise_unclipped(self, sensitivity):

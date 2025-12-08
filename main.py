@@ -5,6 +5,7 @@ import glob
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+from config.config_validation import load_config
 from user_level_src.UserData import UserData
 from user_level_src.Dataset import Dataset
 from user_level_src.Clipper import Clipper
@@ -15,13 +16,19 @@ import scripts.spatioTemporalPipeline as stpipe
 import scripts.utilities as utils
 import json
 
-config_file_name = os.path.join('config', os.listdir('config')[0])
-config = utils.read_config(config_file_name)
-dataset = config["data_type"]
-operations = config["operations"]
+json_files = [f for f in os.listdir("config") if f.endswith(".json")]
+if not json_files:
+    raise FileNotFoundError("No JSON config file found in /config directory!")
 
-config = config[dataset]
-# checking the dataset order of operations selected
+config_file_name = os.path.join("config", json_files[0])
+#print("Config file path =", os.path.abspath(config_file_name))
+
+config = load_config(config_file_name)
+
+#config = utils.read_config(config_file_name)
+dataset = config.data_type
+operations = config.operations
+
 #fileList = [file for file in os.popen('ls data/*.json').read().split('\n') if file]
 fileList = glob.glob("data/*.json")
 
@@ -30,45 +37,34 @@ if not fileList:
 
 # selecting appropriate pipeline
 
-if dataset == "spatioTemporal":
-    if config["differential_privacy"]["dp_query"] == 'mean':
-        data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
-        data = utils.post_processing(data, config)
-        mean_absolute_error = utils.mean_absolute_error(bVector)
-        formatted_error, formatted_averaged_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)          
-        formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
-        concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error_per_hat = formatted_error, epsilon_vs_averaged_error = formatted_averaged_error)
-    if config["differential_privacy"]["dp_query"] == 'count':
-        data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
-        data = utils.post_processing(data, config)
-        mean_absolute_error = utils.mean_absolute_error(bVector)
-        formatted_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)
-        formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
-        concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error)
-else:
-    if "user-level-dp" in operations:
+if "user-level-dp" in operations:
         print("\n=============================")
         print("Running User-Level Differential Privacy")
         print("=============================\n")
-        user_level_config = config["user_level_dp"]
+        user_level = config.medical.user_level_dp
 
-        dataset_config = user_level_config["dataset"]
-        dp_config = user_level_config["dp"]
+        dataset_config = user_level.dataset
+        dp_config = user_level.dp
 
-        dataset_name = dataset_config["name"]
-        total_users = dataset_config["total_users"]
-        total_records = dataset_config["total_records"]
-        min_contrib = dataset_config["min_contribution"]
-        max_contrib = dataset_config["max_contribution"]
-        attribute = dataset_config["attribute"]
-        U = dataset_config["U"]
-        V = dataset_config["V"]
-        epsilon = dp_config["epsilon"]
+        dataset_name = dataset_config.name
+        total_users = dataset_config.total_users
+        total_records = dataset_config.total_records
+        min_contrib = dataset_config.min_contribution
+        max_contrib = dataset_config.max_contribution
+        attribute = dataset_config.attribute
+        U = dataset_config.U
+        V = dataset_config.V
+
+        epsilon = dp_config.epsilon
 
         print(f"Dataset: {dataset_name}, Users: {total_users}, Epsilon: {epsilon}")
 
         dataset_file = dataset_name + ".csv"
         dataset = Dataset.from_csv(dataset_file)
+        if (len(dataset.users) == 0):
+            print("Dataset is empty. Skipping User Level DP. \n")
+            sys.exit()
+            
         dataset.sort_by_contribution()
 
         total_users = len(dataset.users)
@@ -110,7 +106,22 @@ else:
         print(f"DP-protected mean (clipped) = {dp_mean_clipped}")
         print(f"DP-protected mean (unclipped) = {dp_mean_unclipped}")
         sys.exit()
-
+else:
+    if dataset == "spatioTemporal":
+        if config["differential_privacy"]["dp_query"] == 'mean':
+            data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
+            data = utils.post_processing(data, config)
+            mean_absolute_error = utils.mean_absolute_error(bVector)
+            formatted_error, formatted_averaged_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)          
+            formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
+            concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error_per_hat = formatted_error, epsilon_vs_averaged_error = formatted_averaged_error)
+        if config["differential_privacy"]["dp_query"] == 'count':
+            data, bVector = stpipe.spatioTemporalPipeline(config, operations, fileList) 
+            data = utils.post_processing(data, config)
+            mean_absolute_error = utils.mean_absolute_error(bVector)
+            formatted_error = utils.output_handler_spatioTemp_mae(mean_absolute_error, config)
+            formatted_data = utils.output_handler_spatioTemp_dp_data(data, config)
+            concat_output = utils.output_concatenator(anonymised_output = formatted_data, epsilon_vs_error = formatted_error)
     else:
         data, mean_absolute_error, noisy_query_output_for_epsilon_vector = pipe.generalPipelineDP(config, operations, fileList)
         data = utils.post_processing(data, config)
