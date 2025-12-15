@@ -11,15 +11,3 @@ class UserDataHistogram:
 
     def num_records(self):
         return len(self.records)
-
-    def get_attribute_values(self, attr_name):
-        """
-        Return a list of all values for the given attribute for this user.
-        """
-        return [record[attr_name] for record in self.records if attr_name in record]
-    
-    def sum_attribute(self, attr_name):
-        """
-        Return the sum of all values of the given attribute for this user.
-        """
-        return sum(float(v) for v in self.get_attribute_values(attr_name))

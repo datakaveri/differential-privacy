@@ -68,8 +68,11 @@ class ClippedMechanismHistogram:
          
         A = [0] * k
 
+
         for bin_index in range(k):
             Z = self.laplace_sample_clipped(sensitivity)
             A[bin_index] = f[bin_index] + Z
+
+        #print(f"A: {A}\n")
 
         return A

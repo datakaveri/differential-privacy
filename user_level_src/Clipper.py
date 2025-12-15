@@ -82,18 +82,3 @@ class Clipper:
             
         mean_clipped = sum(clipped_sums) / total_contributions if total_contributions > 0 else 0
         return mean_clipped
-
-    def export_debug_info(self, file_path):
-            """
-            Export debug info (A, B, true sum, clipped sum) for each user to a CSV file.
-            """
-            if not self.debug_info:
-                print("⚠️ No debug info found. Run clipped_mean() first.")
-                return
-
-            fieldnames = ["user_id", "num_records", "A", "B", "Y_l (true_sum)", "clipped_sum"]
-            with open(file_path, mode="w", newline="") as f:
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(self.debug_info)
-            #print(f"✅ Debug info written to {file_path}")

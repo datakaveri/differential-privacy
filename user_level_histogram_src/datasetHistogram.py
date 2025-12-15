@@ -24,6 +24,12 @@ class DatasetHistogram:
         Each bin defaults count to zero.
         """
 
+        if k <= 0:
+            raise ValueError("k must be a positive integer")
+        
+        if U >= V:
+            raise ValueError("Lower bound U must be smaller than upper bound V")
+
         bins = []
 
         for i in range(k):
