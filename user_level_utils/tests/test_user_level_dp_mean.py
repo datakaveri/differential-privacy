@@ -370,4 +370,63 @@ def test_compute_U_and_V_normal_dataset():
     V = dataset.compute_V("attr")
 
     assert U == 9      # max of all contributions
-    assert V == 2      # min of all contributions    
+    assert V == 2      # min of all contributions
+
+def test_dataset_from_single_line_csv(tmp_path):
+    """
+    Test Dataset.from_csv with a one-line CSV.
+    Each row should become one record under one user.
+    """
+
+    csv_content = (
+        "user_id,attr\n"
+        "u1,120\n"
+    )
+
+    csv_file = tmp_path / "single_line.csv"
+    csv_file.write_text(csv_content)
+
+    dataset = Dataset.from_csv(csv_file)
+
+    # Assertions
+    assert dataset is not None
+    assert len(dataset.users) == 1
+
+    user = dataset.users[0]
+    assert user.user_id == "u1"
+    assert len(user.records) == 1
+    assert user.records[0]["user_id"] == "u1"
+    assert user.records[0]["attr"] == "120" 
+
+def test_dataset_to_single_line_csv(tmp_path):
+    """
+    Test Dataset.to_csv by writing a dataset to CSV and reading it back.
+    """
+
+    df = pd.DataFrame({
+        "user_id": ["u1"],
+        "attr": [120]
+    })
+
+    # Build dataset from DataFrame
+    dataset = Dataset.from_dataframe(df)
+
+    csv_file = tmp_path / "output_single_line.csv"
+    dataset.to_csv(csv_file)
+
+    # Reload using from_csv
+    reloaded_dataset = Dataset.from_csv(csv_file)
+
+    # Assertions
+    assert len(reloaded_dataset.users) == 1
+
+    user = reloaded_dataset.users[0]
+    assert user.user_id == "u1"
+    assert len(user.records) == 1
+
+    record = user.records[0]
+    assert record["user_id"] == "u1"
+    assert record["attr"] == "120"         
+    assert "user_rank" in record             
+    assert record["user_rank"] == "1"
+
