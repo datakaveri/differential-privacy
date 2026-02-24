@@ -34,5 +34,3 @@ data/*
 # Logs
 *.log
 
-# Tests
-tests/
