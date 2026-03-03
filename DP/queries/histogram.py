@@ -63,11 +63,13 @@ def _resolve_histogram_mode(series: pd.Series, dp_cfg: dict):
     # Auto detect
     try:
         _ = series.astype(float)
-        if "U" in dp_cfg and "V" in dp_cfg:
-            _ = _build_numeric_bin_spec(dp_cfg)
-            return "numeric", None
     except Exception:
-        pass
+        values = sorted(series.astype(str).dropna().unique().tolist())
+        return "categorical", values
+
+    if "U" in dp_cfg and "V" in dp_cfg:
+        _ = _build_numeric_bin_spec(dp_cfg)
+        return "numeric", None
 
     values = sorted(series.astype(str).dropna().unique().tolist())
     return "categorical", values
