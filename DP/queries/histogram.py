@@ -9,11 +9,16 @@ def laplace_noise(scale: float) -> float:
 
 
 def _build_numeric_bin_spec(dp_cfg: dict):
-    if "U" not in dp_cfg or "V" not in dp_cfg:
-        raise ValueError("Numeric histogram requires U and V")
+    # Accept either explicit U/V or min_value/max_value.
+    if "U" in dp_cfg and "V" in dp_cfg:
+        U = float(dp_cfg["U"])
+        V = float(dp_cfg["V"])
+    elif "min_value" in dp_cfg and "max_value" in dp_cfg:
+        U = float(dp_cfg["min_value"])
+        V = float(dp_cfg["max_value"])
+    else:
+        raise ValueError("Numeric histogram requires U/V or min_value/max_value")
 
-    U = float(dp_cfg["U"])
-    V = float(dp_cfg["V"])
     if V <= U:
         raise ValueError("V must be greater than U")
 
@@ -60,16 +65,19 @@ def _resolve_histogram_mode(series: pd.Series, dp_cfg: dict):
         _ = _build_numeric_bin_spec(dp_cfg)
         return "numeric", None
 
+    # Explicit numeric binning intent should force numeric mode.
+    if "bin_width" in dp_cfg or "bins" in dp_cfg:
+        _ = _build_numeric_bin_spec(dp_cfg)
+        return "numeric", None
+
     # Auto detect
     try:
         _ = series.astype(float)
+        if "U" in dp_cfg and "V" in dp_cfg:
+            _ = _build_numeric_bin_spec(dp_cfg)
+            return "numeric", None
     except Exception:
-        values = sorted(series.astype(str).dropna().unique().tolist())
-        return "categorical", values
-
-    if "U" in dp_cfg and "V" in dp_cfg:
-        _ = _build_numeric_bin_spec(dp_cfg)
-        return "numeric", None
+        pass
 
     values = sorted(series.astype(str).dropna().unique().tolist())
     return "categorical", values
