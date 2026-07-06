@@ -1,0 +1,1036 @@
+<title>Telangana 2011 Census — Population Analysis</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:      #0E1520;
+    --surface: #14202E;
+    --sf2:     #1A2A3C;
+    --border:  #1F3350;
+    --text:    #C2D8EC;
+    --muted:   #4E7092;
+    --accent:  #1BBFCE;
+    --sc:      #FF8C42;
+    --st:      #38D0A0;
+    --gen:     #8F96F5;
+    --r:       6px;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 32px 24px 64px;
+  }
+  header { max-width: 980px; margin: 0 auto 44px; }
+  .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  header h1 { font-size: clamp(20px, 3vw, 32px); font-weight: 700; letter-spacing: -.02em; line-height: 1.2; text-wrap: balance; }
+  header p { margin-top: 8px; color: var(--muted); font-size: 13px; max-width: 600px; }
+  .header-stats { display: flex; gap: 28px; margin-top: 20px; flex-wrap: wrap; }
+  .hstat { display: flex; flex-direction: column; gap: 2px; }
+  .hstat-val { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .hstat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+
+  /* Section tabs / nav */
+  .section-nav {
+    max-width: 1340px;
+    margin: 0 auto 32px;
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+  .snav-btn {
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    margin-bottom: -1px;
+    transition: color .15s, border-color .15s;
+    font-family: inherit;
+    letter-spacing: -.01em;
+  }
+  .snav-btn:hover { color: var(--text); }
+  .snav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .section { max-width: 1340px; margin: 0 auto 52px; display: none; }
+  .section.active { display: block; }
+
+  .section-title { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+  .section-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .ctrl-stats-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1; }
+  .ctrl-group {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 5px 10px; height: 32px;
+  }
+  .ctrl-label { font-size: 11px; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+  select, input[type=range] {
+    background: transparent; border: none; color: var(--text);
+    font-size: 12px; font-family: inherit; cursor: pointer; outline: none;
+    accent-color: var(--accent);
+  }
+  select option { background: #1A2A3C; color: var(--text); }
+  select:focus { outline: 2px solid var(--accent); border-radius: 2px; }
+
+  .stats-panel { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; flex-shrink: 0; }
+  .sp-item { display: flex; flex-direction: column; padding: 6px 14px; gap: 1px; border-right: 1px solid var(--border); }
+  .sp-item:last-child { border-right: none; }
+  .sp-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .sp-val { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.01em; color: var(--text); }
+  .sp-sub { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
+
+  .toggle-pills { display: flex; gap: 5px; }
+  .pill { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 100px; border: 1.5px solid; cursor: pointer; letter-spacing: .03em; background: transparent; transition: background .12s, color .12s; white-space: nowrap; }
+  .pill:focus { outline: 2px solid var(--accent); }
+  .pill.sc  { border-color: var(--sc);  color: var(--sc); }
+  .pill.st  { border-color: var(--st);  color: var(--st); }
+  .pill.gen { border-color: var(--gen); color: var(--gen); }
+  .pill.on.sc  { background: var(--sc);  color: #000; }
+  .pill.on.st  { background: var(--st);  color: #000; }
+  .pill.on.gen { background: var(--gen); color: #000; }
+
+  .search-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 4px 10px; color: var(--text);
+    font-size: 12px; font-family: inherit; width: 160px; height: 32px;
+    transition: border-color .15s;
+  }
+  .search-box:focus { outline: none; border-color: var(--accent); }
+  .search-box::placeholder { color: var(--muted); }
+  .range-val { font-variant-numeric: tabular-nums; color: var(--text); min-width: 44px; font-size: 12px; }
+
+  .chart-wrap { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .chart-scroll { overflow-x: auto; overflow-y: hidden; scrollbar-color: var(--border) transparent; scrollbar-width: thin; }
+  .chart-scroll::-webkit-scrollbar { height: 4px; }
+  .chart-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  canvas { display: block; }
+  .chart-hint { margin-top: 7px; font-size: 11px; color: var(--muted); }
+
+  .caste-legend { margin-top: 8px; display: flex; gap: 18px; flex-wrap: wrap; }
+  .cl-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .cl-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  .tooltip {
+    position: fixed; pointer-events: none;
+    background: #090F1C; border: 1px solid var(--accent);
+    border-radius: 6px; padding: 9px 13px; font-size: 12px;
+    color: var(--text); line-height: 1.7; z-index: 999;
+    opacity: 0; transition: opacity .1s;
+    max-width: 240px; box-shadow: 0 4px 24px rgba(0,0,0,.6);
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip strong { color: var(--accent); display: block; font-size: 13px; margin-bottom: 1px; }
+  .tooltip .dist-tag { font-size: 10px; color: var(--muted); margin-bottom: 4px; display: block; }
+  .tt-row { display: flex; justify-content: space-between; gap: 18px; }
+  .tt-val { font-variant-numeric: tabular-nums; }
+  .tt-sc { color: var(--sc); } .tt-st { color: var(--st); } .tt-gen { color: var(--gen); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header>
+  <div class="eyebrow">Telangana State · Census 2011</div>
+  <h1>Primary Census Abstract — Population Analysis</h1>
+  <p>Village-level data aggregated to 612 mandals and 33 districts. Source: Telangana State Development Planning Society.</p>
+  <div class="header-stats">
+    <div class="hstat"><span class="hstat-val">3.50 Cr</span><span class="hstat-lbl">Total Population</span></div>
+    <div class="hstat"><span class="hstat-val">33</span><span class="hstat-lbl">Districts</span></div>
+    <div class="hstat"><span class="hstat-val">612</span><span class="hstat-lbl">Mandals</span></div>
+    <div class="hstat"><span class="hstat-val" style="color:var(--sc)">15.45%</span><span class="hstat-lbl">SC Population</span></div>
+    <div class="hstat"><span class="hstat-val" style="color:var(--st)">9.08%</span><span class="hstat-lbl">ST Population</span></div>
+  </div>
+</header>
+
+<!-- Tab Nav -->
+<div class="section-nav">
+  <button class="snav-btn active" onclick="switchTab(0)">Mandal Population</button>
+  <button class="snav-btn" onclick="switchTab(1)">Mandal — Caste</button>
+  <button class="snav-btn" onclick="switchTab(2)">District Population</button>
+  <button class="snav-btn" onclick="switchTab(3)">District — Caste</button>
+  <button class="snav-btn" onclick="switchTab(4)">Cards &amp; Shops</button>
+  <button class="snav-btn" onclick="switchTab(5)">FSC per Shop</button>
+</div>
+
+<!-- ── TAB 0: MANDAL POPULATION ── -->
+<div class="section active" id="tab0">
+  <div style="margin-bottom:12px;">
+    <div class="section-title">Mandal Population</div>
+    <div class="section-sub">Each bar is one mandal, colour-coded by district. 612 mandals total.</div>
+  </div>
+  <div class="ctrl-stats-row">
+    <div class="controls">
+      <div class="ctrl-group">
+        <span class="ctrl-label">District</span>
+        <select id="c1Dist"><option value="">All</option></select>
+      </div>
+      <div class="ctrl-group">
+        <span class="ctrl-label">Sort</span>
+        <select id="c1Sort">
+          <option value="district">By District</option>
+          <option value="pop_desc">Highest First</option>
+          <option value="pop_asc">Lowest First</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <span class="ctrl-label">Min Pop</span>
+        <input type="range" id="c1MinPop" min="0" max="200000" step="5000" value="0">
+        <span class="range-val" id="c1MinPopVal">0</span>
+      </div>
+      <input type="text" class="search-box" id="c1Search" placeholder="Search mandal…">
+    </div>
+    <div class="stats-panel">
+      <div class="sp-item"><span class="sp-lbl">Shown</span><span class="sp-val" id="s1n">612</span><span class="sp-sub">mandals</span></div>
+      <div class="sp-item"><span class="sp-lbl">Min</span><span class="sp-val" id="s1min">—</span><span class="sp-sub" id="s1minN"></span></div>
+      <div class="sp-item"><span class="sp-lbl">Max</span><span class="sp-val" id="s1max">—</span><span class="sp-sub" id="s1maxN"></span></div>
+      <div class="sp-item"><span class="sp-lbl">Avg</span><span class="sp-val" id="s1avg">—</span><span class="sp-sub">per mandal</span></div>
+    </div>
+  </div>
+  <div class="chart-wrap"><div class="chart-scroll"><canvas id="c1"></canvas></div></div>
+  <div class="chart-hint">Scroll horizontally · Hover for details</div>
+</div>
+
+<!-- ── TAB 1: MANDAL CASTE ── -->
+<div class="section" id="tab1">
+  <div style="margin-bottom:12px;">
+    <div class="section-title">Caste Breakdown per Mandal</div>
+    <div class="section-sub">SC · ST · General (Others) population across all 612 mandals.</div>
+  </div>
+  <div class="ctrl-stats-row">
+    <div class="controls">
+      <div class="ctrl-group">
+        <span class="ctrl-label">District</span>
+        <select id="c2Dist"><option value="">All</option></select>
+      </div>
+      <div class="ctrl-group">
+        <span class="ctrl-label">View</span>
+        <select id="c2View">
+          <option value="grouped">Grouped</option>
+          <option value="stacked">Stacked</option>
+          <option value="pct">Percentage</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <span class="ctrl-label">Sort</span>
+        <select id="c2Sort">
+          <option value="district">By District</option>
+          <option value="tot_desc">Total Pop ↓</option>
+          <option value="tot_asc">Total Pop ↑</option>
+          <option value="sc_desc">SC Count ↓</option>
+          <option value="st_desc">ST Count ↓</option>
+          <option value="gen_desc">General Count ↓</option>
+          <option value="sc_pct">SC % ↓</option>
+          <option value="st_pct">ST % ↓</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <span class="ctrl-label">Show</span>
+        <div class="toggle-pills">
+          <button class="pill sc on"  id="t2SC"  onclick="tog2('sc')">SC</button>
+          <button class="pill st on"  id="t2ST"  onclick="tog2('st')">ST</button>
+          <button class="pill gen on" id="t2GEN" onclick="tog2('gen')">General</button>
+        </div>
+      </div>
+      <input type="text" class="search-box" id="c2Search" placeholder="Search mandal…">
+    </div>
+    <div class="stats-panel">
+      <div class="sp-item"><span class="sp-lbl">Shown</span><span class="sp-val" id="s2n">612</span><span class="sp-sub">mandals</span></div>
+      <div class="sp-item"><span class="sp-lbl" style="color:var(--sc)">SC avg</span><span class="sp-val" id="s2sc" style="color:var(--sc)">—</span><span class="sp-sub">% of pop</span></div>
+      <div class="sp-item"><span class="sp-lbl" style="color:var(--st)">ST avg</span><span class="sp-val" id="s2st" style="color:var(--st)">—</span><span class="sp-sub">% of pop</span></div>
+      <div class="sp-item"><span class="sp-lbl" style="color:var(--gen)">Gen avg</span><span class="sp-val" id="s2gen" style="color:var(--gen)">—</span><span class="sp-sub">% of pop</span></div>
+    </div>
+  </div>
+  <div class="chart-wrap"><div class="chart-scroll"><canvas id="c2"></canvas></div></div>
+  <div class="caste-legend">
+    <div class="cl-item"><div class="cl-dot" style="background:var(--sc)"></div>Scheduled Caste (SC)</div>
+    <div class="cl-item"><div class="cl-dot" style="background:var(--st)"></div>Scheduled Tribe (ST)</div>
+    <div class="cl-item"><div class="cl-dot" style="background:var(--gen)"></div>General / Others</div>
+  </div>
+</div>
+
+<!-- ── TAB 2: DISTRICT POPULATION ── -->
+<div class="section" id="tab2">
+  <div style="margin-bottom:12px;">
+    <div class="section-title">District Population</div>
+    <div class="section-sub">Total population across all 33 districts of Telangana.</div>
+  </div>
+  <div class="ctrl-stats-row">
+    <div class="controls">
+      <div class="ctrl-group">
+        <span class="ctrl-label">Sort</span>
+        <select id="c3Sort">
+          <option value="name">District Name</option>
+          <option value="pop_desc">Highest First</option>
+          <option value="pop_asc">Lowest First</option>
+        </select>
+      </div>
+    </div>
+    <div class="stats-panel">
+      <div class="sp-item"><span class="sp-lbl">Districts</span><span class="sp-val" id="s3n">33</span><span class="sp-sub">shown</span></div>
+      <div class="sp-item"><span class="sp-lbl">Min</span><span class="sp-val" id="s3min">—</span><span class="sp-sub" id="s3minN"></span></div>
+      <div class="sp-item"><span class="sp-lbl">Max</span><span class="sp-val" id="s3max">—</span><span class="sp-sub" id="s3maxN"></span></div>
+      <div class="sp-item"><span class="sp-lbl">Avg</span><span class="sp-val" id="s3avg">—</span><span class="sp-sub">per district</span></div>
+    </div>
+  </div>
+  <div class="chart-wrap"><div class="chart-scroll"><canvas id="c3"></canvas></div></div>
+  <div class="chart-hint">Hover for details</div>
+</div>
+
+<!-- ── TAB 3: DISTRICT CASTE ── -->
+<div class="section" id="tab3">
+  <div style="margin-bottom:12px;">
+    <div class="section-title">Caste Breakdown per District</div>
+    <div class="section-sub">SC · ST · General (Others) population across all 33 districts.</div>
+  </div>
+  <div class="ctrl-stats-row">
+    <div class="controls">
+      <div class="ctrl-group">
+        <span class="ctrl-label">View</span>
+        <select id="c4View">
+          <option value="grouped">Grouped</option>
+          <option value="stacked">Stacked</option>
+          <option value="pct">Percentage</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <span class="ctrl-label">Sort</span>
+        <select id="c4Sort">
+          <option value="name">District Name</option>
+          <option value="tot_desc">Total Pop ↓</option>
+          <option value="tot_asc">Total Pop ↑</option>
+          <option value="sc_desc">SC Count ↓</option>
+          <option value="st_desc">ST Count ↓</option>
+          <option value="gen_desc">General Count ↓</option>
+          <option value="sc_pct">SC % ↓</option>
+          <option value="st_pct">ST % ↓</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <span class="ctrl-label">Show</span>
+        <div class="toggle-pills">
+          <button class="pill sc on"  id="t4SC"  onclick="tog4('sc')">SC</button>
+          <button class="pill st on"  id="t4ST"  onclick="tog4('st')">ST</button>
+          <button class="pill gen on" id="t4GEN" onclick="tog4('gen')">General</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats-panel">
+      <div class="sp-item"><span class="sp-lbl">Districts</span><span class="sp-val" id="s4n">33</span><span class="sp-sub">shown</span></div>
+      <div class="sp-item"><span class="sp-lbl" style="color:var(--sc)">SC avg</span><span class="sp-val" id="s4sc" style="color:var(--sc)">—</span><span class="sp-sub">% of pop</span></div>
+      <div class="sp-item"><span class="sp-lbl" style="color:var(--st)">ST avg</span><span class="sp-val" id="s4st" style="color:var(--st)">—</span><span class="sp-sub">% of pop</span></div>
+      <div class="sp-item"><span class="sp-lbl" style="color:var(--gen)">Gen avg</span><span class="sp-val" id="s4gen" style="color:var(--gen)">—</span><span class="sp-sub">% of pop</span></div>
+    </div>
+  </div>
+  <div class="chart-wrap"><div class="chart-scroll"><canvas id="c4"></canvas></div></div>
+  <div class="caste-legend">
+    <div class="cl-item"><div class="cl-dot" style="background:var(--sc)"></div>Scheduled Caste (SC)</div>
+    <div class="cl-item"><div class="cl-dot" style="background:var(--st)"></div>Scheduled Tribe (ST)</div>
+    <div class="cl-item"><div class="cl-dot" style="background:var(--gen)"></div>General / Others</div>
+  </div>
+</div>
+
+<!-- ── TAB 4: CARDS & SHOPS ── -->
+<div class="section" id="tab4">
+  <div style="margin-bottom:12px;">
+    <div class="section-title">Cards &amp; Shops per District</div>
+    <div class="section-sub">Ration card counts and FP shop distribution — <span style="color:var(--accent)">Allocation 2025-Jun · Lat/Long Jul 2025</span></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px;">Total Ration Cards per District · 2025</div>
+      <div class="chart-wrap"><canvas id="c5a"></canvas></div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px;">FP Shops per District · Jul 2025</div>
+      <div class="chart-wrap"><canvas id="c5b"></canvas></div>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px;">Card Type Split — BPL(FSC) / APL(AFSC) / AAY per District · 2025</div>
+    <div class="ctrl-stats-row">
+      <div class="controls">
+        <div class="ctrl-group"><span class="ctrl-label">View</span>
+          <select id="c5cView"><option value="pct">Percentage</option><option value="stacked">Stacked</option><option value="grouped">Grouped</option></select>
+        </div>
+      </div>
+      <div class="stats-panel">
+        <div class="sp-item"><span class="sp-lbl">Total Cards</span><span class="sp-val" id="s5total">—</span><span class="sp-sub">31 districts</span></div>
+        <div class="sp-item"><span class="sp-lbl" style="color:var(--sc)">BPL (FSC)</span><span class="sp-val" id="s5bpl" style="color:var(--sc)">—</span><span class="sp-sub">share</span></div>
+        <div class="sp-item"><span class="sp-lbl" style="color:var(--st)">APL (AFSC)</span><span class="sp-val" id="s5apl" style="color:var(--st)">—</span><span class="sp-sub">share</span></div>
+        <div class="sp-item"><span class="sp-lbl" style="color:var(--gen)">AAY</span><span class="sp-val" id="s5aay" style="color:var(--gen)">—</span><span class="sp-sub">poorest</span></div>
+      </div>
+    </div>
+    <div class="chart-wrap"><div class="chart-scroll"><canvas id="c5c"></canvas></div></div>
+    <div class="caste-legend">
+      <div class="cl-item"><div class="cl-dot" style="background:var(--sc)"></div>BPL / FSC</div>
+      <div class="cl-item"><div class="cl-dot" style="background:var(--st)"></div>APL / AFSC</div>
+      <div class="cl-item"><div class="cl-dot" style="background:var(--gen)"></div>AAY (Antyodaya)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAB 5: FSC PER SHOP ── -->
+<div class="section" id="tab5">
+  <div style="margin-bottom:12px;">
+    <div class="section-title">FSC Cards per FP Shop</div>
+    <div class="section-sub">How many BPL (FSC) card holders each shop serves — <span style="color:var(--accent)">Allocation Jun 2025 · 14,604 active shops</span></div>
+  </div>
+  <div class="ctrl-stats-row">
+    <div class="controls"></div>
+    <div class="stats-panel">
+      <div class="sp-item"><span class="sp-lbl">Total Shops</span><span class="sp-val">14,605</span><span class="sp-sub">Jun 2025</span></div>
+      <div class="sp-item"><span class="sp-lbl">Total FSC Cards</span><span class="sp-val" id="s5tot">—</span><span class="sp-sub">BPL ration cards</span></div>
+      <div class="sp-item"><span class="sp-lbl">Mean / Median</span><span class="sp-val" id="s5mean">—</span><span class="sp-sub">per shop</span></div>
+      <div class="sp-item"><span class="sp-lbl">Max (single shop)</span><span class="sp-val" id="s5max" style="color:var(--sc)">—</span><span class="sp-sub">FSC cards</span></div>
+      <div class="sp-item"><span class="sp-lbl">Min (non-zero)</span><span class="sp-val" id="s5min" style="color:var(--gen)">—</span><span class="sp-sub">FSC cards</span></div>
+    </div>
+  </div>
+  <div style="margin-bottom:20px;">
+    <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px;">Distribution of Shops by FSC Card Count</div>
+    <div class="chart-wrap"><canvas id="c9hist" style="height:220px"></canvas></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px;">Top 30 Shops by FSC Count <span style="color:var(--sc);font-weight:400">(highest load)</span></div>
+      <div class="chart-wrap"><canvas id="c9top"></canvas></div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px;">Bottom 30 Shops by FSC Count <span style="color:var(--gen);font-weight:400">(lowest load)</span></div>
+      <div class="chart-wrap"><canvas id="c9bot"></canvas></div>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px;">Total FSC Cards per District (sum across all shops)</div>
+    <div class="chart-wrap"><div class="chart-scroll"><canvas id="c9dist"></canvas></div></div>
+  </div>
+</div>
+
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const RAW = {"mandals":[{"d":"Adilabad","m":"Adilabad Rural","p":39527,"sc":4924,"st":14031,"gen":20572,"c":"#bf4242"},{"d":"Adilabad","m":"Adilabad Urban","p":118383,"sc":13005,"st":6746,"gen":98632,"c":"#bf4242"},{"d":"Adilabad","m":"Bazarhathnoor","p":28911,"sc":4605,"st":12291,"gen":12015,"c":"#bf4242"},{"d":"Adilabad","m":"Bela","p":38318,"sc":1930,"st":13767,"gen":22621,"c":"#bf4242"},{"d":"Adilabad","m":"Bheempoor","p":23047,"sc":2508,"st":9856,"gen":10683,"c":"#bf4242"},{"d":"Adilabad","m":"Boath","p":48216,"sc":6431,"st":15560,"gen":26225,"c":"#bf4242"},{"d":"Adilabad","m":"Gadiguda","p":20087,"sc":2978,"st":15046,"gen":2063,"c":"#bf4242"},{"d":"Adilabad","m":"Gudihathnur","p":30339,"sc":5207,"st":11140,"gen":13992,"c":"#bf4242"},{"d":"Adilabad","m":"Ichoda","p":44062,"sc":7249,"st":10210,"gen":26603,"c":"#bf4242"},{"d":"Adilabad","m":"Inderavelly","p":39781,"sc":5273,"st":21765,"gen":12743,"c":"#bf4242"},{"d":"Adilabad","m":"Jainad","p":47904,"sc":7128,"st":5817,"gen":34959,"c":"#bf4242"},{"d":"Adilabad","m":"Mavala","p":40428,"sc":8193,"st":3974,"gen":28261,"c":"#bf4242"},{"d":"Adilabad","m":"Narnoor","p":29152,"sc":5214,"st":18014,"gen":5924,"c":"#bf4242"},{"d":"Adilabad","m":"Neradigonda","p":29633,"sc":3668,"st":13299,"gen":12666,"c":"#bf4242"},{"d":"Adilabad","m":"Sirikonda","p":16503,"sc":1190,"st":9035,"gen":6278,"c":"#bf4242"},{"d":"Adilabad","m":"Talamadugu","p":34632,"sc":6812,"st":9281,"gen":18539,"c":"#bf4242"},{"d":"Adilabad","m":"Tamsi","p":16584,"sc":3894,"st":1802,"gen":10888,"c":"#bf4242"},{"d":"Adilabad","m":"Utnur","p":63465,"sc":9213,"st":32988,"gen":21264,"c":"#bf4242"},{"d":"Bhadradri Kothagudem","m":"Allapalli","p":11853,"sc":745,"st":8735,"gen":2373,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Annapureddipalle","p":21130,"sc":2360,"st":5207,"gen":13563,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Aswapuram","p":43067,"sc":5666,"st":14086,"gen":23315,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Aswaraopeta","p":59652,"sc":6231,"st":23224,"gen":30197,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Bhadrachalam","p":50087,"sc":7323,"st":4680,"gen":38084,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Burgampadu","p":57078,"sc":10913,"st":13174,"gen":32991,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Chandrugonda","p":27911,"sc":3538,"st":9540,"gen":14833,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Cherla","p":42947,"sc":5247,"st":23887,"gen":13813,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Chunchupally","p":43360,"sc":9333,"st":5986,"gen":28041,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Dammapeta","p":58444,"sc":7013,"st":27683,"gen":23748,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Dummugudem","p":46802,"sc":5094,"st":32518,"gen":9190,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Gundala","p":16272,"sc":1112,"st":13073,"gen":2087,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Julurpad","p":33395,"sc":3167,"st":17289,"gen":12939,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Karakagudem","p":15221,"sc":2617,"st":8883,"gen":3721,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Kothagudem","p":79819,"sc":15748,"st":4831,"gen":59240,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Laxmidevipalli","p":38093,"sc":3857,"st":15342,"gen":18894,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Manuguru","p":72117,"sc":11532,"st":13935,"gen":46650,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Mulakalapalle","p":34794,"sc":2759,"st":21417,"gen":10618,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Palawancha","p":113872,"sc":16577,"st":29368,"gen":67927,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Pinapaka","p":33155,"sc":4784,"st":12203,"gen":16168,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Sujathanagar","p":26919,"sc":2547,"st":14235,"gen":10137,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Tekulapalle","p":47879,"sc":2971,"st":37125,"gen":7783,"c":"#e55839"},{"d":"Bhadradri Kothagudem","m":"Yellandu","p":95394,"sc":12348,"st":35613,"gen":47433,"c":"#e55839"},{"d":"Hanumakonda","m":"Atmakur","p":33032,"sc":7622,"st":450,"gen":24960,"c":"#bf571c"},{"d":"Hanumakonda","m":"Bheemadevarapalle","p":46924,"sc":9930,"st":2460,"gen":34534,"c":"#bf571c"},{"d":"Hanumakonda","m":"Damera","p":26508,"sc":6723,"st":216,"gen":19569,"c":"#bf571c"},{"d":"Hanumakonda","m":"Dharmasagar","p":48343,"sc":12391,"st":615,"gen":35337,"c":"#bf571c"},{"d":"Hanumakonda","m":"Elkathurthi","p":40577,"sc":12076,"st":396,"gen":28105,"c":"#bf571c"},{"d":"Hanumakonda","m":"Hanumakonda","p":365053,"sc":47049,"st":10666,"gen":307338,"c":"#bf571c"},{"d":"Hanumakonda","m":"Hasanparthy","p":81707,"sc":20682,"st":3372,"gen":57653,"c":"#bf571c"},{"d":"Hanumakonda","m":"Inavole","p":43537,"sc":11675,"st":600,"gen":31262,"c":"#bf571c"},{"d":"Hanumakonda","m":"Kamalapur","p":61413,"sc":12413,"st":312,"gen":48688,"c":"#bf571c"},{"d":"Hanumakonda","m":"Khazipet","p":169573,"sc":33624,"st":7076,"gen":128873,"c":"#bf571c"},{"d":"Hanumakonda","m":"Nadikuda","p":32116,"sc":8133,"st":189,"gen":23794,"c":"#bf571c"},{"d":"Hanumakonda","m":"Parkal","p":48426,"sc":12659,"st":617,"gen":35150,"c":"#bf571c"},{"d":"Hanumakonda","m":"Shayampet","p":40292,"sc":9078,"st":1592,"gen":29622,"c":"#bf571c"},{"d":"Hanumakonda","m":"Velair","p":24746,"sc":4364,"st":3185,"gen":17197,"c":"#bf571c"},{"d":"Hyderabad","m":"Amberpet","p":153558,"sc":10241,"st":1879,"gen":141438,"c":"#e5a150"},{"d":"Hyderabad","m":"Ammerpet","p":59070,"sc":3617,"st":2137,"gen":53316,"c":"#e5a150"},{"d":"Hyderabad","m":"Asifnagar","p":442229,"sc":26920,"st":2888,"gen":412421,"c":"#e5a150"},{"d":"Hyderabad","m":"Bahadurpura","p":468158,"sc":7380,"st":10472,"gen":450306,"c":"#e5a150"},{"d":"Hyderabad","m":"Bandlaguda","p":330193,"sc":14109,"st":5766,"gen":310318,"c":"#e5a150"},{"d":"Hyderabad","m":"Charminar","p":237594,"sc":3544,"st":933,"gen":233117,"c":"#e5a150"},{"d":"Hyderabad","m":"Golkonda","p":213359,"sc":8597,"st":948,"gen":203814,"c":"#e5a150"},{"d":"Hyderabad","m":"Himayatnagar","p":108062,"sc":7092,"st":626,"gen":100344,"c":"#e5a150"},{"d":"Hyderabad","m":"Khairatabad","p":271385,"sc":18392,"st":3231,"gen":249762,"c":"#e5a150"},{"d":"Hyderabad","m":"Maredpally","p":172542,"sc":25655,"st":3017,"gen":143870,"c":"#e5a150"},{"d":"Hyderabad","m":"Musheerabad","p":347861,"sc":29922,"st":3542,"gen":314397,"c":"#e5a150"},{"d":"Hyderabad","m":"Nampally","p":189378,"sc":12266,"st":674,"gen":176438,"c":"#e5a150"},{"d":"Hyderabad","m":"Saidabad","p":345722,"sc":20336,"st":5809,"gen":319577,"c":"#e5a150"},{"d":"Hyderabad","m":"Secunderabad","p":135370,"sc":13758,"st":731,"gen":120881,"c":"#e5a150"},{"d":"Hyderabad","m":"Shaikpet","p":250932,"sc":17595,"st":4138,"gen":229199,"c":"#e5a150"},{"d":"Hyderabad","m":"Tirumalgiri","p":217910,"sc":28503,"st":2146,"gen":187261,"c":"#e5a150"},{"d":"Jagitial","m":"Beerpur","p":20913,"sc":3952,"st":1554,"gen":15407,"c":"#bf982f"},{"d":"Jagitial","m":"Bheemaram","p":21362,"sc":3683,"st":328,"gen":17351,"c":"#bf982f"},{"d":"Jagitial","m":"Buggaram","p":21716,"sc":4451,"st":33,"gen":17232,"c":"#bf982f"},{"d":"Jagitial","m":"Dharmapuri","p":57300,"sc":12499,"st":897,"gen":43904,"c":"#bf982f"},{"d":"Jagitial","m":"Endapalli","p":28853,"sc":8934,"st":112,"gen":19807,"c":"#bf982f"},{"d":"Jagitial","m":"Gollapalle","p":46076,"sc":9675,"st":339,"gen":36062,"c":"#bf982f"},{"d":"Jagitial","m":"Ibrahimpatnam","p":40630,"sc":6158,"st":2053,"gen":32419,"c":"#bf982f"},{"d":"Jagitial","m":"Jagityal_Rural","p":55521,"sc":9968,"st":134,"gen":45419,"c":"#bf982f"},{"d":"Jagitial","m":"Jagtial","p":113543,"sc":10060,"st":772,"gen":102711,"c":"#bf982f"},{"d":"Jagitial","m":"Kathlapur","p":43986,"sc":7267,"st":1232,"gen":35487,"c":"#bf982f"},{"d":"Jagitial","m":"Kodimial","p":43685,"sc":9150,"st":998,"gen":33537,"c":"#bf982f"},{"d":"Jagitial","m":"Koratla","p":108297,"sc":12996,"st":1568,"gen":93733,"c":"#bf982f"},{"d":"Jagitial","m":"Malial","p":47373,"sc":9792,"st":241,"gen":37340,"c":"#bf982f"},{"d":"Jagitial","m":"Mallapur","p":52087,"sc":8655,"st":3119,"gen":40313,"c":"#bf982f"},{"d":"Jagitial","m":"Medipalle","p":29847,"sc":5507,"st":297,"gen":24043,"c":"#bf982f"},{"d":"Jagitial","m":"Metpalle","p":100653,"sc":14660,"st":2765,"gen":83228,"c":"#bf982f"},{"d":"Jagitial","m":"Pegadapalle","p":42606,"sc":8291,"st":1120,"gen":33195,"c":"#bf982f"},{"d":"Jagitial","m":"Raikal","p":63907,"sc":8664,"st":3931,"gen":51312,"c":"#bf982f"},{"d":"Jagitial","m":"Sarangapur","p":24093,"sc":4641,"st":1724,"gen":17728,"c":"#bf982f"},{"d":"Jagitial","m":"Velgatoor","p":26465,"sc":6531,"st":134,"gen":19800,"c":"#bf982f"},{"d":"Jangaon","m":"Bachannapeta","p":44265,"sc":8401,"st":373,"gen":35491,"c":"#e5d322"},{"d":"Jangaon","m":"Chilpur","p":38127,"sc":7990,"st":5369,"gen":24768,"c":"#e5d322"},{"d":"Jangaon","m":"Devaruppala","p":42411,"sc":7639,"st":9332,"gen":25440,"c":"#e5d322"},{"d":"Jangaon","m":"Ganpur_stn","p":54176,"sc":14942,"st":2547,"gen":36687,"c":"#e5d322"},{"d":"Jangaon","m":"Jangaon","p":92446,"sc":16609,"st":4709,"gen":71128,"c":"#e5d322"},{"d":"Jangaon","m":"Kodakandla","p":32112,"sc":6182,"st":9091,"gen":16839,"c":"#e5d322"},{"d":"Jangaon","m":"Lingalaghanpur","p":38340,"sc":9220,"st":895,"gen":28225,"c":"#e5d322"},{"d":"Jangaon","m":"Narmetta","p":23773,"sc":4425,"st":5952,"gen":13396,"c":"#e5d322"},{"d":"Jangaon","m":"Palakurthi","p":58194,"sc":10102,"st":10766,"gen":37326,"c":"#e5d322"},{"d":"Jangaon","m":"Raghunathpalle","p":53374,"sc":13092,"st":5644,"gen":34638,"c":"#e5d322"},{"d":"Jangaon","m":"Tharigoppula","p":18601,"sc":4175,"st":3891,"gen":10535,"c":"#e5d322"},{"d":"Jangaon","m":"Zaffergadh","p":39172,"sc":9479,"st":3655,"gen":26038,"c":"#e5d322"},{"d":"Jayashankar Bhupalapalli","m":"Bhupalpalle","p":92529,"sc":17733,"st":9950,"gen":64846,"c":"#b3bf42"},{"d":"Jayashankar Bhupalapalli","m":"Chityal","p":37314,"sc":7635,"st":2302,"gen":27377,"c":"#b3bf42"},{"d":"Jayashankar Bhupalapalli","m":"Ghanapur_Mulug","p":35952,"sc":6980,"st":2222,"gen":26750,"c":"#b3bf42"},{"d":"Jayashankar Bhupalapalli","m":"Kataram","p":37336,"sc":12640,"st":3845,"gen":20851,"c":"#b3bf42"},{"d":"Jayashankar Bhupalapalli","m":"Mahadevpur","p":30714,"sc":6729,"st":3137,"gen":20848,"c":"#b3bf42"},{"d":"Jayashankar Bhupalapalli","m":"Malharrao","p":25343,"sc":5734,"st":2220,"gen":17389,"c":"#b3bf42"},{"d":"Jayashankar Bhupalapalli","m":"Mogullapalle","p":35901,"sc":7745,"st":170,"gen":27986,"c":"#b3bf42"},{"d":"Jayashankar Bhupalapalli","m":"Mutharam_Mahadevpur","p":26312,"sc":7380,"st":9072,"gen":9860,"c":"#b3bf42"},{"d":"Jayashankar Bhupalapalli","m":"Palmela","p":7775,"sc":2283,"st":2576,"gen":2916,"c":"#b3bf42"},{"d":"Jayashankar Bhupalapalli","m":"Regonda","p":59602,"sc":10828,"st":1495,"gen":47279,"c":"#b3bf42"},{"d":"Jayashankar Bhupalapalli","m":"Tekumatla","p":27985,"sc":6330,"st":203,"gen":21452,"c":"#b3bf42"},{"d":"Jogulamba Gadwal","m":"Aiza","p":85303,"sc":19552,"st":334,"gen":65417,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Alampur","p":35021,"sc":7884,"st":228,"gen":26909,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Dharur","p":47227,"sc":8988,"st":533,"gen":37706,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Gadwal","p":114390,"sc":15014,"st":1198,"gen":98178,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Ghattu","p":57174,"sc":10474,"st":1143,"gen":45557,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Itikyal","p":52926,"sc":11480,"st":368,"gen":41078,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Kaloor_Timmanadoddi","p":34521,"sc":5450,"st":3311,"gen":25760,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Maldakal","p":52579,"sc":9447,"st":1645,"gen":41487,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Manopad","p":33145,"sc":7571,"st":182,"gen":25392,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Rajoli","p":35451,"sc":9973,"st":142,"gen":25336,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Undavelli","p":28259,"sc":7307,"st":35,"gen":20917,"c":"#b6e539"},{"d":"Jogulamba Gadwal","m":"Waddepalle","p":33994,"sc":7499,"st":257,"gen":26238,"c":"#b6e539"},{"d":"Kamareddy","m":"Banswada","p":68732,"sc":8061,"st":7409,"gen":53262,"c":"#75bf1c"},{"d":"Kamareddy","m":"Bhiknur","p":47766,"sc":8133,"st":704,"gen":38929,"c":"#75bf1c"},{"d":"Kamareddy","m":"Bibipet","p":26749,"sc":5766,"st":207,"gen":20776,"c":"#75bf1c"},{"d":"Kamareddy","m":"Bichkunda","p":50618,"sc":8045,"st":1851,"gen":40722,"c":"#75bf1c"},{"d":"Kamareddy","m":"Birkoor","p":23552,"sc":3471,"st":1099,"gen":18982,"c":"#75bf1c"},{"d":"Kamareddy","m":"Domakonda","p":30190,"sc":5064,"st":209,"gen":24917,"c":"#75bf1c"},{"d":"Kamareddy","m":"Dongli","p":18730,"sc":4562,"st":75,"gen":14093,"c":"#75bf1c"},{"d":"Kamareddy","m":"Gandhari","p":51480,"sc":5699,"st":9657,"gen":36124,"c":"#75bf1c"},{"d":"Kamareddy","m":"Jukkal","p":47239,"sc":9227,"st":3008,"gen":35004,"c":"#75bf1c"},{"d":"Kamareddy","m":"Kamareddy","p":126445,"sc":13889,"st":2998,"gen":109558,"c":"#75bf1c"},{"d":"Kamareddy","m":"Lingampet","p":48122,"sc":6916,"st":7444,"gen":33762,"c":"#75bf1c"},{"d":"Kamareddy","m":"Machareddy","p":23760,"sc":2596,"st":7076,"gen":14088,"c":"#75bf1c"},{"d":"Kamareddy","m":"Madnur","p":40272,"sc":9517,"st":667,"gen":30088,"c":"#75bf1c"},{"d":"Kamareddy","m":"Naga_Reddipet","p":34601,"sc":6399,"st":2856,"gen":25346,"c":"#75bf1c"},{"d":"Kamareddy","m":"Nasurullabad","p":26839,"sc":3597,"st":5992,"gen":17250,"c":"#75bf1c"},{"d":"Kamareddy","m":"Nizamsagar","p":36913,"sc":5185,"st":3463,"gen":28265,"c":"#75bf1c"},{"d":"Kamareddy","m":"Palwancha","p":21466,"sc":3587,"st":892,"gen":16987,"c":"#75bf1c"},{"d":"Kamareddy","m":"Pedda Kodapgal","p":20891,"sc":3016,"st":3464,"gen":14411,"c":"#75bf1c"},{"d":"Kamareddy","m":"Pitlam","p":45255,"sc":7986,"st":5219,"gen":32050,"c":"#75bf1c"},{"d":"Kamareddy","m":"Rajampet","p":27460,"sc":3784,"st":4542,"gen":19134,"c":"#75bf1c"},{"d":"Kamareddy","m":"Ramareddy","p":34726,"sc":5473,"st":4846,"gen":24407,"c":"#75bf1c"},{"d":"Kamareddy","m":"Sadasivanagar","p":41551,"sc":8355,"st":3699,"gen":29497,"c":"#75bf1c"},{"d":"Kamareddy","m":"Tadwai","p":33015,"sc":7828,"st":904,"gen":24283,"c":"#75bf1c"},{"d":"Kamareddy","m":"Yellareddy","p":46253,"sc":7146,"st":3375,"gen":35732,"c":"#75bf1c"},{"d":"Karimnagar","m":"Chigurumamidi","p":41859,"sc":8655,"st":358,"gen":32846,"c":"#86e550"},{"d":"Karimnagar","m":"Choppadandi","p":51288,"sc":12823,"st":685,"gen":37780,"c":"#86e550"},{"d":"Karimnagar","m":"Ellandakunta","p":30763,"sc":7587,"st":200,"gen":22976,"c":"#86e550"},{"d":"Karimnagar","m":"Gangadhara","p":49251,"sc":9567,"st":195,"gen":39489,"c":"#86e550"},{"d":"Karimnagar","m":"Gannervaram","p":21780,"sc":4835,"st":92,"gen":16853,"c":"#86e550"},{"d":"Karimnagar","m":"Huzurabad","p":74721,"sc":15354,"st":699,"gen":58668,"c":"#86e550"},{"d":"Karimnagar","m":"Jammikunta","p":72666,"sc":15297,"st":733,"gen":56636,"c":"#86e550"},{"d":"Karimnagar","m":"Karimnagar","p":261185,"sc":23635,"st":4896,"gen":232654,"c":"#86e550"},{"d":"Karimnagar","m":"Karimnagar (Rural-I)","p":50711,"sc":10921,"st":612,"gen":39178,"c":"#86e550"},{"d":"Karimnagar","m":"Karimnagar (Rural-II)","p":51210,"sc":10969,"st":978,"gen":39263,"c":"#86e550"},{"d":"Karimnagar","m":"Manakondur","p":67854,"sc":14774,"st":594,"gen":52486,"c":"#86e550"},{"d":"Karimnagar","m":"Ramadugu","p":48253,"sc":11549,"st":270,"gen":36434,"c":"#86e550"},{"d":"Karimnagar","m":"Shankarapatnam","p":45302,"sc":9866,"st":274,"gen":35162,"c":"#86e550"},{"d":"Karimnagar","m":"Thimmapur","p":49026,"sc":10851,"st":630,"gen":37545,"c":"#86e550"},{"d":"Karimnagar","m":"V_Saidapur","p":40801,"sc":9532,"st":884,"gen":30385,"c":"#86e550"},{"d":"Karimnagar","m":"Veenavanka","p":49041,"sc":10433,"st":679,"gen":37929,"c":"#86e550"},{"d":"Khammam","m":"Bonakal","p":43909,"sc":13217,"st":1794,"gen":28898,"c":"#49bf2f"},{"d":"Khammam","m":"Chinthakani","p":48909,"sc":11532,"st":1171,"gen":36206,"c":"#49bf2f"},{"d":"Khammam","m":"Enkuru","p":35342,"sc":4644,"st":12624,"gen":18074,"c":"#49bf2f"},{"d":"Khammam","m":"Kalluru","p":63828,"sc":17591,"st":6845,"gen":39392,"c":"#49bf2f"},{"d":"Khammam","m":"Kamepalle","p":41955,"sc":4029,"st":18602,"gen":19324,"c":"#49bf2f"},{"d":"Khammam","m":"Khammam_Rural","p":76357,"sc":16890,"st":8040,"gen":51427,"c":"#49bf2f"},{"d":"Khammam","m":"Khammam_Urban","p":280500,"sc":32712,"st":12930,"gen":234858,"c":"#49bf2f"},{"d":"Khammam","m":"Konijerla","p":61321,"sc":11624,"st":9690,"gen":40007,"c":"#49bf2f"},{"d":"Khammam","m":"Kusumanchi","p":60020,"sc":10314,"st":16536,"gen":33170,"c":"#49bf2f"},{"d":"Khammam","m":"Madhira","p":68548,"sc":19420,"st":2453,"gen":46675,"c":"#49bf2f"},{"d":"Khammam","m":"Mudigonda","p":58485,"sc":15480,"st":1491,"gen":41514,"c":"#49bf2f"},{"d":"Khammam","m":"Nelakondapalle","p":61325,"sc":13875,"st":8105,"gen":39345,"c":"#49bf2f"},{"d":"Khammam","m":"Penuballi","p":52841,"sc":11091,"st":8472,"gen":33278,"c":"#49bf2f"},{"d":"Khammam","m":"Raghunadhapalem","p":49858,"sc":6228,"st":20219,"gen":23411,"c":"#49bf2f"},{"d":"Khammam","m":"Sathupalle","p":77043,"sc":14465,"st":12344,"gen":50234,"c":"#49bf2f"},{"d":"Khammam","m":"Singareni","p":54897,"sc":5027,"st":33543,"gen":16327,"c":"#49bf2f"},{"d":"Khammam","m":"Thallada","p":55750,"sc":14674,"st":3216,"gen":37860,"c":"#49bf2f"},{"d":"Khammam","m":"Thirumalayapalem","p":61502,"sc":14174,"st":15365,"gen":31963,"c":"#49bf2f"},{"d":"Khammam","m":"Vemsoor","p":45078,"sc":12780,"st":2318,"gen":29980,"c":"#49bf2f"},{"d":"Khammam","m":"Wyra","p":54320,"sc":15457,"st":1899,"gen":36964,"c":"#49bf2f"},{"d":"Khammam","m":"Yerrupalem","p":49851,"sc":14095,"st":1685,"gen":34071,"c":"#49bf2f"},{"d":"Kumuram Bheem","m":"Asifabad","p":58511,"sc":8530,"st":11524,"gen":38457,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Bejjur","p":29107,"sc":6145,"st":9848,"gen":13114,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Chintalamanepally","p":29732,"sc":5072,"st":5266,"gen":19394,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Dahegaon","p":27215,"sc":6683,"st":4310,"gen":16222,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Jainoor","p":31453,"sc":2731,"st":18730,"gen":9992,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Kagaznagar","p":109085,"sc":16393,"st":4608,"gen":88084,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Kerameri","p":30724,"sc":3457,"st":13793,"gen":13474,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Kouthala","p":33107,"sc":8996,"st":4266,"gen":19845,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Lingapur","p":12477,"sc":328,"st":10248,"gen":1901,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Penchikalpet","p":15038,"sc":3167,"st":2786,"gen":9085,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Rebbana","p":35859,"sc":9152,"st":3511,"gen":23196,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Sirpur_T","p":27951,"sc":5388,"st":2384,"gen":20179,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Sirpur_U","p":15248,"sc":86,"st":13610,"gen":1552,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Tiryani","p":24782,"sc":2137,"st":17845,"gen":4800,"c":"#22e522"},{"d":"Kumuram Bheem","m":"Wankdi","p":35523,"sc":3331,"st":10898,"gen":21294,"c":"#22e522"},{"d":"Mahabubabad","m":"Bayyaram","p":42587,"sc":3601,"st":21361,"gen":17625,"c":"#42bf59"},{"d":"Mahabubabad","m":"Chinnagudur","p":15317,"sc":2207,"st":4308,"gen":8802,"c":"#42bf59"},{"d":"Mahabubabad","m":"Danthalapalle","p":30276,"sc":7121,"st":3337,"gen":19818,"c":"#42bf59"},{"d":"Mahabubabad","m":"Dornakal","p":48716,"sc":6342,"st":19230,"gen":23144,"c":"#42bf59"},{"d":"Mahabubabad","m":"Ganagavaram","p":10780,"sc":919,"st":8465,"gen":1396,"c":"#42bf59"},{"d":"Mahabubabad","m":"Garla","p":36998,"sc":3750,"st":19075,"gen":14173,"c":"#42bf59"},{"d":"Mahabubabad","m":"Gudur","p":55781,"sc":3528,"st":31960,"gen":20293,"c":"#42bf59"},{"d":"Mahabubabad","m":"Inugurthy","p":25956,"sc":4028,"st":8989,"gen":12939,"c":"#42bf59"},{"d":"Mahabubabad","m":"Kesamudram","p":52984,"sc":5875,"st":16640,"gen":30469,"c":"#42bf59"},{"d":"Mahabubabad","m":"Kothaguda","p":28796,"sc":1765,"st":15928,"gen":11103,"c":"#42bf59"},{"d":"Mahabubabad","m":"Kuravi","p":50573,"sc":5521,"st":22364,"gen":22688,"c":"#42bf59"},{"d":"Mahabubabad","m":"Mahabubabad","p":113812,"sc":13986,"st":37462,"gen":62364,"c":"#42bf59"},{"d":"Mahabubabad","m":"Maripeda","p":70036,"sc":9960,"st":32486,"gen":27590,"c":"#42bf59"},{"d":"Mahabubabad","m":"Narsimhulapet","p":28819,"sc":4543,"st":11246,"gen":13030,"c":"#42bf59"},{"d":"Mahabubabad","m":"Nellikudur","p":43577,"sc":6757,"st":11944,"gen":24876,"c":"#42bf59"},{"d":"Mahabubabad","m":"Peddavangara","p":27823,"sc":5601,"st":5851,"gen":16371,"c":"#42bf59"},{"d":"Mahabubabad","m":"Seerole","p":23318,"sc":2120,"st":12202,"gen":8996,"c":"#42bf59"},{"d":"Mahabubabad","m":"Thorrur","p":68400,"sc":16884,"st":9930,"gen":41586,"c":"#42bf59"},{"d":"Mahabubnagar","m":"Addakal","p":31224,"sc":4310,"st":2399,"gen":24515,"c":"#39e577"},{"d":"Mahabubnagar","m":"Balanagar","p":40306,"sc":6327,"st":14505,"gen":19474,"c":"#39e577"},{"d":"Mahabubnagar","m":"Bhoothpur","p":48041,"sc":7639,"st":5026,"gen":35376,"c":"#39e577"},{"d":"Mahabubnagar","m":"Chinna_Chintha_Kunta","p":37512,"sc":6990,"st":1567,"gen":28955,"c":"#39e577"},{"d":"Mahabubnagar","m":"Devarkadara","p":44829,"sc":6552,"st":950,"gen":37327,"c":"#39e577"},{"d":"Mahabubnagar","m":"Gandeed","p":36330,"sc":6018,"st":4052,"gen":26260,"c":"#39e577"},{"d":"Mahabubnagar","m":"Hanwada","p":55044,"sc":8084,"st":10355,"gen":36605,"c":"#39e577"},{"d":"Mahabubnagar","m":"Jadcherla","p":104141,"sc":15078,"st":12154,"gen":76909,"c":"#39e577"},{"d":"Mahabubnagar","m":"Koilkonda","p":61932,"sc":8288,"st":12747,"gen":40897,"c":"#39e577"},{"d":"Mahabubnagar","m":"Koukuntla","p":18915,"sc":2096,"st":185,"gen":16634,"c":"#39e577"},{"d":"Mahabubnagar","m":"Mahabubnagar_Rural","p":43750,"sc":7547,"st":5351,"gen":30852,"c":"#39e577"},{"d":"Mahabubnagar","m":"Mahabubnagar_Urban","p":215205,"sc":16306,"st":6826,"gen":192073,"c":"#39e577"},{"d":"Mahabubnagar","m":"Midjil","p":30396,"sc":6247,"st":2901,"gen":21248,"c":"#39e577"},{"d":"Mahabubnagar","m":"Mohammadabad","p":34057,"sc":4309,"st":8566,"gen":21182,"c":"#39e577"},{"d":"Mahabubnagar","m":"Musapet","p":26930,"sc":4114,"st":353,"gen":22463,"c":"#39e577"},{"d":"Mahabubnagar","m":"Nawabpet","p":50686,"sc":9179,"st":6100,"gen":35407,"c":"#39e577"},{"d":"Mahabubnagar","m":"Rajapur","p":26362,"sc":4551,"st":6387,"gen":15424,"c":"#39e577"},{"d":"Mancherial","m":"Bellampalle","p":82780,"sc":24402,"st":1927,"gen":56451,"c":"#1cbf75"},{"d":"Mancherial","m":"Bheemaram","p":15493,"sc":4633,"st":3152,"gen":7708,"c":"#1cbf75"},{"d":"Mancherial","m":"Bheemini","p":14184,"sc":3538,"st":729,"gen":9917,"c":"#1cbf75"},{"d":"Mancherial","m":"Chennur","p":54692,"sc":15494,"st":2334,"gen":36864,"c":"#1cbf75"},{"d":"Mancherial","m":"Dandepalle","p":49741,"sc":9967,"st":4573,"gen":35201,"c":"#1cbf75"},{"d":"Mancherial","m":"Hajipur","p":31676,"sc":8248,"st":2125,"gen":21303,"c":"#1cbf75"},{"d":"Mancherial","m":"Jaipur","p":34586,"sc":13187,"st":1035,"gen":20364,"c":"#1cbf75"},{"d":"Mancherial","m":"Jannaram","p":52883,"sc":13410,"st":8636,"gen":30837,"c":"#1cbf75"},{"d":"Mancherial","m":"Kannepalli","p":18549,"sc":5096,"st":1551,"gen":11902,"c":"#1cbf75"},{"d":"Mancherial","m":"Kasipet","p":30866,"sc":5377,"st":9689,"gen":15800,"c":"#1cbf75"},{"d":"Mancherial","m":"Kotapalle","p":33110,"sc":12505,"st":3190,"gen":17415,"c":"#1cbf75"},{"d":"Mancherial","m":"Luxettipet","p":50674,"sc":11071,"st":1108,"gen":38495,"c":"#1cbf75"},{"d":"Mancherial","m":"Mancherial","p":86911,"sc":10121,"st":1410,"gen":75380,"c":"#1cbf75"},{"d":"Mancherial","m":"Mandamarri","p":100109,"sc":26187,"st":4768,"gen":69154,"c":"#1cbf75"},{"d":"Mancherial","m":"Naspur","p":76641,"sc":16830,"st":2295,"gen":57516,"c":"#1cbf75"},{"d":"Mancherial","m":"Nennal","p":23534,"sc":7173,"st":3748,"gen":12613,"c":"#1cbf75"},{"d":"Mancherial","m":"Tandur","p":32617,"sc":7244,"st":2321,"gen":23052,"c":"#1cbf75"},{"d":"Mancherial","m":"Vemanpalle","p":17991,"sc":5010,"st":2378,"gen":10603,"c":"#1cbf75"},{"d":"Medak","m":"Alladurg","p":30789,"sc":5893,"st":2443,"gen":22453,"c":"#50e5bc"},{"d":"Medak","m":"Chegunta","p":39863,"sc":6678,"st":2245,"gen":30940,"c":"#50e5bc"},{"d":"Medak","m":"Chilipched","p":20184,"sc":3649,"st":3944,"gen":12591,"c":"#50e5bc"},{"d":"Medak","m":"Havelighanpur","p":40902,"sc":6760,"st":5338,"gen":28804,"c":"#50e5bc"},{"d":"Medak","m":"Kowdipalle","p":35334,"sc":4540,"st":7128,"gen":23666,"c":"#50e5bc"},{"d":"Medak","m":"Kulcharam","p":35910,"sc":6124,"st":2719,"gen":27067,"c":"#50e5bc"},{"d":"Medak","m":"Manoharabad","p":25903,"sc":4238,"st":528,"gen":21137,"c":"#50e5bc"},{"d":"Medak","m":"Masaipet","p":14733,"sc":3006,"st":2290,"gen":9437,"c":"#50e5bc"},{"d":"Medak","m":"Medak","p":74275,"sc":9444,"st":3914,"gen":60917,"c":"#50e5bc"},{"d":"Medak","m":"Narsapur","p":53774,"sc":7785,"st":8282,"gen":37707,"c":"#50e5bc"},{"d":"Medak","m":"Narsingi","p":16826,"sc":3277,"st":1219,"gen":12330,"c":"#50e5bc"},{"d":"Medak","m":"Nizampet","p":26449,"sc":4152,"st":1982,"gen":20315,"c":"#50e5bc"},{"d":"Medak","m":"Papannapet","p":57149,"sc":9416,"st":4607,"gen":43126,"c":"#50e5bc"},{"d":"Medak","m":"Ramayampet","p":42397,"sc":8847,"st":2852,"gen":30698,"c":"#50e5bc"},{"d":"Medak","m":"Regode","p":22533,"sc":5351,"st":1828,"gen":15354,"c":"#50e5bc"},{"d":"Medak","m":"Shankarampet_A","p":39878,"sc":5720,"st":2098,"gen":32060,"c":"#50e5bc"},{"d":"Medak","m":"Shankarampet_R","p":38884,"sc":6510,"st":4954,"gen":27420,"c":"#50e5bc"},{"d":"Medak","m":"Shivampet","p":42201,"sc":6679,"st":5948,"gen":29574,"c":"#50e5bc"},{"d":"Medak","m":"Tekmal","p":37879,"sc":7532,"st":5939,"gen":24408,"c":"#50e5bc"},{"d":"Medak","m":"Tupran","p":38637,"sc":5949,"st":978,"gen":31710,"c":"#50e5bc"},{"d":"Medak","m":"Yeldurthy","p":31653,"sc":5962,"st":1664,"gen":24027,"c":"#50e5bc"},{"d":"Medchal Malkajgiri","m":"Alwal","p":275308,"sc":37082,"st":4000,"gen":234226,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Bachpalle","p":48835,"sc":2646,"st":1028,"gen":45161,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Balanagar","p":313910,"sc":18166,"st":6645,"gen":289099,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Gandimaisamma Dundigal","p":63194,"sc":5083,"st":1739,"gen":56372,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Ghatkesar","p":74712,"sc":11918,"st":3044,"gen":59750,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Kapra","p":147875,"sc":17030,"st":4423,"gen":126422,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Keesara","p":71301,"sc":9118,"st":1554,"gen":60629,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Kukatpally","p":254086,"sc":10782,"st":5726,"gen":237578,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Malkajgiri","p":154837,"sc":15428,"st":2928,"gen":136481,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Medchel","p":91885,"sc":12967,"st":4437,"gen":74481,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Medipally","p":99768,"sc":9942,"st":2950,"gen":86876,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Muduchinthalapally","p":23194,"sc":4435,"st":1444,"gen":17315,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Quthbullapur","p":383654,"sc":28247,"st":6175,"gen":349232,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Shamirpet","p":52679,"sc":9575,"st":1022,"gen":42082,"c":"#2fbfb2"},{"d":"Medchal Malkajgiri","m":"Uppal","p":404857,"sc":39455,"st":8541,"gen":356861,"c":"#2fbfb2"},{"d":"Mulug","m":"Eturunagaram","p":30293,"sc":6688,"st":8251,"gen":15354,"c":"#22d3e5"},{"d":"Mulug","m":"Govindaraopet","p":30738,"sc":4458,"st":7947,"gen":18333,"c":"#22d3e5"},{"d":"Mulug","m":"Kannaigudem","p":10860,"sc":3320,"st":3525,"gen":4015,"c":"#22d3e5"},{"d":"Mulug","m":"Mangapet","p":48420,"sc":6481,"st":11560,"gen":30379,"c":"#22d3e5"},{"d":"Mulug","m":"Mulug","p":61741,"sc":8231,"st":14221,"gen":39289,"c":"#22d3e5"},{"d":"Mulug","m":"Tadvai","p":22879,"sc":2293,"st":11876,"gen":8710,"c":"#22d3e5"},{"d":"Mulug","m":"Venkatapur","p":33159,"sc":6138,"st":4207,"gen":22814,"c":"#22d3e5"},{"d":"Mulug","m":"Venkatapuram","p":31765,"sc":5050,"st":12452,"gen":14263,"c":"#22d3e5"},{"d":"Mulug","m":"Wazeed","p":24816,"sc":3814,"st":12313,"gen":8689,"c":"#22d3e5"},{"d":"Nagarkurnool","m":"Achampet","p":69875,"sc":11465,"st":20368,"gen":38042,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Amrabad","p":32230,"sc":11780,"st":5382,"gen":15068,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Balmoor","p":38768,"sc":10549,"st":4974,"gen":23245,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Bijinapalle","p":72647,"sc":13261,"st":8662,"gen":50724,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Charakonda","p":20550,"sc":3743,"st":4690,"gen":12117,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Kalwakurthy","p":66388,"sc":13377,"st":4670,"gen":48341,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Kodair","p":43186,"sc":8461,"st":5903,"gen":28822,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Kollapur","p":55466,"sc":10847,"st":4752,"gen":39867,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Lingal","p":34979,"sc":4735,"st":10245,"gen":19999,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Nagar_Kurnool","p":77264,"sc":14673,"st":1113,"gen":61478,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Padra","p":17903,"sc":3316,"st":6143,"gen":8444,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Peddakothapalle","p":56461,"sc":13113,"st":2009,"gen":41339,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Pentlavelli","p":20744,"sc":3334,"st":600,"gen":16810,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Tadoor","p":35839,"sc":8256,"st":1058,"gen":26525,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Telkapalle","p":49585,"sc":14300,"st":1054,"gen":34231,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Thimmajipeta","p":40424,"sc":7764,"st":6855,"gen":25805,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Uppunuthala","p":34225,"sc":8520,"st":4221,"gen":21484,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Urkonda","p":21956,"sc":6116,"st":1189,"gen":14651,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Vangoor","p":36063,"sc":8390,"st":2847,"gen":24826,"c":"#429dbf"},{"d":"Nagarkurnool","m":"Veldanda","p":37213,"sc":7769,"st":10145,"gen":19299,"c":"#429dbf"},{"d":"Nalgonda","m":"Adavi devula palli","p":17249,"sc":1325,"st":7854,"gen":8070,"c":"#3997e5"},{"d":"Nalgonda","m":"Anumula_Haliya","p":42070,"sc":8016,"st":2481,"gen":31573,"c":"#3997e5"},{"d":"Nalgonda","m":"Chandampet","p":32791,"sc":4902,"st":14983,"gen":12906,"c":"#3997e5"},{"d":"Nalgonda","m":"Chandur","p":40211,"sc":7201,"st":294,"gen":32716,"c":"#3997e5"},{"d":"Nalgonda","m":"Chinthapalle","p":45058,"sc":8925,"st":5615,"gen":30518,"c":"#3997e5"},{"d":"Nalgonda","m":"Chityala","p":55600,"sc":9520,"st":509,"gen":45571,"c":"#3997e5"},{"d":"Nalgonda","m":"Damaracherla","p":49697,"sc":5499,"st":20329,"gen":23869,"c":"#3997e5"},{"d":"Nalgonda","m":"Devarakonda","p":67107,"sc":8624,"st":18791,"gen":39692,"c":"#3997e5"},{"d":"Nalgonda","m":"Gattuppal","p":16591,"sc":2281,"st":915,"gen":13395,"c":"#3997e5"},{"d":"Nalgonda","m":"Gundlapalle","p":46380,"sc":9573,"st":12804,"gen":24003,"c":"#3997e5"},{"d":"Nalgonda","m":"Gurrampode","p":43280,"sc":9186,"st":1638,"gen":32456,"c":"#3997e5"},{"d":"Nalgonda","m":"Kangal","p":41615,"sc":8547,"st":732,"gen":32336,"c":"#3997e5"},{"d":"Nalgonda","m":"Kattangoor","p":46831,"sc":10959,"st":744,"gen":35128,"c":"#3997e5"},{"d":"Nalgonda","m":"Kethepalle","p":37533,"sc":10280,"st":254,"gen":26999,"c":"#3997e5"},{"d":"Nalgonda","m":"Kondamallapally","p":32277,"sc":4318,"st":12761,"gen":15198,"c":"#3997e5"},{"d":"Nalgonda","m":"Madugulapally","p":36488,"sc":8611,"st":959,"gen":26918,"c":"#3997e5"},{"d":"Nalgonda","m":"Marriguda","p":33021,"sc":5961,"st":2813,"gen":24247,"c":"#3997e5"},{"d":"Nalgonda","m":"Miryalaguda","p":175838,"sc":25422,"st":23500,"gen":126916,"c":"#3997e5"},{"d":"Nalgonda","m":"Munugode","p":42960,"sc":9265,"st":268,"gen":33427,"c":"#3997e5"},{"d":"Nalgonda","m":"Nakrekal","p":60758,"sc":11896,"st":900,"gen":47962,"c":"#3997e5"},{"d":"Nalgonda","m":"Nalgonda","p":207076,"sc":35274,"st":2990,"gen":168812,"c":"#3997e5"},{"d":"Nalgonda","m":"Nampalle","p":39775,"sc":8637,"st":4353,"gen":26785,"c":"#3997e5"},{"d":"Nalgonda","m":"Narketpalle","p":50864,"sc":11487,"st":630,"gen":38747,"c":"#3997e5"},{"d":"Nalgonda","m":"Neredugommu","p":21661,"sc":2293,"st":12164,"gen":7204,"c":"#3997e5"},{"d":"Nalgonda","m":"Nidamanur","p":43848,"sc":9603,"st":947,"gen":33298,"c":"#3997e5"},{"d":"Nalgonda","m":"Pedda_adiserlapalle","p":47294,"sc":7507,"st":13931,"gen":25856,"c":"#3997e5"},{"d":"Nalgonda","m":"Peddavura","p":54877,"sc":9248,"st":11862,"gen":33767,"c":"#3997e5"},{"d":"Nalgonda","m":"Saligouraram","p":47075,"sc":11795,"st":545,"gen":34735,"c":"#3997e5"},{"d":"Nalgonda","m":"Thipparthi","p":34333,"sc":8099,"st":211,"gen":26023,"c":"#3997e5"},{"d":"Nalgonda","m":"Thripuraram","p":43471,"sc":7205,"st":11653,"gen":24613,"c":"#3997e5"},{"d":"Nalgonda","m":"Tirumalagiri_Sagar","p":38694,"sc":4206,"st":20526,"gen":13962,"c":"#3997e5"},{"d":"Nalgonda","m":"Vemulapalle","p":26093,"sc":7286,"st":296,"gen":18511,"c":"#3997e5"},{"d":"Narayanpet","m":"Damaragidda","p":55151,"sc":10223,"st":2567,"gen":42361,"c":"#1c57bf"},{"d":"Narayanpet","m":"Dhanwada","p":37770,"sc":6060,"st":4902,"gen":26808,"c":"#1c57bf"},{"d":"Narayanpet","m":"Gundumal","p":19932,"sc":3077,"st":3184,"gen":13671,"c":"#1c57bf"},{"d":"Narayanpet","m":"Kosgi","p":40774,"sc":6659,"st":592,"gen":33523,"c":"#1c57bf"},{"d":"Narayanpet","m":"Kothapalle","p":19176,"sc":2925,"st":2060,"gen":14191,"c":"#1c57bf"},{"d":"Narayanpet","m":"Krishna","p":23765,"sc":2748,"st":128,"gen":20889,"c":"#1c57bf"},{"d":"Narayanpet","m":"Maddur","p":45008,"sc":7698,"st":5827,"gen":31483,"c":"#1c57bf"},{"d":"Narayanpet","m":"Maganoor","p":24192,"sc":4633,"st":385,"gen":19174,"c":"#1c57bf"},{"d":"Narayanpet","m":"Makthal","p":72028,"sc":11319,"st":503,"gen":60206,"c":"#1c57bf"},{"d":"Narayanpet","m":"Marikal","p":37650,"sc":6210,"st":1514,"gen":29926,"c":"#1c57bf"},{"d":"Narayanpet","m":"Narayanpet","p":100633,"sc":14126,"st":5870,"gen":80637,"c":"#1c57bf"},{"d":"Narayanpet","m":"Narva","p":31536,"sc":5207,"st":610,"gen":25719,"c":"#1c57bf"},{"d":"Narayanpet","m":"Utkoor","p":54533,"sc":9947,"st":801,"gen":43785,"c":"#1c57bf"},{"d":"Nirmal","m":"Basar","p":19354,"sc":3821,"st":668,"gen":14865,"c":"#506be5"},{"d":"Nirmal","m":"Bhainsa","p":89417,"sc":12518,"st":2153,"gen":74746,"c":"#506be5"},{"d":"Nirmal","m":"Dastuarabad","p":15814,"sc":4220,"st":2364,"gen":9230,"c":"#506be5"},{"d":"Nirmal","m":"Dilawarpur","p":21953,"sc":3553,"st":3011,"gen":15389,"c":"#506be5"},{"d":"Nirmal","m":"Kaddampeddur","p":36033,"sc":6802,"st":7488,"gen":21743,"c":"#506be5"},{"d":"Nirmal","m":"Khanapur","p":48937,"sc":7760,"st":5012,"gen":36165,"c":"#506be5"},{"d":"Nirmal","m":"Kubeer","p":47984,"sc":7049,"st":11352,"gen":29583,"c":"#506be5"},{"d":"Nirmal","m":"Kuntala","p":23388,"sc":3270,"st":2864,"gen":17254,"c":"#506be5"},{"d":"Nirmal","m":"Laxmanchanda","p":30389,"sc":5499,"st":1341,"gen":23549,"c":"#506be5"},{"d":"Nirmal","m":"Lokeswaram","p":34253,"sc":7903,"st":2906,"gen":23444,"c":"#506be5"},{"d":"Nirmal","m":"Mamda","p":32303,"sc":4111,"st":8861,"gen":19331,"c":"#506be5"},{"d":"Nirmal","m":"Mudhole","p":36569,"sc":6341,"st":3030,"gen":27198,"c":"#506be5"},{"d":"Nirmal","m":"Narsapur_G","p":23571,"sc":3998,"st":3345,"gen":16228,"c":"#506be5"},{"d":"Nirmal","m":"Nirmal (U)","p":88433,"sc":6282,"st":1315,"gen":80836,"c":"#506be5"},{"d":"Nirmal","m":"Nirmal_Rural","p":32034,"sc":5533,"st":2974,"gen":23527,"c":"#506be5"},{"d":"Nirmal","m":"Pembi","p":13903,"sc":990,"st":7805,"gen":5108,"c":"#506be5"},{"d":"Nirmal","m":"Sarangapur","p":47993,"sc":7240,"st":9021,"gen":31732,"c":"#506be5"},{"d":"Nirmal","m":"Soan","p":27338,"sc":4050,"st":1932,"gen":21356,"c":"#506be5"},{"d":"Nirmal","m":"Tanur","p":39752,"sc":7145,"st":3134,"gen":29473,"c":"#506be5"},{"d":"Nizamabad","m":"Aloor","p":29117,"sc":6747,"st":1948,"gen":20422,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Armur","p":105132,"sc":14791,"st":2992,"gen":87349,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Balkonda","p":31861,"sc":5099,"st":1215,"gen":25547,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Bheemgal","p":62666,"sc":9075,"st":7272,"gen":46319,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Bodhan","p":122756,"sc":14321,"st":3149,"gen":105286,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Chandur","p":10878,"sc":1486,"st":2568,"gen":6824,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Dharpalle","p":38340,"sc":5260,"st":6350,"gen":26730,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Dichpalle","p":60492,"sc":9210,"st":8258,"gen":43024,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Donkeshwar","p":20588,"sc":4079,"st":1447,"gen":15062,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Indalwai","p":37233,"sc":3998,"st":6841,"gen":26394,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Jakranpalle","p":45505,"sc":8404,"st":3850,"gen":33251,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Kammarpalle","p":36679,"sc":5231,"st":2115,"gen":29333,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Kotgiri","p":23786,"sc":3773,"st":1636,"gen":18377,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Makloor","p":46326,"sc":7615,"st":6640,"gen":32071,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Mendora","p":28439,"sc":5627,"st":2042,"gen":20770,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Mortad","p":33346,"sc":6237,"st":777,"gen":26332,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Mosra","p":13452,"sc":2095,"st":778,"gen":10579,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Mugpal","p":46637,"sc":5586,"st":7320,"gen":33731,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Mupkal","p":20703,"sc":3959,"st":1241,"gen":15503,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Nandipet","p":50010,"sc":8154,"st":2282,"gen":39574,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Navipet","p":55125,"sc":11157,"st":5243,"gen":38725,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Nizamabad_North","p":162179,"sc":13071,"st":1659,"gen":147449,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Nizamabad_Rural","p":52895,"sc":7085,"st":5777,"gen":40033,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Nizamabad_South","p":148973,"sc":10717,"st":1766,"gen":136490,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Pothangal","p":26151,"sc":4696,"st":1298,"gen":20157,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Ranjal","p":38880,"sc":5201,"st":1334,"gen":32345,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Rudrur","p":21909,"sc":2788,"st":245,"gen":18876,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Saloora","p":20993,"sc":4302,"st":40,"gen":16651,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Sirkonda","p":41679,"sc":6229,"st":9241,"gen":26209,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Vailpur","p":46739,"sc":9386,"st":777,"gen":36576,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Varni","p":32971,"sc":3397,"st":6574,"gen":23000,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Yeda_Palle","p":40028,"sc":5452,"st":1712,"gen":32864,"c":"#2f2fbf"},{"d":"Nizamabad","m":"Yergatla","p":18554,"sc":3039,"st":648,"gen":14867,"c":"#2f2fbf"},{"d":"Peddapalli","m":"Antargoan","p":23493,"sc":6255,"st":416,"gen":16822,"c":"#4522e5"},{"d":"Peddapalli","m":"Dharmaram","p":51732,"sc":10606,"st":3533,"gen":37593,"c":"#4522e5"},{"d":"Peddapalli","m":"Elgaid","p":22342,"sc":5553,"st":164,"gen":16625,"c":"#4522e5"},{"d":"Peddapalli","m":"Julapalle","p":30016,"sc":6306,"st":136,"gen":23574,"c":"#4522e5"},{"d":"Peddapalli","m":"Kamanpur","p":25005,"sc":4057,"st":168,"gen":20780,"c":"#4522e5"},{"d":"Peddapalli","m":"Manthani","p":54669,"sc":12725,"st":1375,"gen":40569,"c":"#4522e5"},{"d":"Peddapalli","m":"Mutharam_Manthani","p":25553,"sc":3131,"st":616,"gen":21806,"c":"#4522e5"},{"d":"Peddapalli","m":"Odela","p":42211,"sc":6842,"st":424,"gen":34945,"c":"#4522e5"},{"d":"Peddapalli","m":"Palakurthy","p":34217,"sc":7669,"st":1111,"gen":25437,"c":"#4522e5"},{"d":"Peddapalli","m":"Peddapalle","p":101776,"sc":15346,"st":786,"gen":85644,"c":"#4522e5"},{"d":"Peddapalli","m":"Ramagiri","p":45768,"sc":7905,"st":767,"gen":37096,"c":"#4522e5"},{"d":"Peddapalli","m":"Ramagundam","p":229644,"sc":48738,"st":4080,"gen":176826,"c":"#4522e5"},{"d":"Peddapalli","m":"Srirampur","p":41956,"sc":7351,"st":345,"gen":34260,"c":"#4522e5"},{"d":"Peddapalli","m":"Sultanabad","p":63454,"sc":11433,"st":1024,"gen":50997,"c":"#4522e5"},{"d":"Rajanna Sircilla","m":"Boinpalle","p":39240,"sc":10156,"st":253,"gen":28831,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Chandurthi","p":33587,"sc":6795,"st":778,"gen":26014,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Ellanthakunta","p":48379,"sc":10613,"st":336,"gen":37430,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Gambhiraopeta","p":46878,"sc":9217,"st":2330,"gen":35331,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Konaraopeta","p":40857,"sc":9079,"st":1925,"gen":29853,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Mustabad","p":44217,"sc":10396,"st":1467,"gen":32354,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Rudrangi","p":16095,"sc":1556,"st":4278,"gen":10261,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Sirsilla","p":92001,"sc":6346,"st":1104,"gen":84551,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Thangallapalle","p":50675,"sc":10762,"st":373,"gen":39540,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Veernapalle","p":13363,"sc":2731,"st":5830,"gen":4802,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Vemulawada","p":50158,"sc":8234,"st":499,"gen":41425,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Vemulawada_Rural","p":30317,"sc":6835,"st":632,"gen":22850,"c":"#7042bf"},{"d":"Rajanna Sircilla","m":"Yellareddypeta","p":46270,"sc":9390,"st":3185,"gen":33695,"c":"#7042bf"},{"d":"Rangareddy","m":"Abdullapurmet","p":105605,"sc":19619,"st":3568,"gen":82418,"c":"#9739e5"},{"d":"Rangareddy","m":"Amangal","p":36406,"sc":6144,"st":8855,"gen":21407,"c":"#9739e5"},{"d":"Rangareddy","m":"Balapur","p":179970,"sc":21153,"st":6409,"gen":152408,"c":"#9739e5"},{"d":"Rangareddy","m":"Chevella","p":58166,"sc":12577,"st":377,"gen":45212,"c":"#9739e5"},{"d":"Rangareddy","m":"Farooqnagar","p":112633,"sc":14964,"st":11607,"gen":86062,"c":"#9739e5"},{"d":"Rangareddy","m":"Gandipet","p":57330,"sc":10060,"st":575,"gen":46695,"c":"#9739e5"},{"d":"Rangareddy","m":"Hayathnagar","p":121590,"sc":8245,"st":3680,"gen":109665,"c":"#9739e5"},{"d":"Rangareddy","m":"Ibrahimpatnam","p":75305,"sc":17585,"st":2484,"gen":55236,"c":"#9739e5"},{"d":"Rangareddy","m":"Jilled Chowdergudem","p":31662,"sc":6276,"st":2911,"gen":22475,"c":"#9739e5"},{"d":"Rangareddy","m":"Kadthal","p":36406,"sc":5113,"st":12139,"gen":19154,"c":"#9739e5"},{"d":"Rangareddy","m":"Kandukur","p":54587,"sc":13139,"st":4351,"gen":37097,"c":"#9739e5"},{"d":"Rangareddy","m":"Keshampeta","p":42592,"sc":8904,"st":4163,"gen":29525,"c":"#9739e5"},{"d":"Rangareddy","m":"Kondurg","p":28856,"sc":7613,"st":1093,"gen":20150,"c":"#9739e5"},{"d":"Rangareddy","m":"Kothur","p":34300,"sc":5334,"st":4536,"gen":24430,"c":"#9739e5"},{"d":"Rangareddy","m":"Madgul","p":49133,"sc":10728,"st":8060,"gen":30345,"c":"#9739e5"},{"d":"Rangareddy","m":"Maheshwaram","p":65125,"sc":12968,"st":10014,"gen":42143,"c":"#9739e5"},{"d":"Rangareddy","m":"Manchal","p":45189,"sc":7459,"st":10433,"gen":27297,"c":"#9739e5"},{"d":"Rangareddy","m":"Moinabad","p":56205,"sc":13784,"st":240,"gen":42181,"c":"#9739e5"},{"d":"Rangareddy","m":"Nandigam","p":30941,"sc":5084,"st":1636,"gen":24221,"c":"#9739e5"},{"d":"Rangareddy","m":"Rajendranagar","p":229823,"sc":17285,"st":3056,"gen":209482,"c":"#9739e5"},{"d":"Rangareddy","m":"Saroornagar","p":369034,"sc":24931,"st":9376,"gen":334727,"c":"#9739e5"},{"d":"Rangareddy","m":"Serilingampally","p":309320,"sc":21953,"st":6649,"gen":280718,"c":"#9739e5"},{"d":"Rangareddy","m":"Shabad","p":51334,"sc":11766,"st":1781,"gen":37787,"c":"#9739e5"},{"d":"Rangareddy","m":"Shamshabad","p":87837,"sc":15968,"st":6134,"gen":65735,"c":"#9739e5"},{"d":"Rangareddy","m":"Shankarpalle","p":65428,"sc":14190,"st":2085,"gen":49153,"c":"#9739e5"},{"d":"Rangareddy","m":"Talakondapalle","p":42057,"sc":9019,"st":7785,"gen":25253,"c":"#9739e5"},{"d":"Rangareddy","m":"Yacharam","p":49409,"sc":12476,"st":4301,"gen":32632,"c":"#9739e5"},{"d":"Sangareddy","m":"Ameenapur","p":45439,"sc":5010,"st":809,"gen":39620,"c":"#921cbf"},{"d":"Sangareddy","m":"Andhole","p":63536,"sc":12741,"st":704,"gen":50091,"c":"#921cbf"},{"d":"Sangareddy","m":"Chowtakur","p":22113,"sc":5419,"st":877,"gen":15817,"c":"#921cbf"},{"d":"Sangareddy","m":"Gummadidala","p":37061,"sc":5231,"st":1306,"gen":30524,"c":"#921cbf"},{"d":"Sangareddy","m":"Hathanoora","p":55935,"sc":11193,"st":2805,"gen":41937,"c":"#921cbf"},{"d":"Sangareddy","m":"Jharasangam","p":44583,"sc":12946,"st":1138,"gen":30499,"c":"#921cbf"},{"d":"Sangareddy","m":"Jinnaram","p":60218,"sc":6607,"st":1223,"gen":52388,"c":"#921cbf"},{"d":"Sangareddy","m":"Kalher","p":22112,"sc":3162,"st":2850,"gen":16100,"c":"#921cbf"},{"d":"Sangareddy","m":"Kandi","p":48078,"sc":8799,"st":4240,"gen":35039,"c":"#921cbf"},{"d":"Sangareddy","m":"Kangti","p":44095,"sc":8661,"st":5113,"gen":30321,"c":"#921cbf"},{"d":"Sangareddy","m":"Kohir","p":60638,"sc":18086,"st":2431,"gen":40121,"c":"#921cbf"},{"d":"Sangareddy","m":"Kondapur","p":42985,"sc":10414,"st":3784,"gen":28787,"c":"#921cbf"},{"d":"Sangareddy","m":"Manoor","p":28603,"sc":6509,"st":1043,"gen":21051,"c":"#921cbf"},{"d":"Sangareddy","m":"Mogdampalle","p":36445,"sc":6243,"st":7918,"gen":22284,"c":"#921cbf"},{"d":"Sangareddy","m":"Munipalli","p":40965,"sc":9503,"st":401,"gen":31061,"c":"#921cbf"},{"d":"Sangareddy","m":"Nagalgidda","p":30898,"sc":5846,"st":7555,"gen":17497,"c":"#921cbf"},{"d":"Sangareddy","m":"Narayankhed","p":71399,"sc":10616,"st":12045,"gen":48738,"c":"#921cbf"},{"d":"Sangareddy","m":"Naykal","p":57110,"sc":15094,"st":696,"gen":41320,"c":"#921cbf"},{"d":"Sangareddy","m":"Nizampet","p":21665,"sc":2828,"st":4735,"gen":14102,"c":"#921cbf"},{"d":"Sangareddy","m":"Patancheruvu","p":113752,"sc":16113,"st":1716,"gen":95923,"c":"#921cbf"},{"d":"Sangareddy","m":"Pulkal","p":29273,"sc":6479,"st":3069,"gen":19725,"c":"#921cbf"},{"d":"Sangareddy","m":"Raikode","p":40732,"sc":8942,"st":281,"gen":31509,"c":"#921cbf"},{"d":"Sangareddy","m":"Ramachandrapuram","p":117110,"sc":15764,"st":2794,"gen":98552,"c":"#921cbf"},{"d":"Sangareddy","m":"Sadasivpet","p":94337,"sc":15675,"st":1184,"gen":77478,"c":"#921cbf"},{"d":"Sangareddy","m":"Sangareddy","p":106500,"sc":15724,"st":2963,"gen":87813,"c":"#921cbf"},{"d":"Sangareddy","m":"Sirgapoor","p":29792,"sc":5864,"st":5704,"gen":18224,"c":"#921cbf"},{"d":"Sangareddy","m":"Watpalle","p":30523,"sc":8042,"st":1102,"gen":21379,"c":"#921cbf"},{"d":"Sangareddy","m":"Zahirabad","p":133006,"sc":19918,"st":6224,"gen":106864,"c":"#921cbf"},{"d":"Siddipet","m":"Akbarpet-Bhoompally","p":29834,"sc":6452,"st":191,"gen":23191,"c":"#d750e5"},{"d":"Siddipet","m":"Akkannapeta","p":40286,"sc":5813,"st":7654,"gen":26819,"c":"#d750e5"},{"d":"Siddipet","m":"Bejjanki","p":35064,"sc":8945,"st":358,"gen":25761,"c":"#d750e5"},{"d":"Siddipet","m":"Cheriyal","p":54941,"sc":11434,"st":264,"gen":43243,"c":"#d750e5"},{"d":"Siddipet","m":"Chinnakodur","p":46976,"sc":9101,"st":388,"gen":37487,"c":"#d750e5"},{"d":"Siddipet","m":"Dhoolmitta","p":15501,"sc":2426,"st":2751,"gen":10324,"c":"#d750e5"},{"d":"Siddipet","m":"Doultabad","p":30888,"sc":6408,"st":952,"gen":23528,"c":"#d750e5"},{"d":"Siddipet","m":"Dubbak","p":60137,"sc":12025,"st":1204,"gen":46908,"c":"#d750e5"},{"d":"Siddipet","m":"Gajwel","p":77881,"sc":14051,"st":929,"gen":62901,"c":"#d750e5"},{"d":"Siddipet","m":"Husnabad","p":42696,"sc":8011,"st":2983,"gen":31702,"c":"#d750e5"},{"d":"Siddipet","m":"Jagadevpur","p":34953,"sc":6267,"st":203,"gen":28483,"c":"#d750e5"},{"d":"Siddipet","m":"Koheda","p":44645,"sc":8880,"st":1063,"gen":34702,"c":"#d750e5"},{"d":"Siddipet","m":"Komaravelly","p":18031,"sc":4161,"st":61,"gen":13809,"c":"#d750e5"},{"d":"Siddipet","m":"Kondapak","p":32545,"sc":6970,"st":164,"gen":25411,"c":"#d750e5"},{"d":"Siddipet","m":"Kukunoorpally","p":20360,"sc":4614,"st":59,"gen":15687,"c":"#d750e5"},{"d":"Siddipet","m":"Maddur","p":21067,"sc":4456,"st":201,"gen":16410,"c":"#d750e5"},{"d":"Siddipet","m":"Markook","p":22899,"sc":4673,"st":151,"gen":18075,"c":"#d750e5"},{"d":"Siddipet","m":"Mirdoddi","p":23878,"sc":5531,"st":208,"gen":18139,"c":"#d750e5"},{"d":"Siddipet","m":"Mulug","p":34767,"sc":7033,"st":600,"gen":27134,"c":"#d750e5"},{"d":"Siddipet","m":"Nanganur","p":39010,"sc":7024,"st":1060,"gen":30926,"c":"#d750e5"},{"d":"Siddipet","m":"Narayanraopet","p":18852,"sc":3342,"st":158,"gen":15352,"c":"#d750e5"},{"d":"Siddipet","m":"Rayapole","p":26528,"sc":5448,"st":144,"gen":20936,"c":"#d750e5"},{"d":"Siddipet","m":"Siddipet_Rural","p":28030,"sc":6467,"st":297,"gen":21266,"c":"#d750e5"},{"d":"Siddipet","m":"Siddipet_Urban","p":140075,"sc":15165,"st":1323,"gen":123587,"c":"#d750e5"},{"d":"Siddipet","m":"Thoguta","p":34488,"sc":6327,"st":883,"gen":27278,"c":"#d750e5"},{"d":"Siddipet","m":"Wargal","p":37733,"sc":6484,"st":761,"gen":30488,"c":"#d750e5"},{"d":"Suryapet","m":"Ananthagiri","p":30972,"sc":6677,"st":5234,"gen":19061,"c":"#bf2fb2"},{"d":"Suryapet","m":"Atmakur_S","p":50970,"sc":10564,"st":8407,"gen":31999,"c":"#bf2fb2"},{"d":"Suryapet","m":"Chilkur","p":39225,"sc":6419,"st":4621,"gen":28185,"c":"#bf2fb2"},{"d":"Suryapet","m":"Chinthala palem","p":36542,"sc":5303,"st":5217,"gen":26022,"c":"#bf2fb2"},{"d":"Suryapet","m":"Chivvemla","p":47835,"sc":9174,"st":16707,"gen":21954,"c":"#bf2fb2"},{"d":"Suryapet","m":"Garidepalle","p":56179,"sc":11041,"st":4802,"gen":40336,"c":"#bf2fb2"},{"d":"Suryapet","m":"Huzur nagar","p":60426,"sc":10917,"st":1516,"gen":47993,"c":"#bf2fb2"},{"d":"Suryapet","m":"Jajireddigudem","p":28637,"sc":5129,"st":2479,"gen":21029,"c":"#bf2fb2"},{"d":"Suryapet","m":"Kodad","p":111940,"sc":17778,"st":7630,"gen":86532,"c":"#bf2fb2"},{"d":"Suryapet","m":"Maddirala","p":30620,"sc":6288,"st":2080,"gen":22252,"c":"#bf2fb2"},{"d":"Suryapet","m":"Mattampalle","p":44939,"sc":6446,"st":14160,"gen":24333,"c":"#bf2fb2"},{"d":"Suryapet","m":"Mellachervu","p":38140,"sc":4091,"st":7411,"gen":26638,"c":"#bf2fb2"},{"d":"Suryapet","m":"Mothey","p":44132,"sc":9270,"st":9192,"gen":25670,"c":"#bf2fb2"},{"d":"Suryapet","m":"Munagala","p":43824,"sc":10336,"st":1932,"gen":31556,"c":"#bf2fb2"},{"d":"Suryapet","m":"Nadigudem","p":29553,"sc":7925,"st":863,"gen":20765,"c":"#bf2fb2"},{"d":"Suryapet","m":"Nagaram","p":27596,"sc":7329,"st":1068,"gen":19199,"c":"#bf2fb2"},{"d":"Suryapet","m":"Neredcherla","p":41047,"sc":9756,"st":1952,"gen":29339,"c":"#bf2fb2"},{"d":"Suryapet","m":"Noothankal","p":34335,"sc":7789,"st":4329,"gen":22217,"c":"#bf2fb2"},{"d":"Suryapet","m":"Palakeedu","p":25452,"sc":3837,"st":7231,"gen":14384,"c":"#bf2fb2"},{"d":"Suryapet","m":"Penpahad","p":39624,"sc":9592,"st":5968,"gen":24064,"c":"#bf2fb2"},{"d":"Suryapet","m":"Suryapet","p":155422,"sc":25884,"st":13984,"gen":115554,"c":"#bf2fb2"},{"d":"Suryapet","m":"Thirumalagiri","p":38808,"sc":7236,"st":6952,"gen":24620,"c":"#bf2fb2"},{"d":"Suryapet","m":"Thungathurthi","p":43342,"sc":9545,"st":7536,"gen":26261,"c":"#bf2fb2"},{"d":"Vikarabad","m":"Bantwaram","p":18229,"sc":5652,"st":245,"gen":12332,"c":"#e522b0"},{"d":"Vikarabad","m":"Basheerabad","p":43562,"sc":7058,"st":7986,"gen":28518,"c":"#e522b0"},{"d":"Vikarabad","m":"Bomraspeta","p":36764,"sc":4896,"st":11142,"gen":20726,"c":"#e522b0"},{"d":"Vikarabad","m":"Chowdapur","p":26988,"sc":3311,"st":7272,"gen":16405,"c":"#e522b0"},{"d":"Vikarabad","m":"Dharur","p":40814,"sc":7427,"st":5551,"gen":27836,"c":"#e522b0"},{"d":"Vikarabad","m":"Doma","p":48224,"sc":8361,"st":8479,"gen":31384,"c":"#e522b0"},{"d":"Vikarabad","m":"Doulatabad","p":48379,"sc":9247,"st":4016,"gen":35116,"c":"#e522b0"},{"d":"Vikarabad","m":"Dudyal","p":22291,"sc":3482,"st":4287,"gen":14522,"c":"#e522b0"},{"d":"Vikarabad","m":"Kodangal","p":53673,"sc":10420,"st":2972,"gen":40281,"c":"#e522b0"},{"d":"Vikarabad","m":"Kotepally","p":22004,"sc":5414,"st":980,"gen":15610,"c":"#e522b0"},{"d":"Vikarabad","m":"Kulkacharla","p":43293,"sc":5287,"st":11285,"gen":26721,"c":"#e522b0"},{"d":"Vikarabad","m":"Marpalle","p":51090,"sc":13811,"st":2329,"gen":34950,"c":"#e522b0"},{"d":"Vikarabad","m":"Mominpet","p":43261,"sc":12464,"st":3137,"gen":27660,"c":"#e522b0"},{"d":"Vikarabad","m":"Nawabpet","p":41283,"sc":11985,"st":187,"gen":29111,"c":"#e522b0"},{"d":"Vikarabad","m":"Pargi","p":62984,"sc":12758,"st":4891,"gen":45335,"c":"#e522b0"},{"d":"Vikarabad","m":"Peddemul","p":44819,"sc":8402,"st":8895,"gen":27522,"c":"#e522b0"},{"d":"Vikarabad","m":"Pudur","p":44884,"sc":11225,"st":1478,"gen":32181,"c":"#e522b0"},{"d":"Vikarabad","m":"Tandur","p":118776,"sc":13791,"st":3808,"gen":101177,"c":"#e522b0"},{"d":"Vikarabad","m":"Vikarabad","p":89496,"sc":18900,"st":4781,"gen":65815,"c":"#e522b0"},{"d":"Vikarabad","m":"Yelal","p":45295,"sc":8837,"st":3666,"gen":32792,"c":"#e522b0"},{"d":"Wanaparthy","m":"Amarchinta","p":28434,"sc":3971,"st":969,"gen":23494,"c":"#bf4286"},{"d":"Wanaparthy","m":"Atmakur","p":38467,"sc":6575,"st":815,"gen":31077,"c":"#bf4286"},{"d":"Wanaparthy","m":"Chinnambavi","p":28949,"sc":5576,"st":367,"gen":23006,"c":"#bf4286"},{"d":"Wanaparthy","m":"Ghanpur","p":42505,"sc":5960,"st":8639,"gen":27906,"c":"#bf4286"},{"d":"Wanaparthy","m":"Gopalpeta","p":38424,"sc":7412,"st":4209,"gen":26803,"c":"#bf4286"},{"d":"Wanaparthy","m":"Kothakota","p":59331,"sc":8752,"st":3467,"gen":47112,"c":"#bf4286"},{"d":"Wanaparthy","m":"Madanapur","p":27905,"sc":3552,"st":2349,"gen":22004,"c":"#bf4286"},{"d":"Wanaparthy","m":"Pangal","p":48540,"sc":7934,"st":5750,"gen":34856,"c":"#bf4286"},{"d":"Wanaparthy","m":"Pebbair","p":48749,"sc":10084,"st":1393,"gen":37272,"c":"#bf4286"},{"d":"Wanaparthy","m":"Peddamandadi","p":39693,"sc":6781,"st":3952,"gen":28960,"c":"#bf4286"},{"d":"Wanaparthy","m":"Revelly","p":20921,"sc":5415,"st":1265,"gen":14241,"c":"#bf4286"},{"d":"Wanaparthy","m":"Srirangapur","p":19941,"sc":3454,"st":566,"gen":15921,"c":"#bf4286"},{"d":"Wanaparthy","m":"Veepangandla","p":27378,"sc":5066,"st":1717,"gen":20595,"c":"#bf4286"},{"d":"Wanaparthy","m":"Wanaparthy","p":108521,"sc":12650,"st":10604,"gen":85267,"c":"#bf4286"},{"d":"Warangal","m":"Chennaraopeta","p":41260,"sc":4723,"st":14864,"gen":21673,"c":"#e53977"},{"d":"Warangal","m":"Duggondi","p":42050,"sc":6764,"st":2097,"gen":33189,"c":"#e53977"},{"d":"Warangal","m":"Geesugonda","p":58423,"sc":12312,"st":4535,"gen":41576,"c":"#e53977"},{"d":"Warangal","m":"Khanapur","p":32186,"sc":2621,"st":8777,"gen":20788,"c":"#e53977"},{"d":"Warangal","m":"Khilla_Warangal","p":172108,"sc":22930,"st":3978,"gen":145200,"c":"#e53977"},{"d":"Warangal","m":"Nallabelly","p":37503,"sc":4088,"st":7011,"gen":26404,"c":"#e53977"},{"d":"Warangal","m":"Narsampet","p":76637,"sc":10452,"st":10634,"gen":55551,"c":"#e53977"},{"d":"Warangal","m":"Nekkonda","p":51646,"sc":7261,"st":14338,"gen":30047,"c":"#e53977"},{"d":"Warangal","m":"Parvathagiri","p":47639,"sc":6922,"st":13885,"gen":26832,"c":"#e53977"},{"d":"Warangal","m":"Raiparthy","p":56189,"sc":9923,"st":13116,"gen":33150,"c":"#e53977"},{"d":"Warangal","m":"Sangem","p":46076,"sc":8122,"st":6468,"gen":31486,"c":"#e53977"},{"d":"Warangal","m":"Warangal","p":26877,"sc":8912,"st":646,"gen":17319,"c":"#e53977"},{"d":"Warangal","m":"Wardhannapet","p":48554,"sc":11165,"st":6511,"gen":30878,"c":"#e53977"},{"d":"Yadadri Bhuvanagiri","m":"Addagudur","p":25849,"sc":6790,"st":179,"gen":18880,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Alair","p":41654,"sc":8443,"st":949,"gen":32262,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Atmakur_M","p":29479,"sc":5125,"st":264,"gen":24090,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Bhongiri","p":103538,"sc":15728,"st":3594,"gen":84216,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Bibinagar","p":48498,"sc":8310,"st":4861,"gen":35327,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Bommalaramaram","p":37248,"sc":5118,"st":9560,"gen":22570,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Choutuppal","p":73336,"sc":11101,"st":1338,"gen":60897,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Gundala","p":31385,"sc":7540,"st":438,"gen":23407,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Mootakondur","p":24324,"sc":4506,"st":208,"gen":19610,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Mothkur","p":29845,"sc":6258,"st":201,"gen":23386,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Narayanapur","p":44335,"sc":6990,"st":9591,"gen":27754,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Pochampalle","p":51061,"sc":8219,"st":1138,"gen":41704,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Rajapet","p":38454,"sc":8043,"st":1093,"gen":29318,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Ramannapeta","p":51534,"sc":10687,"st":530,"gen":40317,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Turkapalle_M","p":33797,"sc":4131,"st":8473,"gen":21193,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Valigonda","p":59285,"sc":11732,"st":317,"gen":47236,"c":"#bf1c3a"},{"d":"Yadadri Bhuvanagiri","m":"Yadagirigutta","p":47211,"sc":7387,"st":1022,"gen":38802,"c":"#bf1c3a"}],"dist_color":{"Adilabad":"#bf4242","Bhadradri Kothagudem":"#e55839","Hanumakonda":"#bf571c","Hyderabad":"#e5a150","Jagitial":"#bf982f","Jangaon":"#e5d322","Jayashankar Bhupalapalli":"#b3bf42","Jogulamba Gadwal":"#b6e539","Kamareddy":"#75bf1c","Karimnagar":"#86e550","Khammam":"#49bf2f","Kumuram Bheem":"#22e522","Mahabubabad":"#42bf59","Mahabubnagar":"#39e577","Mancherial":"#1cbf75","Medak":"#50e5bc","Medchal Malkajgiri":"#2fbfb2","Mulug":"#22d3e5","Nagarkurnool":"#429dbf","Nalgonda":"#3997e5","Narayanpet":"#1c57bf","Nirmal":"#506be5","Nizamabad":"#2f2fbf","Peddapalli":"#4522e5","Rajanna Sircilla":"#7042bf","Rangareddy":"#9739e5","Sangareddy":"#921cbf","Siddipet":"#d750e5","Suryapet":"#bf2fb2","Vikarabad":"#e522b0","Wanaparthy":"#bf4286","Warangal":"#e53977","Yadadri Bhuvanagiri":"#bf1c3a"},"dist_list":["Adilabad","Bhadradri Kothagudem","Hanumakonda","Hyderabad","Jagitial","Jangaon","Jayashankar Bhupalapalli","Jogulamba Gadwal","Kamareddy","Karimnagar","Khammam","Kumuram Bheem","Mahabubabad","Mahabubnagar","Mancherial","Medak","Medchal Malkajgiri","Mulug","Nagarkurnool","Nalgonda","Narayanpet","Nirmal","Nizamabad","Peddapalli","Rajanna Sircilla","Rangareddy","Sangareddy","Siddipet","Suryapet","Vikarabad","Wanaparthy","Warangal","Yadadri Bhuvanagiri"],"districts":[{"d":"Adilabad","p":708972,"sc":99422,"st":224622,"gen":384928,"c":"#bf4242"},{"d":"Bhadradri Kothagudem","p":1069261,"sc":143482,"st":392034,"gen":533745,"c":"#e55839"},{"d":"Hanumakonda","p":1062247,"sc":208419,"st":31746,"gen":822082,"c":"#bf571c"},{"d":"Hyderabad","p":3943323,"sc":247927,"st":48937,"gen":3646459,"c":"#e5a150"},{"d":"Jagitial","p":988913,"sc":165534,"st":23351,"gen":800028,"c":"#bf982f"},{"d":"Jangaon","p":534991,"sc":112256,"st":62224,"gen":360511,"c":"#e5d322"},{"d":"Jayashankar Bhupalapalli","p":416763,"sc":92017,"st":37192,"gen":287554,"c":"#b3bf42"},{"d":"Jogulamba Gadwal","p":609990,"sc":120639,"st":9376,"gen":479975,"c":"#b6e539"},{"d":"Kamareddy","p":972625,"sc":153302,"st":81656,"gen":737667,"c":"#75bf1c"},{"d":"Karimnagar","p":1005711,"sc":186648,"st":12779,"gen":806284,"c":"#86e550"},{"d":"Khammam","p":1401639,"sc":279319,"st":199342,"gen":922978,"c":"#49bf2f"},{"d":"Kumuram Bheem","p":515812,"sc":81596,"st":133627,"gen":300589,"c":"#22e522"},{"d":"Mahabubabad","p":774549,"sc":104508,"st":292778,"gen":377263,"c":"#42bf59"},{"d":"Mahabubnagar","p":905660,"sc":123635,"st":100424,"gen":681601,"c":"#39e577"},{"d":"Mancherial","p":807037,"sc":199493,"st":56969,"gen":550575,"c":"#1cbf75"},{"d":"Medak","p":766153,"sc":127512,"st":72900,"gen":565741,"c":"#50e5bc"},{"d":"Medchal Malkajgiri","p":2460095,"sc":231874,"st":55656,"gen":2172565,"c":"#2fbfb2"},{"d":"Mulug","p":294671,"sc":46473,"st":86352,"gen":161846,"c":"#22d3e5"},{"d":"Nagarkurnool","p":861766,"sc":183769,"st":106880,"gen":571117,"c":"#429dbf"},{"d":"Nalgonda","p":1618416,"sc":292951,"st":209252,"gen":1116213,"c":"#3997e5"},{"d":"Narayanpet","p":562148,"sc":90832,"st":28943,"gen":442373,"c":"#1c57bf"},{"d":"Nirmal","p":709418,"sc":108085,"st":80576,"gen":520757,"c":"#506be5"},{"d":"Nizamabad","p":1571022,"sc":217267,"st":107035,"gen":1246720,"c":"#2f2fbf"},{"d":"Peddapalli","p":791836,"sc":153917,"st":14945,"gen":622974,"c":"#4522e5"},{"d":"Rajanna Sircilla","p":552037,"sc":102110,"st":22990,"gen":426937,"c":"#7042bf"},{"d":"Rangareddy","p":2426243,"sc":334337,"st":138298,"gen":1953608,"c":"#9739e5"},{"d":"Sangareddy","p":1528903,"sc":277429,"st":86710,"gen":1164764,"c":"#921cbf"},{"d":"Siddipet","p":1012065,"sc":187508,"st":25010,"gen":799547,"c":"#d750e5"},{"d":"Suryapet","p":1099560,"sc":208326,"st":141271,"gen":749963,"c":"#bf2fb2"},{"d":"Vikarabad","p":946109,"sc":182728,"st":97387,"gen":665994,"c":"#e522b0"},{"d":"Wanaparthy","p":577758,"sc":93182,"st":46062,"gen":438514,"c":"#bf4286"},{"d":"Warangal","p":737148,"sc":116195,"st":106860,"gen":514093,"c":"#e53977"},{"d":"Yadadri Bhuvanagiri","p":770833,"sc":136108,"st":43756,"gen":590969,"c":"#bf1c3a"}]};
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+const TT  = document.getElementById('tooltip');
+const CV  = {
+  bg:'#0E1520',surface:'#14202E',sf2:'#1A2A3C',
+  border:'#1F3350',text:'#C2D8EC',muted:'#4E7092',
+  accent:'#1BBFCE',sc:'#FF8C42',st:'#38D0A0',gen:'#8F96F5'
+};
+
+// Populate dist dropdowns
+['c1Dist','c2Dist'].forEach(id => {
+  const s = document.getElementById(id);
+  RAW.dist_list.forEach(d => { const o=document.createElement('option'); o.value=d; o.textContent=d; s.appendChild(o); });
+});
+
+// Tab switching
+const tabs = [0,1,2,3];
+function switchTab(i) {
+  document.querySelectorAll('.section').forEach((s,j) => s.classList.toggle('active', j===i));
+  document.querySelectorAll('.snav-btn').forEach((b,j) => b.classList.toggle('active', j===i));
+  // Draw on first show
+  const drawFns = [drawC1, drawC2, drawC3, drawC4];
+  drawFns[i]();
+}
+
+// Caste visibility state
+const vis2 = {sc:true,st:true,gen:true};
+const vis4 = {sc:true,st:true,gen:true};
+function tog2(k){ vis2[k]=!vis2[k]; document.getElementById('t2'+k.toUpperCase()).classList.toggle('on',vis2[k]); drawC2(); }
+function tog4(k){ vis4[k]=!vis4[k]; document.getElementById('t4'+k.toUpperCase()).classList.toggle('on',vis4[k]); drawC4(); }
+
+// Formatters
+function fmt(n){ if(n>=1e7) return (n/1e7).toFixed(2)+' Cr'; if(n>=1e5) return (n/1e5).toFixed(2)+' L'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return n.toLocaleString('en-IN'); }
+function pct(a,b){ return b?((a/b)*100).toFixed(1)+'%':'0%'; }
+
+// Tooltip helpers
+function showTT(html,e){ TT.innerHTML=html; TT.classList.add('visible'); moveTT(e); }
+function moveTT(e){ TT.style.left=Math.min(e.clientX+14,window.innerWidth-250)+'px'; TT.style.top=Math.min(e.clientY+14,window.innerHeight-140)+'px'; }
+function hideTT(){ TT.classList.remove('visible'); }
+function hitTest(canvas, rects, e, cb){
+  const r=canvas.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+  const h=rects.find(r=>mx>=r.x&&mx<r.x+r.w&&my>=r.y&&my<r.y+r.h);
+  if(h) cb(h.data,e); else hideTT();
+}
+
+// ── Generic bar chart drawer ──
+// mode: 'single' | 'caste-grouped' | 'caste-stacked' | 'caste-pct'
+function drawBars(canvasId, data, opts) {
+  const {
+    barW=10, barGap=3, distGap=5, padL=72, padR=20, padT=18, padB=110,
+    height=420, mode='single', vis={sc:true,st:true,gen:true},
+    sortByDist=false, labelField='d', labelColor=null, showDistLine=false
+  } = opts;
+
+  const C   = document.getElementById(canvasId);
+  const ctx = C.getContext('2d');
+
+  // Series for caste modes
+  const series = [];
+  if(mode!=='single'){
+    if(vis.sc)  series.push({key:'sc', color:CV.sc});
+    if(vis.st)  series.push({key:'st', color:CV.st});
+    if(vis.gen) series.push({key:'gen',color:CV.gen});
+  }
+  const ns = series.length || 1;
+  const grpW = mode==='single' ? barW : (mode==='caste-grouped' ? (barW*ns+(ns-1)*2) : barW*3);
+  const step  = grpW + barGap;
+
+  // District boundaries (for lines + labels)
+  let distStarts = {};
+  if(sortByDist){
+    let prev=null, x=padL;
+    data.forEach(r=>{
+      if(r.d!==prev){ if(prev!==null) x+=distGap; distStarts[r.d]=x; prev=r.d; }
+      x+=step;
+    });
+  }
+  const extraGap = sortByDist ? Math.max(0,Object.keys(distStarts).length-1)*distGap : 0;
+  const totalW   = Math.max(padL+padR+data.length*step+extraGap, 400);
+  const plotH    = height - padT - padB;
+
+  C.width=totalW*DPR; C.height=height*DPR;
+  C.style.width=totalW+'px'; C.style.height=height+'px';
+  ctx.scale(DPR,DPR);
+  ctx.fillStyle=CV.surface; ctx.fillRect(0,0,totalW,height);
+
+  // Max val
+  let maxVal=1;
+  if(mode==='single')        maxVal=Math.max(1,...data.map(r=>r.p));
+  else if(mode==='caste-grouped') series.forEach(s=>{ maxVal=Math.max(maxVal,...data.map(r=>r[s.key])); });
+  else if(mode==='caste-stacked') maxVal=Math.max(1,...data.map(r=>series.reduce((a,s)=>a+r[s.key],0)));
+  else maxVal=100;
+  const sc=plotH/maxVal;
+
+  // Gridlines
+  ctx.font="11px 'Courier New',monospace"; ctx.textAlign='right';
+  for(let i=0;i<=5;i++){
+    const val=(maxVal/5)*i, y=padT+plotH-val*sc;
+    ctx.strokeStyle=i===0?CV.border:CV.border+'66';
+    ctx.lineWidth=i===0?1.5:0.5;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(totalW-padR,y); ctx.stroke();
+    ctx.fillStyle=CV.muted;
+    ctx.fillText(mode==='caste-pct'?val.toFixed(0)+'%':fmt(val), padL-6, y+4);
+  }
+  // Y label
+  ctx.save(); ctx.translate(13,padT+plotH/2); ctx.rotate(-Math.PI/2);
+  ctx.textAlign='center'; ctx.font='11px system-ui'; ctx.fillStyle=CV.muted;
+  ctx.fillText(mode==='caste-pct'?'Share (%)':'Population',0,0); ctx.restore();
+
+  const hitRects=[];
+  let x=padL, prevD=null;
+
+  data.forEach(r=>{
+    if(sortByDist && r.d!==prevD){ if(prevD!==null) x+=distGap; prevD=r.d; }
+
+    if(mode==='single'){
+      const bh=r.p*sc, by=padT+plotH-bh;
+      ctx.fillStyle=r.c||CV.accent;
+      ctx.beginPath();
+      if(ctx.roundRect) ctx.roundRect(x,by,barW,bh,[2,2,0,0]); else ctx.rect(x,by,barW,bh);
+      ctx.fill();
+    } else if(mode==='caste-grouped'){
+      const bw2=Math.max(4,Math.floor((barW*3-(ns-1)*2)/ns));
+      series.forEach((s,si)=>{
+        const bh=r[s.key]*sc, bx=x+si*(bw2+2);
+        ctx.fillStyle=s.color;
+        ctx.beginPath();
+        if(ctx.roundRect) ctx.roundRect(bx,padT+plotH-bh,bw2,bh,[2,2,0,0]); else ctx.rect(bx,padT+plotH-bh,bw2,bh);
+        ctx.fill();
+      });
+    } else if(mode==='caste-stacked'){
+      let sy=padT+plotH;
+      [...series].reverse().forEach(s=>{ const bh=r[s.key]*sc; sy-=bh; ctx.fillStyle=s.color; ctx.fillRect(x,sy,barW*3,bh); });
+    } else {
+      let sy=padT+plotH, tot=series.reduce((a,s)=>a+r[s.key],0)||1;
+      [...series].reverse().forEach(s=>{ const bh=(r[s.key]/tot*100)*sc; sy-=bh; ctx.fillStyle=s.color; ctx.fillRect(x,sy,barW*3,bh); });
+    }
+
+    hitRects.push({x,y:padT,w:step,h:plotH,data:r});
+
+    // Label
+    ctx.save();
+    ctx.translate(x+grpW/2, padT+plotH+10);
+    ctx.rotate(Math.PI/3.2);
+    ctx.fillStyle = labelColor ? (labelColor(r)||CV.muted) : CV.muted;
+    ctx.font='9px system-ui'; ctx.textAlign='left';
+    const lbl=(r[labelField]||'').length>14?(r[labelField]).slice(0,14)+'…':r[labelField];
+    ctx.fillText(lbl,0,0);
+    ctx.restore();
+
+    x+=step;
+  });
+
+  // District boundary lines
+  if(showDistLine){
+    Object.entries(distStarts).forEach(([d,dx])=>{
+      ctx.strokeStyle=CV.sf2; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(dx-2,padT); ctx.lineTo(dx-2,padT+plotH); ctx.stroke();
+    });
+  }
+
+  if(!data.length){
+    ctx.fillStyle=CV.muted; ctx.font='13px system-ui'; ctx.textAlign='center';
+    ctx.fillText('No data matches the current filters.', totalW/2, height/2);
+  }
+  return hitRects;
+}
+
+// ── Stats updaters ──
+function statsP(ids, data, key='p', noun='mandals'){
+  if(!data.length){ [ids.n,ids.min,ids.max,ids.avg,ids.minN,ids.maxN].filter(Boolean).forEach(id=>document.getElementById(id).textContent='—'); return; }
+  const minR=data.reduce((a,b)=>a[key]<b[key]?a:b);
+  const maxR=data.reduce((a,b)=>a[key]>b[key]?a:b);
+  const avg=Math.round(data.reduce((a,b)=>a+b[key],0)/data.length);
+  document.getElementById(ids.n).textContent=data.length;
+  document.getElementById(ids.min).textContent=fmt(minR[key]);
+  document.getElementById(ids.max).textContent=fmt(maxR[key]);
+  document.getElementById(ids.avg).textContent=fmt(avg);
+  if(ids.minN) document.getElementById(ids.minN).textContent=minR.m||minR.d||'';
+  if(ids.maxN) document.getElementById(ids.maxN).textContent=maxR.m||maxR.d||'';
+}
+function statsCaste(ids, data){
+  if(!data.length){ [ids.n,ids.sc,ids.st,ids.gen].forEach(id=>document.getElementById(id).textContent='—'); return; }
+  const avg=k=>(data.reduce((a,r)=>a+(r.p?r[k]/r.p*100:0),0)/data.length).toFixed(1)+'%';
+  document.getElementById(ids.n).textContent=data.length;
+  document.getElementById(ids.sc).textContent=avg('sc');
+  document.getElementById(ids.st).textContent=avg('st');
+  document.getElementById(ids.gen).textContent=avg('gen');
+}
+
+// ── Sort helpers ──
+function sortMandals(data, sortV){
+  if(sortV==='pop_desc') return [...data].sort((a,b)=>b.p-a.p);
+  if(sortV==='pop_asc')  return [...data].sort((a,b)=>a.p-b.p);
+  return [...data].sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.m<b.m?-1:1);
+}
+function sortDistricts(data, sortV){
+  if(sortV==='pop_desc'||sortV==='tot_desc') return [...data].sort((a,b)=>b.p-a.p);
+  if(sortV==='pop_asc' ||sortV==='tot_asc')  return [...data].sort((a,b)=>a.p-b.p);
+  if(sortV==='sc_desc') return [...data].sort((a,b)=>b.sc-a.sc);
+  if(sortV==='st_desc') return [...data].sort((a,b)=>b.st-a.st);
+  if(sortV==='gen_desc')return [...data].sort((a,b)=>b.gen-a.gen);
+  if(sortV==='sc_pct')  return [...data].sort((a,b)=>(b.sc/b.p)-(a.sc/a.p));
+  if(sortV==='st_pct')  return [...data].sort((a,b)=>(b.st/b.p)-(a.st/a.p));
+  return [...data].sort((a,b)=>a.d<b.d?-1:1);
+}
+function sortMandalsCaste(data, sortV){
+  if(sortV==='tot_desc') return [...data].sort((a,b)=>b.p-a.p);
+  if(sortV==='tot_asc')  return [...data].sort((a,b)=>a.p-b.p);
+  if(sortV==='sc_desc')  return [...data].sort((a,b)=>b.sc-a.sc);
+  if(sortV==='st_desc')  return [...data].sort((a,b)=>b.st-a.st);
+  if(sortV==='gen_desc') return [...data].sort((a,b)=>b.gen-a.gen);
+  if(sortV==='sc_pct')   return [...data].sort((a,b)=>(b.sc/b.p)-(a.sc/a.p));
+  if(sortV==='st_pct')   return [...data].sort((a,b)=>(b.st/b.p)-(a.st/a.p));
+  return [...data].sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.m<b.m?-1:1);
+}
+
+// ── Hit rect storage ──
+let hr1=[],hr2=[],hr3=[],hr4=[];
+
+// ── DRAW C1: Mandal Population ──
+function drawC1(){
+  const dist=document.getElementById('c1Dist').value;
+  const sortV=document.getElementById('c1Sort').value;
+  const minP=+document.getElementById('c1MinPop').value||0;
+  const srch=document.getElementById('c1Search').value.trim().toLowerCase();
+  let data=RAW.mandals.filter(r=>{
+    if(dist&&r.d!==dist) return false;
+    if(r.p<minP) return false;
+    if(srch&&!r.m.toLowerCase().includes(srch)&&!r.d.toLowerCase().includes(srch)) return false;
+    return true;
+  });
+  data=sortMandals(data,sortV);
+  statsP({n:'s1n',min:'s1min',max:'s1max',avg:'s1avg',minN:'s1minN',maxN:'s1maxN'},data);
+  hr1=drawBars('c1',data,{
+    barW:8,barGap:2,distGap:5,height:420,mode:'single',
+    sortByDist:sortV==='district',labelField:'m',
+    labelColor:r=>RAW.dist_color[r.d]||CV.muted,
+    showDistLine:sortV==='district'
+  });
+}
+
+// ── DRAW C2: Mandal Caste ──
+function drawC2(){
+  const dist=document.getElementById('c2Dist').value;
+  const sortV=document.getElementById('c2Sort').value;
+  const view=document.getElementById('c2View').value;
+  const srch=document.getElementById('c2Search').value.trim().toLowerCase();
+  let data=RAW.mandals.filter(r=>{
+    if(dist&&r.d!==dist) return false;
+    if(srch&&!r.m.toLowerCase().includes(srch)&&!r.d.toLowerCase().includes(srch)) return false;
+    return true;
+  });
+  data=sortMandalsCaste(data,sortV);
+  statsCaste({n:'s2n',sc:'s2sc',st:'s2st',gen:'s2gen'},data);
+  const modeMap={grouped:'caste-grouped',stacked:'caste-stacked',pct:'caste-pct'};
+  hr2=drawBars('c2',data,{
+    barW:8,barGap:2,distGap:5,height:420,mode:modeMap[view],vis:vis2,
+    sortByDist:sortV==='district',labelField:'m',
+    labelColor:r=>sortV==='district'?(RAW.dist_color[r.d]||CV.muted):CV.muted,
+    showDistLine:sortV==='district'
+  });
+}
+
+// ── DRAW C3: District Population ──
+function drawC3(){
+  const sortV=document.getElementById('c3Sort').value;
+  let data=sortDistricts([...RAW.districts],sortV);
+  statsP({n:'s3n',min:'s3min',max:'s3max',avg:'s3avg',minN:'s3minN',maxN:'s3maxN'},data,'p','districts');
+  hr3=drawBars('c3',data,{
+    barW:22,barGap:6,height:400,mode:'single',
+    sortByDist:false,labelField:'d',
+    labelColor:r=>r.c||CV.muted
+  });
+}
+
+// ── DRAW C4: District Caste ──
+function drawC4(){
+  const sortV=document.getElementById('c4Sort').value;
+  const view=document.getElementById('c4View').value;
+  let data=sortDistricts([...RAW.districts],sortV);
+  statsCaste({n:'s4n',sc:'s4sc',st:'s4st',gen:'s4gen'},data);
+  const modeMap={grouped:'caste-grouped',stacked:'caste-stacked',pct:'caste-pct'};
+  hr4=drawBars('c4',data,{
+    barW:22,barGap:6,height:400,mode:modeMap[view],vis:vis4,
+    sortByDist:false,labelField:'d',
+    labelColor:r=>r.c||CV.muted
+  });
+}
+
+// ── Tooltips ──
+function ttMandal(r,ev){
+  showTT(`<strong>${r.m}</strong><span class="dist-tag">${r.d}</span>
+    <div class="tt-row"><span>Population</span><span class="tt-val">${r.p.toLocaleString('en-IN')}</span></div>
+    <div class="tt-row"><span class="tt-sc">SC</span><span class="tt-val tt-sc">${r.sc.toLocaleString('en-IN')} (${pct(r.sc,r.p)})</span></div>
+    <div class="tt-row"><span class="tt-st">ST</span><span class="tt-val tt-st">${r.st.toLocaleString('en-IN')} (${pct(r.st,r.p)})</span></div>
+    <div class="tt-row"><span class="tt-gen">General</span><span class="tt-val tt-gen">${r.gen.toLocaleString('en-IN')} (${pct(r.gen,r.p)})</span></div>
+  `,ev);
+}
+function ttDistrict(r,ev){
+  showTT(`<strong>${r.d}</strong>
+    <div class="tt-row"><span>Total</span><span class="tt-val">${r.p.toLocaleString('en-IN')}</span></div>
+    <div class="tt-row"><span class="tt-sc">SC</span><span class="tt-val tt-sc">${r.sc.toLocaleString('en-IN')} (${pct(r.sc,r.p)})</span></div>
+    <div class="tt-row"><span class="tt-st">ST</span><span class="tt-val tt-st">${r.st.toLocaleString('en-IN')} (${pct(r.st,r.p)})</span></div>
+    <div class="tt-row"><span class="tt-gen">General</span><span class="tt-val tt-gen">${r.gen.toLocaleString('en-IN')} (${pct(r.gen,r.p)})</span></div>
+  `,ev);
+}
+
+['c1','c2','c3','c4'].forEach((id,i)=>{
+  const c=document.getElementById(id);
+  const hrs=[()=>hr1,()=>hr2,()=>hr3,()=>hr4][i];
+  const cb=i<2?ttMandal:ttDistrict;
+  c.addEventListener('mousemove',e=>hitTest(c,hrs(),e,cb));
+  c.addEventListener('mouseleave',hideTT);
+});
+
+// ── Control wiring ──
+document.getElementById('c1Dist').addEventListener('change',drawC1);
+document.getElementById('c1Sort').addEventListener('change',drawC1);
+document.getElementById('c1MinPop').addEventListener('input',function(){
+  const v=+this.value;
+  document.getElementById('c1MinPopVal').textContent=v>=1000?(v/1000).toFixed(0)+'K':v;
+  drawC1();
+});
+document.getElementById('c1Search').addEventListener('input',drawC1);
+
+document.getElementById('c2Dist').addEventListener('change',drawC2);
+document.getElementById('c2Sort').addEventListener('change',drawC2);
+document.getElementById('c2View').addEventListener('change',drawC2);
+document.getElementById('c2Search').addEventListener('input',drawC2);
+
+document.getElementById('c3Sort').addEventListener('change',drawC3);
+document.getElementById('c4Sort').addEventListener('change',drawC4);
+document.getElementById('c4View').addEventListener('change',drawC4);
+
+// ── Initial draw (only tab 0 is visible) ──
+drawC1();
+
+let rzT; window.addEventListener('resize',()=>{ clearTimeout(rzT); rzT=setTimeout(()=>{ drawC1(); if(document.getElementById('tab1').classList.contains('active')) drawC2(); if(document.getElementById('tab2').classList.contains('active')) drawC3(); if(document.getElementById('tab3').classList.contains('active')) drawC4(); },120); });
+// ══════════════════════════════════════════
+// FP SHOP DATA + NEW TAB LOGIC
+// ══════════════════════════════════════════
+const FP = {"cards_dist":[{"distName":"Adilabad","totalRcs":16555,"rcsFsc":15368,"rcsAfsc":1174,"rcsAap":13},{"distName":"Nizamabad","totalRcs":17805,"rcsFsc":16791,"rcsAfsc":953,"rcsAap":61},{"distName":"Karimnagar","totalRcs":10190,"rcsFsc":9605,"rcsAfsc":585,"rcsAap":0},{"distName":"Medak","totalRcs":9888,"rcsFsc":9273,"rcsAfsc":613,"rcsAap":2},{"distName":"Hyderabad","totalRcs":11060,"rcsFsc":10704,"rcsAfsc":332,"rcsAap":24},{"distName":"Ranga Reddy","totalRcs":19749,"rcsFsc":18554,"rcsAfsc":1192,"rcsAap":3},{"distName":"Mahbubnagar","totalRcs":8801,"rcsFsc":8093,"rcsAfsc":707,"rcsAap":1},{"distName":"Nalgonda","totalRcs":17190,"rcsFsc":16141,"rcsAfsc":1044,"rcsAap":5},{"distName":"Hanumakonda","totalRcs":7905,"rcsFsc":7452,"rcsAfsc":453,"rcsAap":0},{"distName":"Khammam","totalRcs":13944,"rcsFsc":12998,"rcsAfsc":945,"rcsAap":1},{"distName":"Kumarambheem Asifabad","totalRcs":9308,"rcsFsc":8585,"rcsAfsc":723,"rcsAap":0},{"distName":"Jayashankar Bhupalpalli","totalRcs":6646,"rcsFsc":6146,"rcsAfsc":498,"rcsAap":2},{"distName":"Jogulamba Gadwal","totalRcs":7346,"rcsFsc":6915,"rcsAfsc":426,"rcsAap":5},{"distName":"Jagityal","totalRcs":12511,"rcsFsc":11858,"rcsAfsc":646,"rcsAap":7},{"distName":"Janagaon","totalRcs":6078,"rcsFsc":5697,"rcsAfsc":377,"rcsAap":4},{"distName":"Kamareddy","totalRcs":11955,"rcsFsc":11095,"rcsAfsc":824,"rcsAap":36},{"distName":"Bhadrdri Kothagudem","totalRcs":17473,"rcsFsc":16401,"rcsAfsc":1072,"rcsAap":0},{"distName":"Mahabubabad","totalRcs":8311,"rcsFsc":7744,"rcsAfsc":567,"rcsAap":0},{"distName":"Manchiryala","totalRcs":11774,"rcsFsc":10911,"rcsAfsc":860,"rcsAap":3},{"distName":"Medchal","totalRcs":10599,"rcsFsc":10057,"rcsAfsc":542,"rcsAap":0},{"distName":"Nagarkarnool","totalRcs":9658,"rcsFsc":8927,"rcsAfsc":730,"rcsAap":1},{"distName":"Nirmal","totalRcs":12100,"rcsFsc":11440,"rcsAfsc":660,"rcsAap":0},{"distName":"Peddapalli","totalRcs":8468,"rcsFsc":7908,"rcsAfsc":549,"rcsAap":11},{"distName":"Sangareddy","totalRcs":14785,"rcsFsc":13743,"rcsAfsc":1041,"rcsAap":1},{"distName":"Siddipet","totalRcs":12556,"rcsFsc":11735,"rcsAfsc":814,"rcsAap":7},{"distName":"Rajanna Siricilla","totalRcs":7491,"rcsFsc":7021,"rcsAfsc":458,"rcsAap":12},{"distName":"Suryapet","totalRcs":8393,"rcsFsc":7893,"rcsAfsc":497,"rcsAap":3}],"card_type_dist":[{"distName":"Adilabad","rcsFsc":15368,"rcsAfsc":1174,"rcsAap":13},{"distName":"Nizamabad","rcsFsc":16791,"rcsAfsc":953,"rcsAap":61},{"distName":"Karimnagar","rcsFsc":9605,"rcsAfsc":585,"rcsAap":0},{"distName":"Medak","rcsFsc":9273,"rcsAfsc":613,"rcsAap":2},{"distName":"Hyderabad","rcsFsc":10704,"rcsAfsc":332,"rcsAap":24},{"distName":"Ranga Reddy","rcsFsc":18554,"rcsAfsc":1192,"rcsAap":3},{"distName":"Mahbubnagar","rcsFsc":8093,"rcsAfsc":707,"rcsAap":1},{"distName":"Nalgonda","rcsFsc":16141,"rcsAfsc":1044,"rcsAap":5},{"distName":"Hanumakonda","rcsFsc":7452,"rcsAfsc":453,"rcsAap":0},{"distName":"Khammam","rcsFsc":12998,"rcsAfsc":945,"rcsAap":1},{"distName":"Kumarambheem Asifabad","rcsFsc":8585,"rcsAfsc":723,"rcsAap":0},{"distName":"Jayashankar Bhupalpalli","rcsFsc":6146,"rcsAfsc":498,"rcsAap":2},{"distName":"Jogulamba Gadwal","rcsFsc":6915,"rcsAfsc":426,"rcsAap":5},{"distName":"Jagityal","rcsFsc":11858,"rcsAfsc":646,"rcsAap":7},{"distName":"Janagaon","rcsFsc":5697,"rcsAfsc":377,"rcsAap":4},{"distName":"Kamareddy","rcsFsc":11095,"rcsAfsc":824,"rcsAap":36},{"distName":"Bhadrdri Kothagudem","rcsFsc":16401,"rcsAfsc":1072,"rcsAap":0},{"distName":"Mahabubabad","rcsFsc":7744,"rcsAfsc":567,"rcsAap":0},{"distName":"Manchiryala","rcsFsc":10911,"rcsAfsc":860,"rcsAap":3},{"distName":"Medchal","rcsFsc":10057,"rcsAfsc":542,"rcsAap":0},{"distName":"Nagarkarnool","rcsFsc":8927,"rcsAfsc":730,"rcsAap":1},{"distName":"Nirmal","rcsFsc":11440,"rcsAfsc":660,"rcsAap":0},{"distName":"Peddapalli","rcsFsc":7908,"rcsAfsc":549,"rcsAap":11},{"distName":"Sangareddy","rcsFsc":13743,"rcsAfsc":1041,"rcsAap":1},{"distName":"Siddipet","rcsFsc":11735,"rcsAfsc":814,"rcsAap":7},{"distName":"Rajanna Siricilla","rcsFsc":7021,"rcsAfsc":458,"rcsAap":12},{"distName":"Suryapet","rcsFsc":7893,"rcsAfsc":497,"rcsAap":3}],"fulfillment":[{"distName":"Adilabad","fulfil_pct":88.7},{"distName":"Nizamabad","fulfil_pct":91.4},{"distName":"Karimnagar","fulfil_pct":86.8},{"distName":"Medak","fulfil_pct":83.5},{"distName":"Hyderabad","fulfil_pct":85.9},{"distName":"Ranga Reddy","fulfil_pct":84.1},{"distName":"Mahbubnagar","fulfil_pct":81.6},{"distName":"Nalgonda","fulfil_pct":76.1},{"distName":"Hanumakonda","fulfil_pct":86.5},{"distName":"Khammam","fulfil_pct":83.1},{"distName":"Kumarambheem Asifabad","fulfil_pct":91.7},{"distName":"Jayashankar Bhupalpalli","fulfil_pct":83.9},{"distName":"Jogulamba Gadwal","fulfil_pct":86.0},{"distName":"Jagityal","fulfil_pct":90.5},{"distName":"Janagaon","fulfil_pct":78.4},{"distName":"Kamareddy","fulfil_pct":86.5},{"distName":"Bhadrdri Kothagudem","fulfil_pct":81.0},{"distName":"Mahabubabad","fulfil_pct":72.6},{"distName":"Manchiryala","fulfil_pct":86.7},{"distName":"Medchal","fulfil_pct":85.1},{"distName":"Nagarkarnool","fulfil_pct":76.4},{"distName":"Nirmal","fulfil_pct":88.4},{"distName":"Peddapalli","fulfil_pct":83.7},{"distName":"Sangareddy","fulfil_pct":84.3},{"distName":"Siddipet","fulfil_pct":85.7},{"distName":"Rajanna Siricilla","fulfil_pct":85.4},{"distName":"Suryapet","fulfil_pct":79.1},{"distName":"Vikarabad","fulfil_pct":82.6},{"distName":"Wanaparthy","fulfil_pct":75.0},{"distName":"Warangal","fulfil_pct":84.0},{"distName":"Yadadri Bhuvanagiri","fulfil_pct":74.8}],"rice_trend":[{"label":"2018-04","totalRice":146411222},{"label":"2018-10","totalRice":148326807},{"label":"2018-12","totalRice":38570985},{"label":"2019-04","totalRice":149452019},{"label":"2019-10","totalRice":113200300},{"label":"2020-04","totalRice":316192902},{"label":"2020-10","totalRice":130500277},{"label":"2023-06","totalRice":156846090},{"label":"2023-12","totalRice":160875319},{"label":"2024-06","totalRice":159511140},{"label":"2024-12","totalRice":161273083},{"label":"2025-05","totalRice":170220485}],"rice_annual":[],"utilization":[{"distName":"Adilabad","util_rate":100.3},{"distName":"Nizamabad","util_rate":100.2},{"distName":"Karimnagar","util_rate":100.1},{"distName":"Medak","util_rate":100.2},{"distName":"Hyderabad","util_rate":100.5},{"distName":"Ranga Reddy","util_rate":100.3},{"distName":"Mahbubnagar","util_rate":100.3},{"distName":"Nalgonda","util_rate":100.2},{"distName":"Hanumakonda","util_rate":100.3},{"distName":"Khammam","util_rate":100.4},{"distName":"Kumarambheem Asifabad","util_rate":100.2},{"distName":"Jayashankar Bhupalpalli","util_rate":100.3},{"distName":"Jogulamba Gadwal","util_rate":100.4},{"distName":"Jagityal","util_rate":100.2},{"distName":"Janagaon","util_rate":100.9},{"distName":"Kamareddy","util_rate":100.4},{"distName":"Bhadrdri Kothagudem","util_rate":100.2},{"distName":"Mahabubabad","util_rate":100.3},{"distName":"Manchiryala","util_rate":100.2},{"distName":"Medchal","util_rate":100.5},{"distName":"Nagarkarnool","util_rate":100.4},{"distName":"Nirmal","util_rate":100.2},{"distName":"Peddapalli","util_rate":100.2},{"distName":"Sangareddy","util_rate":100.1},{"distName":"Siddipet","util_rate":100.5},{"distName":"Rajanna Siricilla","util_rate":100.5},{"distName":"Suryapet","util_rate":100.4},{"distName":"Vikarabad","util_rate":100.2},{"distName":"Wanaparthy","util_rate":100.2},{"distName":"Warangal","util_rate":100.2},{"distName":"Yadadri Bhuvanagiri","util_rate":100.3},{"distName":"Mulugu","util_rate":100.2},{"distName":"Narayanpet","util_rate":100.4}],"leakage":[{"distName":"Adilabad","alloc_qty":10149071,"trans_qty":7643824,"gap_pct":24.7},{"distName":"Nizamabad","alloc_qty":20909851,"trans_qty":15212088,"gap_pct":27.2},{"distName":"Karimnagar","alloc_qty":11717255,"trans_qty":9726333,"gap_pct":17.0},{"distName":"Medak","alloc_qty":9937701,"trans_qty":7485517,"gap_pct":24.7},{"distName":"Hyderabad","alloc_qty":33301102,"trans_qty":28371261,"gap_pct":14.8},{"distName":"Ranga Reddy","alloc_qty":25019898,"trans_qty":23005102,"gap_pct":8.1},{"distName":"Mahbubnagar","alloc_qty":11207190,"trans_qty":8179808,"gap_pct":27.0},{"distName":"Nalgonda","alloc_qty":17680099,"trans_qty":14439226,"gap_pct":18.3},{"distName":"Hanumakonda","alloc_qty":9804860,"trans_qty":7156343,"gap_pct":27.0},{"distName":"Khammam","alloc_qty":16116780,"trans_qty":12368866,"gap_pct":23.3},{"distName":"Kumarambheem Asifabad","alloc_qty":7524793,"trans_qty":5409209,"gap_pct":28.1},{"distName":"Jayashankar Bhupalpalli","alloc_qty":5114043,"trans_qty":3770535,"gap_pct":26.3},{"distName":"Jogulamba Gadwal","alloc_qty":8150688,"trans_qty":6112697,"gap_pct":25.0},{"distName":"Jagityal","alloc_qty":14283543,"trans_qty":10318988,"gap_pct":27.8},{"distName":"Janagaon","alloc_qty":6367628,"trans_qty":4924650,"gap_pct":22.7},{"distName":"Kamareddy","alloc_qty":13165947,"trans_qty":9814691,"gap_pct":25.5},{"distName":"Bhadrdri Kothagudem","alloc_qty":11728514,"trans_qty":8887484,"gap_pct":24.2},{"distName":"Mahabubabad","alloc_qty":8516679,"trans_qty":6568477,"gap_pct":22.9},{"distName":"Manchiryala","alloc_qty":9657848,"trans_qty":7260547,"gap_pct":24.8},{"distName":"Medchal","alloc_qty":23566325,"trans_qty":21393614,"gap_pct":9.2},{"distName":"Nagarkarnool","alloc_qty":9845110,"trans_qty":7566333,"gap_pct":23.1},{"distName":"Nirmal","alloc_qty":9971346,"trans_qty":7590291,"gap_pct":23.9},{"distName":"Peddapalli","alloc_qty":8799137,"trans_qty":6906660,"gap_pct":21.5},{"distName":"Sangareddy","alloc_qty":18183909,"trans_qty":14559032,"gap_pct":19.9},{"distName":"Siddipet","alloc_qty":13392653,"trans_qty":10189570,"gap_pct":23.9},{"distName":"Rajanna Siricilla","alloc_qty":7755313,"trans_qty":5983039,"gap_pct":22.9},{"distName":"Suryapet","alloc_qty":11923636,"trans_qty":9435097,"gap_pct":20.9},{"distName":"Vikarabad","alloc_qty":12065702,"trans_qty":8988559,"gap_pct":25.5},{"distName":"Wanaparthy","alloc_qty":6911934,"trans_qty":5112449,"gap_pct":26.0},{"distName":"Warangal","alloc_qty":10994298,"trans_qty":8192757,"gap_pct":25.5},{"distName":"Yadadri Bhuvanagiri","alloc_qty":9438514,"trans_qty":6986077,"gap_pct":26.0},{"distName":"Mulugu","alloc_qty":3730206,"trans_qty":2770813,"gap_pct":25.7},{"distName":"Narayanpet","alloc_qty":7335936,"trans_qty":5391472,"gap_pct":26.5}],"commodities":[{"distName":"Adilabad","wheat":0,"sugar":30116,"kerosene":277930},{"distName":"Bhadrdri Kothagudem","wheat":8295,"sugar":79187,"kerosene":195936},{"distName":"Hanumakonda","wheat":0,"sugar":41189,"kerosene":177444},{"distName":"Hyderabad","wheat":15180726,"sugar":281607,"kerosene":1696225},{"distName":"Jagityal","wheat":0,"sugar":33642,"kerosene":304957},{"distName":"Janagaon","wheat":1852,"sugar":30711,"kerosene":145251},{"distName":"Jayashankar Bhupalpalli","wheat":0,"sugar":17348,"kerosene":168352},{"distName":"Jogulamba Gadwal","wheat":43243,"sugar":32495,"kerosene":200375},{"distName":"Kamareddy","wheat":0,"sugar":52241,"kerosene":292756},{"distName":"Karimnagar","wheat":0,"sugar":68526,"kerosene":174292},{"distName":"Khammam","wheat":15,"sugar":99069,"kerosene":192026},{"distName":"Kumarambheem Asifabad","wheat":0,"sugar":38341,"kerosene":70406},{"distName":"Mahabubabad","wheat":209,"sugar":42902,"kerosene":159001},{"distName":"Mahbubnagar","wheat":52682,"sugar":47487,"kerosene":296551},{"distName":"Manchiryala","wheat":0,"sugar":37693,"kerosene":148581},{"distName":"Medak","wheat":0,"sugar":34519,"kerosene":187296},{"distName":"Medchal","wheat":5353473,"sugar":87908,"kerosene":775061},{"distName":"Mulugu","wheat":0,"sugar":1433,"kerosene":16903},{"distName":"Nagarkarnool","wheat":0,"sugar":43907,"kerosene":233682},{"distName":"Nalgonda","wheat":586,"sugar":108743,"kerosene":447335},{"distName":"Narayanpet","wheat":0,"sugar":5618,"kerosene":2},{"distName":"Nirmal","wheat":6498,"sugar":23182,"kerosene":261205},{"distName":"Nizamabad","wheat":52235,"sugar":5624,"kerosene":385707},{"distName":"Peddapalli","wheat":464,"sugar":21002,"kerosene":162512},{"distName":"Rajanna Siricilla","wheat":3114,"sugar":64667,"kerosene":142725},{"distName":"Ranga Red","wheat":0,"sugar":0,"kerosene":0},{"distName":"Ranga Reddy","wheat":2961890,"sugar":114106,"kerosene":754551},{"distName":"Sangared","wheat":0,"sugar":0,"kerosene":0},{"distName":"Sangareddy","wheat":0,"sugar":5968,"kerosene":297788},{"distName":"Siddipet","wheat":52390,"sugar":71276,"kerosene":276415},{"distName":"Suryapet","wheat":13,"sugar":55435,"kerosene":157704},{"distName":"Vikarabad","wheat":0,"sugar":66880,"kerosene":151625},{"distName":"Wanaparthy","wheat":4270,"sugar":20427,"kerosene":92633},{"distName":"Warangal","wheat":224,"sugar":34994,"kerosene":152027},{"distName":"Yadadri Bhuvanagiri","wheat":0,"sugar":39064,"kerosene":155429}],"shop_count":[{"distName":"Adilabad","shops":356,"active":356},{"distName":"Bhadrdri Kothagudem","shops":443,"active":443},{"distName":"Hanumakonda","shops":414,"active":414},{"distName":"Hyderabad","shops":700,"active":700},{"distName":"Jagityal","shops":592,"active":592},{"distName":"Janagaon","shops":335,"active":335},{"distName":"Jayashankar Bhupalpalli","shops":277,"active":277},{"distName":"Jogulamba Gadwal","shops":335,"active":335},{"distName":"Kamareddy","shops":592,"active":592},{"distName":"Karimnagar","shops":566,"active":566},{"distName":"Khammam","shops":748,"active":748},{"distName":"Kumarambheem Asifabad","shops":314,"active":314},{"distName":"Mahabubabad","shops":558,"active":558},{"distName":"Mahbubnagar","shops":506,"active":506},{"distName":"Manchiryala","shops":423,"active":423},{"distName":"Medak","shops":520,"active":520},{"distName":"Medchal","shops":618,"active":618},{"distName":"Mulugu","shops":222,"active":222},{"distName":"Nagarkarnool","shops":552,"active":552},{"distName":"Nalgonda","shops":997,"active":997},{"distName":"Narayanpet","shops":301,"active":301},{"distName":"Nirmal","shops":412,"active":412},{"distName":"Nizamabad","shops":759,"active":759},{"distName":"Peddapalli","shops":410,"active":410},{"distName":"Rajanna Siricilla","shops":345,"active":345},{"distName":"Ranga Reddy","shops":936,"active":936},{"distName":"Sangareddy","shops":845,"active":845},{"distName":"Siddipet","shops":686,"active":686},{"distName":"Suryapet","shops":735,"active":735},{"distName":"Vikarabad","shops":588,"active":588},{"distName":"Wanaparthy","shops":325,"active":325},{"distName":"Warangal","shops":509,"active":509},{"distName":"Yadadri Bhuvanagiri","shops":515,"active":515}],"ob_trend":[{"year":2018,"totalObQty":41396225},{"year":2019,"totalObQty":48551527},{"year":2020,"totalObQty":40162001},{"year":2022,"totalObQty":27303746},{"year":2023,"totalObQty":109138280},{"year":2024,"totalObQty":34578207},{"year":2025,"totalObQty":24822255}],"high_ob_mandals":[{"officeName":"Saroornagar-3","distName":"Ranga Reddy","totalObQty":2850730},{"officeName":"Balanagar-1","distName":"Medchal","totalObQty":1651846},{"officeName":"Charminar-3","distName":"Hyderabad","totalObQty":1308219},{"officeName":"Yakutpura-2","distName":"Hyderabad","totalObQty":1007139},{"officeName":"Uppal-2","distName":"Medchal","totalObQty":936282},{"officeName":"Mehdipatnam-5","distName":"Hyderabad","totalObQty":901554},{"officeName":"Khairatabad-7","distName":"Hyderabad","totalObQty":803473},{"officeName":"Malakpet-1","distName":"Hyderabad","totalObQty":739994},{"officeName":"Amberpet-6","distName":"Hyderabad","totalObQty":719683},{"officeName":"Begumpet-8","distName":"Hyderabad","totalObQty":670100},{"officeName":"Secunderabad-9","distName":"Hyderabad","totalObQty":621484},{"officeName":"KARIMNAGAR URBAN","distName":"Karimnagar","totalObQty":577526},{"officeName":"Khammam (Rural)-1 (Urban)","distName":"Khammam","totalObQty":513097},{"officeName":"Farooqnagar","distName":"Ranga Reddy","totalObQty":462701},{"officeName":"Miryalaguda","distName":"Nalgonda","totalObQty":442433},{"officeName":"Nampally-4","distName":"Hyderabad","totalObQty":400209},{"officeName":"Nalgonda","distName":"Nalgonda","totalObQty":377748},{"officeName":"Bodhan","distName":"Nizamabad","totalObQty":373540},{"officeName":"RAMAGUNDAM URBAN","distName":"Peddapalli","totalObQty":349692},{"officeName":"Devarakonda","distName":"Nalgonda","totalObQty":287116}],"fps_type":[{"distName":"Adilabad","Normal Shop":356,"kerosene Shop":0},{"distName":"Bhadrdri Kothagudem","Normal Shop":443,"kerosene Shop":0},{"distName":"Hanumakonda","Normal Shop":414,"kerosene Shop":0},{"distName":"Hyderabad","Normal Shop":653,"kerosene Shop":47},{"distName":"Jagityal","Normal Shop":592,"kerosene Shop":0},{"distName":"Janagaon","Normal Shop":335,"kerosene Shop":0},{"distName":"Jayashankar Bhupalpalli","Normal Shop":277,"kerosene Shop":0},{"distName":"Jogulamba Gadwal","Normal Shop":335,"kerosene Shop":0},{"distName":"Kamareddy","Normal Shop":592,"kerosene Shop":0},{"distName":"Karimnagar","Normal Shop":566,"kerosene Shop":0},{"distName":"Khammam","Normal Shop":748,"kerosene Shop":0},{"distName":"Kumarambheem Asifabad","Normal Shop":314,"kerosene Shop":0},{"distName":"Mahabubabad","Normal Shop":558,"kerosene Shop":0},{"distName":"Mahbubnagar","Normal Shop":506,"kerosene Shop":0},{"distName":"Manchiryala","Normal Shop":423,"kerosene Shop":0},{"distName":"Medak","Normal Shop":520,"kerosene Shop":0},{"distName":"Medchal","Normal Shop":618,"kerosene Shop":0},{"distName":"Mulugu","Normal Shop":222,"kerosene Shop":0},{"distName":"Nagarkarnool","Normal Shop":552,"kerosene Shop":0},{"distName":"Nalgonda","Normal Shop":997,"kerosene Shop":0},{"distName":"Narayanpet","Normal Shop":301,"kerosene Shop":0},{"distName":"Nirmal","Normal Shop":412,"kerosene Shop":0},{"distName":"Nizamabad","Normal Shop":759,"kerosene Shop":0},{"distName":"Peddapalli","Normal Shop":410,"kerosene Shop":0},{"distName":"Rajanna Siricilla","Normal Shop":345,"kerosene Shop":0},{"distName":"Ranga Reddy","Normal Shop":936,"kerosene Shop":0},{"distName":"Sangareddy","Normal Shop":845,"kerosene Shop":0},{"distName":"Siddipet","Normal Shop":686,"kerosene Shop":0},{"distName":"Suryapet","Normal Shop":610,"kerosene Shop":125},{"distName":"Vikarabad","Normal Shop":588,"kerosene Shop":0},{"distName":"Wanaparthy","Normal Shop":325,"kerosene Shop":0},{"distName":"Warangal","Normal Shop":509,"kerosene Shop":0},{"distName":"Yadadri Bhuvanagiri","Normal Shop":515,"kerosene Shop":0}],"census_vs_cards":[{"Name_District":"Adilabad","bpl_share":92.8,"agri_lab_pct":30.4,"sc_pct":14.02,"st_pct":31.68,"shops":356},{"Name_District":"Nizamabad","bpl_share":94.3,"agri_lab_pct":28.48,"sc_pct":13.93,"st_pct":6.66,"shops":759},{"Name_District":"Karimnagar","bpl_share":94.3,"agri_lab_pct":36.27,"sc_pct":18.56,"st_pct":1.27,"shops":566},{"Name_District":"Medak","bpl_share":93.8,"agri_lab_pct":37.33,"sc_pct":16.68,"st_pct":9.59,"shops":520},{"Name_District":"Hyderabad","bpl_share":96.8,"agri_lab_pct":1.53,"sc_pct":6.29,"st_pct":1.24,"shops":700},{"Name_District":"Rangareddy","bpl_share":93.9,"agri_lab_pct":19.04,"sc_pct":13.8,"st_pct":5.69,"shops":936},{"Name_District":"Nalgonda","bpl_share":93.9,"agri_lab_pct":44.89,"sc_pct":18.11,"st_pct":13.24,"shops":997},{"Name_District":"Hanumakonda","bpl_share":94.3,"agri_lab_pct":30.84,"sc_pct":19.51,"st_pct":3.04,"shops":414},{"Name_District":"Khammam","bpl_share":93.2,"agri_lab_pct":57.45,"sc_pct":19.93,"st_pct":14.22,"shops":748},{"Name_District":"Jayashankar Bhupalapalli","bpl_share":92.5,"agri_lab_pct":55.06,"sc_pct":22.08,"st_pct":8.92,"shops":277},{"Name_District":"Jogulamba Gadwal","bpl_share":94.1,"agri_lab_pct":55.46,"sc_pct":19.84,"st_pct":1.57,"shops":335},{"Name_District":"Kamareddy","bpl_share":92.8,"agri_lab_pct":36.95,"sc_pct":15.76,"st_pct":8.4,"shops":592},{"Name_District":"Mahabubabad","bpl_share":93.2,"agri_lab_pct":46.01,"sc_pct":13.49,"st_pct":37.8,"shops":558},{"Name_District":"Medchal Malkajgiri","bpl_share":94.9,"agri_lab_pct":4.98,"sc_pct":9.53,"st_pct":2.81,"shops":618},{"Name_District":"Nagarkurnool","bpl_share":92.4,"agri_lab_pct":38.9,"sc_pct":21.32,"st_pct":12.4,"shops":552},{"Name_District":"Nirmal","bpl_share":94.5,"agri_lab_pct":29.34,"sc_pct":15.33,"st_pct":11.29,"shops":412},{"Name_District":"Peddapalli","bpl_share":93.4,"agri_lab_pct":40.97,"sc_pct":19.44,"st_pct":1.89,"shops":410},{"Name_District":"Sangareddy","bpl_share":93.0,"agri_lab_pct":38.88,"sc_pct":18.1,"st_pct":5.7,"shops":845},{"Name_District":"Siddipet","bpl_share":93.5,"agri_lab_pct":32.18,"sc_pct":18.18,"st_pct":4.03,"shops":686},{"Name_District":"Rajanna Sircilla","bpl_share":93.7,"agri_lab_pct":31.38,"sc_pct":18.5,"st_pct":4.16,"shops":345},{"Name_District":"Suryapet","bpl_share":94.0,"agri_lab_pct":54.27,"sc_pct":18.95,"st_pct":12.85,"shops":735}],"years_allocation":[2018,2019,2020,2022,2023,2024,2025],"years_transactions":[2018,2019,2020,2023,2024,2025]};
+
+// extend switchTab
+const _origST = window.switchTab || switchTab;
+window.switchTab = function(i) {
+  document.querySelectorAll('.section').forEach((s,j) => s.classList.toggle('active', j===i));
+  document.querySelectorAll('.snav-btn').forEach((b,j) => b.classList.toggle('active', j===i));
+  if(i<=3){ [drawC1,drawC2,drawC3,drawC4][i](); }
+  else if(i===4) drawTab4();
+  else if(i===5) drawTab5();
+};
+
+// ── helper formatters ──
+function fmtN(n){
+  if(n>=1e7) return (n/1e7).toFixed(2)+' Cr';
+  if(n>=1e5) return (n/1e5).toFixed(1)+' L';
+  if(n>=1e3) return (n/1e3).toFixed(1)+'K';
+  return Math.round(n).toLocaleString('en-IN');
+}
+
+// ── horizontal bar ──
+function hBar(id, labels, vals, colors, opts){
+  opts=opts||{};
+  const C=document.getElementById(id); if(!C) return;
+  const barH=opts.barH||16, gap=opts.gap||5, PL=opts.padL||150, PR=opts.padR||72, PT=6, PB=6;
+  const W=C.parentElement.clientWidth||480;
+  const H=(barH+gap)*labels.length+PT+PB;
+  C.width=W*DPR; C.height=H*DPR;
+  C.style.width=W+'px'; C.style.height=H+'px';
+  const ctx=C.getContext('2d'); ctx.scale(DPR,DPR);
+  ctx.fillStyle=CV.surface; ctx.fillRect(0,0,W,H);
+  const maxV=Math.max(...vals,1), plotW=W-PL-PR;
+  labels.forEach((lbl,i)=>{
+    const y=PT+i*(barH+gap);
+    const bw=vals[i]/maxV*plotW;
+    ctx.fillStyle=Array.isArray(colors)?colors[i%colors.length]:colors;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(PL,y,Math.max(bw,2),barH,[0,2,2,0]);
+    else ctx.rect(PL,y,Math.max(bw,2),barH);
+    ctx.fill();
+    ctx.fillStyle=CV.muted; ctx.font='10px system-ui'; ctx.textAlign='right';
+    const l=lbl.length>22?lbl.slice(0,22)+'…':lbl;
+    ctx.fillText(l,PL-6,y+barH/2+4);
+    ctx.fillStyle=CV.text; ctx.textAlign='left'; ctx.font="10px 'Courier New',monospace";
+    const vStr=opts.pct?vals[i].toFixed(1)+'%':fmtN(vals[i]);
+    ctx.fillText(vStr,PL+bw+5,y+barH/2+4);
+  });
+}
+
+// ── line chart ──
+function lineChart(id, labels, series, hPx){
+  const C=document.getElementById(id); if(!C) return;
+  const W=C.parentElement.clientWidth||700, H=hPx||220;
+  const PL=65,PR=20,PT=16,PB=50;
+  C.width=W*DPR; C.height=H*DPR; C.style.width=W+'px'; C.style.height=H+'px';
+  const ctx=C.getContext('2d'); ctx.scale(DPR,DPR);
+  ctx.fillStyle=CV.surface; ctx.fillRect(0,0,W,H);
+  const pH=H-PT-PB, pW=W-PL-PR;
+  const allV=series.flatMap(s=>s.data);
+  const maxV=Math.max(...allV,1);
+  for(let i=0;i<=4;i++){
+    const v=maxV/4*i, y=PT+pH-v/maxV*pH;
+    ctx.strokeStyle=i===0?CV.border:CV.border+'44'; ctx.lineWidth=i===0?1.5:.5;
+    ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(W-PR,y); ctx.stroke();
+    ctx.fillStyle=CV.muted; ctx.font="9px 'Courier New',monospace"; ctx.textAlign='right';
+    ctx.fillText(fmtN(v),PL-4,y+3);
+  }
+  series.forEach(s=>{
+    ctx.strokeStyle=s.color; ctx.lineWidth=2; ctx.beginPath();
+    s.data.forEach((v,i)=>{
+      const x=PL+(labels.length>1?i/(labels.length-1):0.5)*pW, y=PT+pH-v/maxV*pH;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    s.data.forEach((v,i)=>{
+      const x=PL+(labels.length>1?i/(labels.length-1):0.5)*pW, y=PT+pH-v/maxV*pH;
+      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
+      ctx.fillStyle=s.color; ctx.fill();
+    });
+  });
+  const step=Math.max(1,Math.floor(labels.length/8));
+  labels.forEach((l,i)=>{
+    if(i%step!==0&&i!==labels.length-1) return;
+    const x=PL+(labels.length>1?i/(labels.length-1):0.5)*pW;
+    ctx.save(); ctx.translate(x,PT+pH+8); ctx.rotate(Math.PI/4);
+    ctx.fillStyle=CV.muted; ctx.font='9px system-ui'; ctx.textAlign='left';
+    ctx.fillText(l,0,0); ctx.restore();
+  });
+}
+
+// ── scatter ──
+function scatterChart(id, data, opts){
+  opts=opts||{};
+  const C=document.getElementById(id); if(!C) return;
+  const W=C.parentElement.clientWidth||480, H=parseInt(C.style.height)||300;
+  const PL=60,PR=20,PT=16,PB=44;
+  C.width=W*DPR; C.height=H*DPR; C.style.width=W+'px'; C.style.height=H+'px';
+  const ctx=C.getContext('2d'); ctx.scale(DPR,DPR);
+  ctx.fillStyle=CV.surface; ctx.fillRect(0,0,W,H);
+  const pH=H-PT-PB, pW=W-PL-PR;
+  const xs=data.map(d=>d.x), ys=data.map(d=>d.y);
+  const minX=Math.min(...xs), maxX=Math.max(...xs,minX+1);
+  const minY=Math.min(...ys), maxY=Math.max(...ys,minY+1);
+  const scX=v=>PL+(v-minX)/(maxX-minX)*pW;
+  const scY=v=>PT+pH-(v-minY)/(maxY-minY)*pH;
+  for(let i=0;i<=4;i++){
+    const v=minY+(maxY-minY)/4*i, y=scY(v);
+    ctx.strokeStyle=i===0?CV.border:CV.border+'44'; ctx.lineWidth=i===0?1.5:.5;
+    ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(W-PR,y); ctx.stroke();
+    ctx.fillStyle=CV.muted; ctx.font="9px 'Courier New',monospace"; ctx.textAlign='right';
+    ctx.fillText(v.toFixed(1)+'%',PL-4,y+3);
+    const vx=minX+(maxX-minX)/4*i, x=scX(vx);
+    ctx.strokeStyle=CV.border+'44'; ctx.lineWidth=.5;
+    ctx.beginPath(); ctx.moveTo(x,PT); ctx.lineTo(x,PT+pH); ctx.stroke();
+    ctx.fillStyle=CV.muted; ctx.font='9px system-ui'; ctx.textAlign='center';
+    ctx.fillText(vx.toFixed(1)+'%',x,PT+pH+12);
+  }
+  // trendline
+  const n=xs.length, sx=xs.reduce((a,b)=>a+b,0), sy=ys.reduce((a,b)=>a+b,0);
+  const sxy=data.reduce((a,d)=>a+d.x*d.y,0), sx2=xs.reduce((a,b)=>a+b*b,0);
+  const m=(n*sxy-sx*sy)/(n*sx2-sx*sx||1), b2=(sy-m*sx)/n;
+  ctx.strokeStyle=CV.accent+'66'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(scX(minX),scY(minX*m+b2)); ctx.lineTo(scX(maxX),scY(maxX*m+b2)); ctx.stroke();
+  ctx.setLineDash([]);
+  const hits=[];
+  data.forEach(d=>{
+    const x=scX(d.x), y=scY(d.y);
+    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2);
+    ctx.fillStyle=d.color||CV.accent; ctx.fill();
+    ctx.strokeStyle=CV.surface; ctx.lineWidth=1; ctx.stroke();
+    hits.push({x:x-8,y:y-8,w:16,h:16,data:d});
+  });
+  ctx.fillStyle=CV.muted; ctx.font='10px system-ui'; ctx.textAlign='center';
+  ctx.fillText(opts.xLabel||'X',PL+pW/2,PT+pH+36);
+  ctx.save(); ctx.translate(12,PT+pH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText(opts.yLabel||'Y',0,0); ctx.restore();
+  return hits;
+}
+
+// ─── TAB 4 ───
+function drawTab4(){
+  // Total cards per district
+  const cd=[...FP.cards_dist].sort((a,b)=>b.totalRcs-a.totalRcs);
+  hBar('c5a',cd.map(r=>r.distName),cd.map(r=>r.totalRcs),CV.accent,{padL:140,barH:14,gap:4});
+
+  // Shops per district (single color all Active)
+  const sc2=[...FP.shop_count].sort((a,b)=>b.shops-a.shops);
+  hBar('c5b',sc2.map(r=>r.distName),sc2.map(r=>r.shops),CV.st,{padL:140,barH:14,gap:4});
+
+  // Stats
+  const tot=FP.cards_dist.reduce((a,r)=>a+r.totalRcs,0);
+  const bpl=FP.cards_dist.reduce((a,r)=>a+r.rcsFsc,0);
+  const apl=FP.cards_dist.reduce((a,r)=>a+r.rcsAfsc,0);
+  const aay=FP.cards_dist.reduce((a,r)=>a+r.rcsAap,0);
+  document.getElementById('s5total').textContent=fmtN(tot);
+  document.getElementById('s5bpl').textContent=(bpl/tot*100).toFixed(1)+'%';
+  document.getElementById('s5apl').textContent=(apl/tot*100).toFixed(1)+'%';
+  document.getElementById('s5aay').textContent=(aay/tot*100).toFixed(1)+'%';
+
+  drawCardType();
+}
+
+function drawCardType(){
+  const view=document.getElementById('c5cView').value;
+  const data=[...FP.card_type_dist].sort((a,b)=>a.distName<b.distName?-1:1);
+  const C=document.getElementById('c5c'); if(!C) return;
+  const gw=30, gg=4, ns=3;
+  const totalW=Math.max(data.length*(gw+gg)+80, 500);
+  const H=280, PL=60, PR=20, PT=16, PB=80;
+  C.width=totalW*DPR; C.height=H*DPR; C.style.width=totalW+'px'; C.style.height=H+'px';
+  const ctx=C.getContext('2d'); ctx.scale(DPR,DPR);
+  ctx.fillStyle=CV.surface; ctx.fillRect(0,0,totalW,H);
+  const pH=H-PT-PB;
+  let maxV;
+  if(view==='grouped') maxV=Math.max(...data.map(r=>Math.max(r.rcsFsc,r.rcsAfsc,r.rcsAap)),1);
+  else if(view==='pct') maxV=100;
+  else maxV=Math.max(...data.map(r=>r.rcsFsc+r.rcsAfsc+r.rcsAap),1);
+  const sc=pH/maxV;
+  for(let i=0;i<=4;i++){
+    const v=maxV/4*i, y=PT+pH-v*sc;
+    ctx.strokeStyle=i===0?CV.border:CV.border+'55'; ctx.lineWidth=i===0?1.5:.5;
+    ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(totalW-PR,y); ctx.stroke();
+    ctx.fillStyle=CV.muted; ctx.font="9px 'Courier New',monospace"; ctx.textAlign='right';
+    ctx.fillText(view==='pct'?v.toFixed(0)+'%':fmtN(v),PL-4,y+3);
+  }
+  const bw=Math.floor((gw-4)/3);
+  data.forEach((r,i)=>{
+    const gx=PL+i*(gw+gg);
+    const series=[{v:r.rcsFsc,c:CV.sc},{v:r.rcsAfsc,c:CV.st},{v:r.rcsAap,c:CV.gen}];
+    if(view==='grouped'){
+      series.forEach((s,si)=>{ const bh=s.v*sc; ctx.fillStyle=s.c; ctx.fillRect(gx+si*(bw+2),PT+pH-bh,bw,bh); });
+    } else if(view==='stacked'){
+      let sy2=PT+pH;
+      [...series].reverse().forEach(s=>{ const bh=s.v*sc; sy2-=bh; ctx.fillStyle=s.c; ctx.fillRect(gx,sy2,gw,bh); });
+    } else {
+      const tot=(r.rcsFsc+r.rcsAfsc+r.rcsAap)||1;
+      let sy2=PT+pH;
+      [...series].reverse().forEach(s=>{ const bh=(s.v/tot*100)*sc; sy2-=bh; ctx.fillStyle=s.c; ctx.fillRect(gx,sy2,gw,bh); });
+    }
+    ctx.save(); ctx.translate(gx+gw/2,PT+pH+8); ctx.rotate(Math.PI/3);
+    ctx.fillStyle=CV.muted; ctx.font='9px system-ui'; ctx.textAlign='left';
+    ctx.fillText(r.distName.length>14?r.distName.slice(0,14)+'…':r.distName,0,0); ctx.restore();
+  });
+}
+document.getElementById('c5cView').addEventListener('change',drawCardType);
+
+
+// resize handler extension
+const _origRz=window.onresize;
+window.addEventListener('resize',()=>{
+  clearTimeout(window._rzT2);
+  window._rzT2=setTimeout(()=>{
+    const ai=Array.from(document.querySelectorAll('.section')).findIndex(s=>s.classList.contains('active'));
+    if(ai===4) drawTab4();
+    else if(ai===5) drawTab5();
+  },120);
+});
+
+// ══ EXTRA DATA ══
+const EX = {"fsc_histogram":{"labels":["<100","100\u2013199","200\u2013299","300\u2013499","500\u2013749","750\u2013999","1000\u20131999","2000+"],"counts":[120,772,1646,5802,4184,1295,774,12]},"top30_fsc_shops":[{"shopNo":"3314005","officeName":"Medipally","distName":"Medchal","rcsFsc":4982,"totalRcs":5145},{"shopNo":"3314006","officeName":"Medipally","distName":"Medchal","rcsFsc":3647,"totalRcs":3759},{"shopNo":"1676602","officeName":"Amberpet-6","distName":"Hyderabad","rcsFsc":3604,"totalRcs":3617},{"shopNo":"1596002","officeName":"Abdullapurmet","distName":"Ranga Reddy","rcsFsc":2716,"totalRcs":2815},{"shopNo":"3314004","officeName":"Medipally","distName":"Medchal","rcsFsc":2456,"totalRcs":2477},{"shopNo":"3005013","officeName":"Burgampadu","distName":"Bhadrdri Kothagudem","rcsFsc":2383,"totalRcs":2462},{"shopNo":"1581405","officeName":"Saroornagar-3","distName":"Ranga Reddy","rcsFsc":2368,"totalRcs":2377},{"shopNo":"1581641","officeName":"Saroornagar-3","distName":"Ranga Reddy","rcsFsc":2323,"totalRcs":2336},{"shopNo":"3005014","officeName":"Burgampadu","distName":"Bhadrdri Kothagudem","rcsFsc":2172,"totalRcs":2226},{"shopNo":"1881044","officeName":"Nizamabad","distName":"Nizamabad","rcsFsc":2085,"totalRcs":2116},{"shopNo":"3312025","officeName":"Shamirpet","distName":"Medchal","rcsFsc":2084,"totalRcs":2251},{"shopNo":"3001014","officeName":"Aswapuram","distName":"Bhadrdri Kothagudem","rcsFsc":2050,"totalRcs":2083},{"shopNo":"1583266","officeName":"Saroornagar-3","distName":"Ranga Reddy","rcsFsc":1971,"totalRcs":1988},{"shopNo":"3310014","officeName":"Keesara","distName":"Medchal","rcsFsc":1940,"totalRcs":1989},{"shopNo":"1585141","officeName":"Saroornagar-3","distName":"Ranga Reddy","rcsFsc":1913,"totalRcs":1966},{"shopNo":"1890043","officeName":"Nizamabad (North)","distName":"Nizamabad","rcsFsc":1819,"totalRcs":1828},{"shopNo":"1675517","officeName":"Mehdipatnam-5","distName":"Hyderabad","rcsFsc":1798,"totalRcs":1828},{"shopNo":"3014009","officeName":"Manuguru","distName":"Bhadrdri Kothagudem","rcsFsc":1738,"totalRcs":1828},{"shopNo":"1583625","officeName":"Saroornagar-3","distName":"Ranga Reddy","rcsFsc":1735,"totalRcs":1750},{"shopNo":"1581387","officeName":"Saroornagar-3","distName":"Ranga Reddy","rcsFsc":1682,"totalRcs":1692},{"shopNo":"3384191","officeName":"Balanagar-1","distName":"Medchal","rcsFsc":1670,"totalRcs":1685},{"shopNo":"1583402","officeName":"Saroornagar-3","distName":"Ranga Reddy","rcsFsc":1669,"totalRcs":1690},{"shopNo":"2237033","officeName":"Khammam (Rural)-2","distName":"Khammam","rcsFsc":1651,"totalRcs":1809},{"shopNo":"1425022","officeName":"Mahabubnagar","distName":"Mahbubnagar","rcsFsc":1646,"totalRcs":1702},{"shopNo":"3310020","officeName":"Keesara","distName":"Medchal","rcsFsc":1643,"totalRcs":1680},{"shopNo":"1581647","officeName":"Saroornagar-3","distName":"Ranga Reddy","rcsFsc":1636,"totalRcs":1660},{"shopNo":"1581409","officeName":"Saroornagar-3","distName":"Ranga Reddy","rcsFsc":1632,"totalRcs":1660},{"shopNo":"3384114","officeName":"Balanagar-1","distName":"Medchal","rcsFsc":1623,"totalRcs":1630},{"shopNo":"3384208","officeName":"Balanagar-1","distName":"Medchal","rcsFsc":1621,"totalRcs":1634},{"shopNo":"1583624","officeName":"Saroornagar-3","distName":"Ranga Reddy","rcsFsc":1602,"totalRcs":1613}],"dist_fsc_chart":[{"distName":"Hyderabad","shops":655,"totalFsc":616430,"avgFsc":941},{"distName":"Ranga Reddy","shops":936,"totalFsc":539444,"avgFsc":576},{"distName":"Medchal","shops":618,"totalFsc":520209,"avgFsc":842},{"distName":"Nalgonda","shops":997,"totalFsc":453946,"avgFsc":455},{"distName":"Khammam","shops":748,"totalFsc":388655,"avgFsc":520},{"distName":"Nizamabad","shops":760,"totalFsc":381584,"avgFsc":502},{"distName":"Sangareddy","shops":846,"totalFsc":354808,"avgFsc":419},{"distName":"Jagityal","shops":592,"totalFsc":304122,"avgFsc":514},{"distName":"Siddipet","shops":686,"totalFsc":280588,"avgFsc":409},{"distName":"Bhadrdri Kothagudem","shops":443,"totalFsc":276057,"avgFsc":623},{"distName":"Karimnagar","shops":566,"totalFsc":274660,"avgFsc":485},{"distName":"Kamareddy","shops":592,"totalFsc":238047,"avgFsc":402},{"distName":"Mahabubabad","shops":558,"totalFsc":226452,"avgFsc":406},{"distName":"Mahbubnagar","shops":506,"totalFsc":226246,"avgFsc":447},{"distName":"Nagarkarnool","shops":558,"totalFsc":224855,"avgFsc":403},{"distName":"Hanumakonda","shops":414,"totalFsc":220181,"avgFsc":532},{"distName":"Peddapalli","shops":413,"totalFsc":211141,"avgFsc":511},{"distName":"Manchiryala","shops":423,"totalFsc":208314,"avgFsc":492},{"distName":"Nirmal","shops":412,"totalFsc":207117,"avgFsc":503},{"distName":"Medak","shops":520,"totalFsc":202799,"avgFsc":390},{"distName":"Suryapet","shops":400,"totalFsc":196163,"avgFsc":490},{"distName":"Adilabad","shops":356,"totalFsc":177944,"avgFsc":500},{"distName":"Rajanna Siricilla","shops":345,"totalFsc":163900,"avgFsc":475},{"distName":"Jogulamba Gadwal","shops":335,"totalFsc":153999,"avgFsc":460},{"distName":"Janagaon","shops":335,"totalFsc":152445,"avgFsc":455},{"distName":"Kumarambheem Asifabad","shops":314,"totalFsc":128696,"avgFsc":410},{"distName":"Jayashankar Bhupalpalli","shops":277,"totalFsc":116198,"avgFsc":419}],"stats_fsc":{"total_shops":14605,"shops_with_fsc":14604,"total_fsc_cards":7445000,"mean":510,"median":464,"max":4982,"min":1},"dup_summary":[{"label":"12_2023","total_rows":17244,"unique_shops":17244,"max_appearances":1,"shops_with_dups":0,"dup_rate":0.0},{"label":"12_2024","total_rows":16235,"unique_shops":16235,"max_appearances":1,"shops_with_dups":0,"dup_rate":0.0},{"label":"1_2022","total_rows":17047,"unique_shops":17047,"max_appearances":1,"shops_with_dups":0,"dup_rate":0.0},{"label":"1_2023","total_rows":17219,"unique_shops":17219,"max_appearances":1,"shops_with_dups":0,"dup_rate":0.0},{"label":"2018","total_rows":35122,"unique_shops":17065,"max_appearances":3,"shops_with_dups":17024,"dup_rate":99.8},{"label":"2019","total_rows":46591,"unique_shops":17593,"max_appearances":3,"shops_with_dups":16478,"dup_rate":93.7},{"label":"2020","total_rows":29482,"unique_shops":17029,"max_appearances":2,"shops_with_dups":12453,"dup_rate":73.1},{"label":"6_2023","total_rows":17227,"unique_shops":17227,"max_appearances":1,"shops_with_dups":0,"dup_rate":0.0},{"label":"6_2024","total_rows":3915,"unique_shops":3915,"max_appearances":1,"shops_with_dups":0,"dup_rate":0.0},{"label":"6_2025","total_rows":14605,"unique_shops":14605,"max_appearances":1,"shops_with_dups":0,"dup_rate":0.0}],"appear_dist":{"2018":{"1":41,"2":15991,"3":1033},"2019":{"1":1115,"2":3958,"3":12520},"2020":{"1":4576,"2":12453}},"bottom30_fsc_shops":[{"shopNo":"2915016","officeName":"Nizamsagar","distName":"Kamareddy","rcsFsc":1,"totalRcs":1},{"shopNo":"2915006","officeName":"Nizamsagar","distName":"Kamareddy","rcsFsc":1,"totalRcs":1},{"shopNo":"2915005","officeName":"Nizamsagar","distName":"Kamareddy","rcsFsc":1,"totalRcs":1},{"shopNo":"2915003","officeName":"Nizamsagar","distName":"Kamareddy","rcsFsc":1,"totalRcs":1},{"shopNo":"2911021","officeName":"Machareddy","distName":"Kamareddy","rcsFsc":1,"totalRcs":1},{"shopNo":"2911018","officeName":"Machareddy","distName":"Kamareddy","rcsFsc":1,"totalRcs":1},{"shopNo":"2911015","officeName":"Machareddy","distName":"Kamareddy","rcsFsc":1,"totalRcs":1},{"shopNo":"2911011","officeName":"Machareddy","distName":"Kamareddy","rcsFsc":1,"totalRcs":1},{"shopNo":"2911005","officeName":"Machareddy","distName":"Kamareddy","rcsFsc":1,"totalRcs":1},{"shopNo":"1804014","officeName":"Armur","distName":"Nizamabad","rcsFsc":1,"totalRcs":1},{"shopNo":"2919025","officeName":"Ramareddy","distName":"Kamareddy","rcsFsc":2,"totalRcs":2},{"shopNo":"2915018","officeName":"Nizamsagar","distName":"Kamareddy","rcsFsc":2,"totalRcs":2},{"shopNo":"2915007","officeName":"Nizamsagar","distName":"Kamareddy","rcsFsc":2,"totalRcs":2},{"shopNo":"2915004","officeName":"Nizamsagar","distName":"Kamareddy","rcsFsc":2,"totalRcs":2},{"shopNo":"1699999","officeName":"Amberpet-6","distName":"Hyderabad","rcsFsc":2,"totalRcs":2},{"shopNo":"1633333","officeName":"Mehdipatnam-5","distName":"Hyderabad","rcsFsc":2,"totalRcs":2},{"shopNo":"2915019","officeName":"Nizamsagar","distName":"Kamareddy","rcsFsc":3,"totalRcs":3},{"shopNo":"3109013","officeName":"Gangaram","distName":"Mahabubabad","rcsFsc":11,"totalRcs":18},{"shopNo":"3403011","officeName":"Balmoor","distName":"Nagarkarnool","rcsFsc":15,"totalRcs":99},{"shopNo":"2806004","officeName":"Jangaon","distName":"Janagaon","rcsFsc":25,"totalRcs":37},{"shopNo":"3109012","officeName":"Gangaram","distName":"Mahabubabad","rcsFsc":30,"totalRcs":30},{"shopNo":"3522011","officeName":"Pembi","distName":"Nirmal","rcsFsc":36,"totalRcs":100},{"shopNo":"4015021","officeName":"Nereducherla","distName":"Suryapet","rcsFsc":38,"totalRcs":38},{"shopNo":"1533011","officeName":"Maheswaram","distName":"Ranga Reddy","rcsFsc":41,"totalRcs":49},{"shopNo":"3821025","officeName":"Raipole","distName":"Siddipet","rcsFsc":42,"totalRcs":45},{"shopNo":"2359035","officeName":"Chandam Pet","distName":"Nalgonda","rcsFsc":42,"totalRcs":55},{"shopNo":"3821028","officeName":"Raipole","distName":"Siddipet","rcsFsc":43,"totalRcs":43},{"shopNo":"3409019","officeName":"Lingal","distName":"Nagarkarnool","rcsFsc":44,"totalRcs":149},{"shopNo":"3720025","officeName":"Pulkal","distName":"Sangareddy","rcsFsc":45,"totalRcs":46},{"shopNo":"3008007","officeName":"Dammapeta","distName":"Bhadrdri Kothagudem","rcsFsc":45,"totalRcs":114}],"period_labels":["2018","2019","2020","Jan 2022","Jan 2023","Jun 2023","Dec 2023","Jun 2024","Dec 2024","Jun 2025"],"volatile_shops":[{"shopNo":"3213039","officeName":"Mandamarri","distName":"Manchiryala","vals":[382,80,78,79,79,79,79,0,79,80],"cv":0.895,"min":78,"max":382,"latest":80},{"shopNo":"2711010","officeName":"MALLAPUR","distName":"Jagityal","vals":[37,38,38,38,483,483,484,0,484,493],"cv":0.824,"min":37,"max":493,"latest":493},{"shopNo":"1585678","officeName":"Saroornagar-3","distName":"Ranga Reddy","vals":[589,588,588,604,603,105,105,105,104,106],"cv":0.738,"min":104,"max":604,"latest":106},{"shopNo":"2060007","officeName":"Kothapally","distName":"Karimnagar","vals":[2122,2164,2164,2229,553,553,550,550,551,645],"cv":0.686,"min":550,"max":2229,"latest":645},{"shopNo":"1585676","officeName":"Saroornagar-3","distName":"Ranga Reddy","vals":[904,908,908,870,868,219,219,219,219,219],"cv":0.639,"min":219,"max":908,"latest":219},{"shopNo":"3384212","officeName":"Balanagar-1","distName":"Medchal","vals":[97,112,112,139,519,518,517,0,517,562],"cv":0.633,"min":97,"max":562,"latest":562},{"shopNo":"3384211","officeName":"Balanagar-1","distName":"Medchal","vals":[921,958,956,858,86,86,438,0,438,457],"cv":0.619,"min":86,"max":958,"latest":457},{"shopNo":"3403011","officeName":"Balmoor","distName":"Nagarkarnool","vals":[2,3,3,8,8,8,14,0,15,15],"cv":0.618,"min":2,"max":15,"latest":15},{"shopNo":"3409019","officeName":"Lingal","distName":"Nagarkarnool","vals":[7,7,7,18,23,23,23,0,29,44],"cv":0.608,"min":7,"max":44,"latest":44},{"shopNo":"2060017","officeName":"Kothapally","distName":"Karimnagar","vals":[635,636,636,657,209,209,208,208,208,224],"cv":0.58,"min":208,"max":657,"latest":224},{"shopNo":"2060001","officeName":"Kothapally","distName":"Karimnagar","vals":[1312,1323,1311,1334,446,446,445,445,445,480],"cv":0.562,"min":445,"max":1334,"latest":480},{"shopNo":"1585770","officeName":"Saroornagar-3","distName":"Ranga Reddy","vals":[375,378,378,406,406,123,123,123,123,125],"cv":0.548,"min":123,"max":406,"latest":125},{"shopNo":"1599003","officeName":"Balapur","distName":"Ranga Reddy","vals":[3732,3780,3778,4083,4075,4073,1003,1003,1003,1159],"cv":0.539,"min":1003,"max":4083,"latest":1159},{"shopNo":"1676602","officeName":"Amberpet-6","distName":"Hyderabad","vals":[936,964,941,982,3595,3593,3593,3592,3591,3604],"cv":0.537,"min":936,"max":3604,"latest":3604},{"shopNo":"3302117","officeName":"Uppal-2","distName":"Medchal","vals":[364,380,381,400,400,1084,1078,0,1078,1085],"cv":0.529,"min":364,"max":1085,"latest":1085},{"shopNo":"2404009","officeName":"Jainoor","distName":"Kumarambheem Asifabad","vals":[334,341,340,345,125,130,130,0,130,139],"cv":0.493,"min":125,"max":345,"latest":139},{"shopNo":"2059011","officeName":"Ganneruvaram","distName":"Karimnagar","vals":[572,574,573,576,222,227,226,226,226,228],"cv":0.492,"min":222,"max":576,"latest":228},{"shopNo":"3302116","officeName":"Uppal-2","distName":"Medchal","vals":[587,599,598,625,625,209,207,0,207,215],"cv":0.488,"min":207,"max":625,"latest":215},{"shopNo":"2411001","officeName":"Wankdi","distName":"Kumarambheem Asifabad","vals":[1437,1443,1442,1483,566,565,565,0,565,565],"cv":0.487,"min":565,"max":1483,"latest":565},{"shopNo":"2033227","officeName":"Jammikunta","distName":"Karimnagar","vals":[788,799,798,823,326,326,327,327,327,354],"cv":0.469,"min":326,"max":823,"latest":354}],"volatile_count":116,"total_tracked_shops":14469};
+
+// ─── TAB 5: FSC PER SHOP ───
+function drawTab5(){
+  const st=EX.stats_fsc;
+  document.getElementById('s5tot').textContent=fmtN(st.total_fsc_cards);
+  document.getElementById('s5mean').textContent=fmtN(st.mean)+' / '+fmtN(st.median);
+  document.getElementById('s5max').textContent=fmtN(st.max);
+  document.getElementById('s5min').textContent=fmtN(st.min);
+
+  // Histogram
+  const hist=EX.fsc_histogram;
+  const Ch=document.getElementById('c9hist'); if(!Ch) return;
+  const W=Ch.parentElement.clientWidth||600, H=parseInt(Ch.style.height)||220;
+  const PL=52,PR=16,PT=14,PB=52;
+  Ch.width=W*DPR; Ch.height=H*DPR; Ch.style.width=W+'px'; Ch.style.height=H+'px';
+  const ctx=Ch.getContext('2d'); ctx.scale(DPR,DPR);
+  ctx.fillStyle=CV.surface; ctx.fillRect(0,0,W,H);
+  const pH=H-PT-PB, pW=W-PL-PR;
+  const maxV=Math.max(...hist.counts);
+  const bw=pW/hist.labels.length;
+  for(let i=0;i<=4;i++){
+    const v=maxV/4*i, y=PT+pH-v/maxV*pH;
+    ctx.strokeStyle=i===0?CV.border:CV.border+'44'; ctx.lineWidth=i===0?1.5:.5;
+    ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(W-PR,y); ctx.stroke();
+    ctx.fillStyle=CV.muted; ctx.font="9px 'Courier New',monospace"; ctx.textAlign='right';
+    ctx.fillText(fmtN(v),PL-4,y+3);
+  }
+  hist.counts.forEach((cnt,i)=>{
+    const bh=cnt/maxV*pH, bx=PL+i*bw+2;
+    ctx.fillStyle=`hsl(${190+i*12},65%,${45+i*3}%)`;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(bx,PT+pH-bh,bw-4,bh,[3,3,0,0]);
+    else ctx.rect(bx,PT+pH-bh,bw-4,bh);
+    ctx.fill();
+    if(bh>14){ ctx.fillStyle=CV.text; ctx.font='10px system-ui'; ctx.textAlign='center'; ctx.fillText(cnt,bx+(bw-4)/2,PT+pH-bh-5); }
+    ctx.save(); ctx.translate(bx+(bw-4)/2,PT+pH+8); ctx.rotate(Math.PI/4);
+    ctx.fillStyle=CV.muted; ctx.font='10px system-ui'; ctx.textAlign='left';
+    ctx.fillText(hist.labels[i],0,0); ctx.restore();
+  });
+
+  // Top 30
+  const t=EX.top30_fsc_shops;
+  hBar('c9top',t.map(r=>r.officeName+' · '+r.distName.slice(0,8)),t.map(r=>r.rcsFsc),
+    t.map((_,i)=>`hsl(${6+i*2},80%,${52-i}%)`),{padL:155,barH:13,gap:3});
+
+  // Bottom 30 (lowest non-zero)
+  const b=EX.bottom30_fsc_shops;
+  hBar('c9bot',b.map(r=>r.officeName+' · '+r.distName.slice(0,8)),b.map(r=>r.rcsFsc),
+    b.map((_,i)=>`hsl(${260+i*3},55%,${55+i}%)`),{padL:155,barH:13,gap:3});
+
+  // Per district FSC totals
+  const dc=EX.dist_fsc_chart;
+  hBar('c9dist',dc.map(r=>r.distName+' ('+r.shops+'sh)'),dc.map(r=>r.totalFsc),CV.accent,{padL:155,barH:13,gap:3});
+}
+
+
+</script>
